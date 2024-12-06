@@ -1,10 +1,12 @@
 import { MessageSquare, HelpCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export function BillingCard() {
+  const navigate = useNavigate();
   return (
     <div className="space-y-4">
       <div className="bg-white rounded-lg shadow p-4">
-        <button className="w-full bg-[#0a66c2] text-white rounded-full py-2 font-medium hover:bg-[#004182]">
+        <button onClick={()=>navigate("/job-posting")} className="w-full bg-[#0a66c2] text-white rounded-full py-2 font-medium hover:bg-[#004182]">
           Post a free job
         </button>
         <p className="text-sm text-gray-600 mt-4">

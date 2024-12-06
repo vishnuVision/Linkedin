@@ -85,14 +85,32 @@ const conversations = [
   },
 ];
 
-const MessageList = ({displayChat}) => {
+const MessageList = ({displayChat,setDisplayChat,divRef}) => {
+  
+  useEffect(() => {
+    const observer = new ResizeObserver((entries) => {
+      for (let entry of entries) {
+        const width = entry.contentRect.width;
+        if(width > 1024)
+        {
+          setDisplayChat(false);
+        }
+      }
+    });
 
-  useEffect(()=>{
-    console.log(displayChat);
-  },[displayChat])
+    if (divRef.current) {
+      observer.observe(divRef.current);
+    }
+
+    return () => {
+      if (divRef.current) {
+        observer.unobserve(divRef.current);
+      }
+    };
+  }, []);
 
   return (
-    <div className={`border-r border-gray-200 h-full overflow-y-scroll ${displayChat ? "absolute overflow-scroll bg-white block z-40 w-80 max-h-full" : "hidden w-96"}`}>
+    <div ref={divRef} className={`border-r border-gray-200 h-full overflow-y-scroll ${displayChat ? "absolute overflow-scroll bg-white block z-40 w-60 sm:w-80 max-h-full" : "hidden md:block w-96"}`}>
       <div className="">
         {conversations.map((conversation) => (
           <MessageListItem key={conversation.id} {...conversation} />
@@ -103,7 +121,9 @@ const MessageList = ({displayChat}) => {
 };
 
 MessageList.propTypes = {
-  displayChat:PropTypes.bool
+  displayChat:PropTypes.bool,
+  setDisplayChat:PropTypes.func,
+  divRef:PropTypes.any
 }
 
 export default MessageList;

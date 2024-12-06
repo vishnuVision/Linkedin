@@ -2,14 +2,15 @@ import MessageList from '../components/Message/MessageList';
 import Chat from '../components/Message/Chat';
 import Sidebar from '../components/Dashboard/Sidebar';
 import { Menu, Search } from 'lucide-react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 function ChatDashboard() {
 
     const [displayChat,setDisplayChat]= useState(false);
+    const divRef = useRef();
 
     return (
-        <div className="max-h-[100vh] overflow-hidden bg-transparent">
+        <div ref={divRef} className="max-h-[100vh] overflow-hidden bg-transparent">
             <main className="pt-20 px-4">
                 <div className="max-w-6xl h-full mx-auto grid grid-cols-12 gap-4">
                     <div className="col-span-12 lg:col-span-9">
@@ -29,7 +30,7 @@ function ChatDashboard() {
                                 </div>
                             </div>
                             <div className="flex h-[calc(100vh-165px)] relative ">
-                                <MessageList displayChat={displayChat}/>
+                                <MessageList setDisplayChat={setDisplayChat} displayChat={displayChat} divRef={divRef}/>
                                 <Chat />
                             </div>
                         </div>

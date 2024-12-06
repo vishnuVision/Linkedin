@@ -24,6 +24,10 @@ import CompanyProfile from "./pages/CompanyProfile"
 import CompanyPageDashboard from "./pages/CompanyPageDashboard"
 import CompanyForm from "./Forms/CompanyForm"
 import JobPostingAccount from "./pages/JobPostingAccount"
+import CompanyAdminDashboard from "./pages/CompanyAdminDashboard"
+import JobPostPage from "./pages/JobPostPage"
+import JobPostingForm from "./Forms/JobPostingForm"
+import JobConfirmation from "./Forms/JobConfirmation"
 
 function App() {
   const [isChatDetailsOpen, setIsChatDetailsOpen] = useState(false);
@@ -36,6 +40,7 @@ function App() {
               <Route path="/feed" element={<Dashboard />} />
               <Route path="/profile/:id/*" element={<Profile />} />
               <Route path="/company/:id/*" element={<CompanyProfile />} />
+              <Route path="/company/:id/admin/dashboard/*" element={<CompanyAdminDashboard />} />
               <Route path="/messaging" element={<ChatDashboard />} />
               <Route path="/mynetwork/*" element={<Network />} />
               <Route path="/jobs" element={<JobDetails />} />
@@ -47,6 +52,9 @@ function App() {
               <Route path="/newsletters" element={<Newsletters />} />
               <Route path="/newsletter/:id" element={<NewsletterDetails />} />
               <Route path="/jobs/:id" element={<JobInfo />} />
+              <Route path="/job-posting" element={<JobPostPage />} />
+              <Route path="/job-posting/form" element={<JobPostingForm />} />
+              <Route path="/job-posting/form/assesments" element={<JobConfirmation />} />
               <Route path="/settings/*" element={<Setting />} />
               <Route path="/company/setup" element={<CompanyPageDashboard />} />
               <Route path="/company/setup/new" element={<CompanyForm />} />

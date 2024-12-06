@@ -34,7 +34,7 @@ function NetworkSidebar() {
                 url.includes("/jobs") &&
                 <div className="bg-white rounded-lg shadow mt-4">
                     <div className="p-2 flex flex-col text-sm font-semibold text-[#0a66c2] px-4 gap-2 justify-evenly">
-                        <Link className="font-semibold hover:underline hover:underline-offset-1">Post a free job</Link>
+                        <Link to={"/job-posting/"} className="font-semibold hover:underline hover:underline-offset-1">Post a free job</Link>
                         <Link to={"/newsletters"} className="font-semibold hover:underline hover:underline-offset-1">NewsLetters</Link>
                     </div>
                 </div>

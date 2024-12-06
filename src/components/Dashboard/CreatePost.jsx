@@ -60,7 +60,7 @@ export default function CreatePost() {
 
 function PostButton({ icon, label, onclick }) {
   return (
-    <button onClick={onclick} className="flex items-center gap-2 py-2 hover:bg-gray-100 rounded-lg">
+    <button onClick={onclick} className="flex items-center gap-2 py-2 px-2 hover:bg-gray-100 rounded-lg">
       {icon}
       <span className="text-gray-600 hidden sm:block">{label}</span>
     </button>
@@ -75,7 +75,7 @@ PostButton.propTypes = {
 
 function PostLink({ icon, label, to }) {
   return (
-    <Link to={to} className="flex items-center gap-2 py-2 hover:bg-gray-100 rounded-lg">
+    <Link to={to} className="flex items-center gap-2 py-2 px-2 hover:bg-gray-100 rounded-lg">
       {icon}
       <span className="text-gray-600 hidden sm:block">{label}</span>
     </Link>
