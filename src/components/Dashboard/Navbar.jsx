@@ -18,8 +18,7 @@ export default function Navbar() {
     const observer = new ResizeObserver((entries) => {
       for (let entry of entries) {
         const width = entry.contentRect.width;
-        if(width > 1024)
-        {
+        if (width > 1024) {
           setIsMobile(false);
         }
       }
@@ -38,12 +37,13 @@ export default function Navbar() {
 
   useEffect(() => {
     function handleClickOutside(event) {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
+      if (menuRef.current &&
+        !menuRef.current.contains(event.target) &&
+        mainRef.current &&
+        !mainRef.current.contains(event.target)) {
+        setIsMobile(false);
         setShowProfile(false);
         setShowBusiness(false);
-      }
-      if (mainRef.current && !mainRef.current.contains(event.target)) {
-        setIsMobile(false);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
@@ -52,13 +52,15 @@ export default function Navbar() {
     };
   }, []);
 
+  console.log(isMobile)
+
   return (
     <nav ref={divRef} className="fixed top-0 w-full bg-white border-b border-gray-200 z-50">
-      <div className="max-w-6xl mx-auto px-4">
+      <div className="max-w-6xl mx-auto md:px-4 px-1">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-1 md:gap-8">
             <Link to={"/feed"} className='flex gap-1 text-2xl justify-center items-center font-bold text-[#0a66c2]'><span className='hidden md:block'>Linked</span><img src="/logo.png" alt="LinkedIn" className="w-6 h-6" /></Link>
-            <div className="relative">
+            <div className="relative ml-2 md:m-0">
               <Search className="absolute left-3 top-2.5 h-5 w-3 md:w-5 text-gray-400" />
               <input
                 type="text"
@@ -67,7 +69,7 @@ export default function Navbar() {
               />
             </div>
           </div>
-          <div ref={mainRef} className={`${isMobile ? "fixed flex-col sm:flex-row top-20 right-2 bg-white overflow-x-scroll shadow-xl z-50 flex items-center border p-2 rounded-l-lg rounded-b-lg justify-center gap-4 lg:hidden" : "gap-2 h-full hidden lg:flex" }`}>
+          <div ref={mainRef} className={`${isMobile ? "fixed flex-col sm:flex-row top-20 right-2 bg-white overflow-x-scroll shadow-xl z-50 flex items-center border p-2 rounded-l-lg rounded-b-lg justify-center gap-4 lg:hidden" : "gap-2 h-full hidden lg:flex"}`}>
             <div className={`flex gap-2 ${isMobile ? "flex-col" : ""}`}>
               <NavItem onClick={() => setIsMobile(false)} icon={<Home />} to='/feed' label="Home" active={url === '/feed' ? true : false} />
               <NavItem onClick={() => setIsMobile(false)} icon={<Users />} to='/mynetwork/grow' label="Network" active={url.includes('/mynetwork') ? true : false} />
@@ -76,7 +78,7 @@ export default function Navbar() {
               <NavItem onClick={() => setIsMobile(false)} icon={<Bell />} to='/notifications' label="Notifications" active={url === '/notifications' ? true : false} />
             </div>
             <div className='relative'>
-              <NavButton onClick={() => setShowProfile((prev)=>!prev)} icon={<img
+              <NavButton onClick={() => setShowProfile((prev) => !prev)} icon={<img
                 src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
                 alt="Profile"
                 className="w-8 h-8 rounded-full object-cover"
@@ -105,7 +107,7 @@ export default function Navbar() {
                     <div className='flex flex-col w-full justify-start border-t border-gray-300 py-2'>
                       <p className='px-4'>Manage</p>
                       <Link to="/profile/1/all-posts" className="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 hover:underline hover:underline-offset-1">Posts & Activity</Link>
-                      <Link to="/company/1" className="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 hover:underline hover:underline-offset-1">Company: Vishnu Mandlesara</Link>
+                      <Link to="/company/1/admin/dashboard/" className="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 hover:underline hover:underline-offset-1">Company: Vishnu Mandlesara</Link>
                       <Link to="/my-items/" className="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 hover:underline hover:underline-offset-1">Job Posting Account</Link>
                     </div>
                     <div className='flex w-full justify-start items-start border-t border-gray-300'>
@@ -151,8 +153,8 @@ export default function Navbar() {
               </div>
             </div>
           </div>
-          <div onClick={() => { setIsMobile(prev => !prev) }} className='lg:hidden flex justify-center items-center'>
-            <Menu/>
+          <div ref={menuRef} onClick={() => { setIsMobile(prev => !prev) }} className='lg:hidden flex justify-center items-center'>
+            <Menu />
           </div>
         </div>
       </div>
@@ -160,7 +162,7 @@ export default function Navbar() {
   );
 }
 
-function NavItem({ icon, label, active = false, to = "/",onClick}) {
+function NavItem({ icon, label, active = false, to = "/", onClick }) {
   return (
     <Link onClick={onClick} to={to} className={`flex h-full flex-col justify-center px-4 items-center text-gray-500 hover:text-gray-900 ${active ? "border-b-2 border-gray-900" : ""}`}>
       <div className={`p-1 ${active ? 'text-gray-900' : ''}`}>
@@ -187,7 +189,7 @@ NavItem.propTypes = {
   label: PropTypes.any,
   active: PropTypes.bool,
   to: PropTypes.string,
-  onClick:PropTypes.func
+  onClick: PropTypes.func
 }
 
 NavButton.propTypes = {

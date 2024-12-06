@@ -3,14 +3,15 @@ import JobList from "../components/Jobs/JobList";
 import JobSidebar from "../components/Jobs/JobSidebar";
 import Notfound from "../components/Notfound";
 import Input from "../components/Ui/Input"
-import { Link, Route, Routes, useNavigate } from "react-router-dom"
+import { Link, Outlet, Route, Routes, useNavigate } from "react-router-dom"
 
 function JobPostingAccount() {
     return (
         <Routes>
             <Route path="/" element={<Signup />} />
             <Route element={<JobLayout />} >
-                <Route path="/posted-jobs" element={<h1>post jobs</h1>} />
+                <Route path="/posted-jobs" element={<JobList />} />
+                <Route path="/saved-jobs" element={<JobList />} />
             </Route>
             <Route path="*" element={<Notfound />} />
         </Routes>
@@ -54,7 +55,7 @@ const JobLayout = () => {
                         <JobSidebar />
                     </div>
                     <div className="md:col-span-2">
-                        <JobList />
+                        <Outlet/>
                     </div>
                     <div className="md:col-span-1">
                         <BillingCard />

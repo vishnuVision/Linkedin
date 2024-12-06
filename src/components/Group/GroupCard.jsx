@@ -7,7 +7,7 @@ function GroupCard({ to }) {
         <div className="border-b border-gray-200 flex-grow">
             <div className="">
                 <div className="flex flex-wrap gap-2 items-center p-4">
-                    <div className='flex justify-between flex-grow'>
+                    <div className='flex justify-between'>
                         <div>
                             <img className="w-16 h-16 object-contain rounded-sm" src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" alt="" />
                         </div>
