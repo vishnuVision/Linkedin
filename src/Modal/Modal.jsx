@@ -16,7 +16,7 @@ function Modal({ isOpen, onClose, children, title }) {
             <X className="w-5 h-5 text-gray-500" />
           </button>
         </div>
-        <div className="p-6">{children}</div>
+        <div className="px-6 py-4">{children}</div>
       </div>
     </div>
   );

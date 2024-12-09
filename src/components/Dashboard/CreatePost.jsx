@@ -22,7 +22,7 @@ export default function CreatePost() {
             className="w-12 h-12 rounded-full object-cover"
           />
         </Link>
-        <button className="flex-1 text-left px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-full text-gray-500">
+        <button onClick={() => {setIsModalOpenForImage(true);setAccept("image/*")}} className="flex-1 text-left px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-full text-gray-500">
           Start a post
         </button>
       </div>
