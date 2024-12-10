@@ -1,4 +1,4 @@
-import { MapPin, Building2, GraduationCap, Bookmark } from 'lucide-react';
+import { MapPin, Building2, GraduationCap, Bookmark, UserPlus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 export default function ProfileCard() {
@@ -36,8 +36,17 @@ export default function ProfileCard() {
             </div>
           </div>
         </div>
+        <Link to={"/mynetwork/grow"} className='justify-between items-center border-t flex gap-1 px-4 py-2 border-gray-200 text-sm text-gray-600 hover:bg-gray-100 cursor-pointer'>
+          <div className='text-sm'>
+            <p>Connections</p>
+            <p className='font-semibold'>Grow you network</p>
+          </div>
+          <div>
+            <UserPlus className='fill-slate-600'/>
+          </div>
+        </Link>
         <Link to={"/my-items/posted-jobs"} className='border-t flex gap-1 px-4 py-2 border-gray-200 text-sm text-gray-600 hover:bg-gray-100 rounded-b-lg cursor-pointer'>
-          <Bookmark size={20} className='fill-slate-600'/>
+          <Bookmark size={20} className='fill-slate-600' />
           <p>Saved items</p>
         </Link>
       </div>

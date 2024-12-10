@@ -7,7 +7,7 @@ import Activity from '../components/Profile/Activity';
 import Educations from '../components/Profile/Educations';
 import { Routes, Route } from 'react-router-dom';
 import Notfound from '../components/Notfound';
-import { MoveLeft, Trash2 } from 'lucide-react';
+import { MoveLeft, Plus, Trash2 } from 'lucide-react';
 import Feed from '../components/Dashboard/Feed';
 import { useState } from 'react';
 import Modal from '../Modal/Modal';
@@ -38,7 +38,7 @@ const ProfilePage = () => {
 
   return (
     <>
-      <ProfileHeader setIsModalOpen={setIsModalOpen}/>
+      <ProfileHeader setIsModalOpen={setIsModalOpen} />
       <Analytics />
       <About />
       <Activity />
@@ -76,6 +76,7 @@ const ActivityPage = () => {
 }
 
 const SkillPage = () => {
+  const [isOpen,setIsOpen] = useState(false);
   const skills = [
     { name: 'React.js', endorsements: 42 },
     { name: 'JavaScript', endorsements: 38 },
@@ -90,7 +91,10 @@ const SkillPage = () => {
         <div onClick={handleBack} className='w-10 h-10 hover:bg-[#866f55] hover:bg-opacity-10 rounded-full flex justify-center items-center cursor-pointer'>
           <MoveLeft />
         </div>
-        <h2 className="text-xl font-bold text-gray-900">Skills</h2>
+        <div className="flex justify-between items-center flex-grow">
+          <h2 className="text-xl font-bold text-gray-900">Skills</h2>
+          <button onClick={() => setIsOpen(prev => !prev)} className="p-2 hover:bg-[#866f55] hover:bg-opacity-10 rounded-full  "><Plus width={25} height={25} /></button>
+        </div>
       </div>
       <div className="grid grid-cols-1 gap-4 px-4 pb-4">
         {skills.map((skill, index) => (
@@ -100,11 +104,14 @@ const SkillPage = () => {
           >
             <span className="text-gray-700">{skill.name}</span>
             <div className="flex items-center gap-2 text-gray-500">
-              <Trash2 />
+              <button className='p-2 hover:bg-[#866f55] hover:bg-opacity-10 rounded-full'><Trash2 /></button>
             </div>
           </div>
         ))}
       </div>
+      <Modal isOpen={isOpen} onClose={()=>setIsOpen(false)} title='Add skill'>
+        Add Skill
+      </Modal>
     </div>
   )
 }

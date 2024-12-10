@@ -1,7 +1,7 @@
 import { Image, Video, Calendar, FileText } from 'lucide-react';
 import PropTypes from 'prop-types';
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import ImageUploadModal from '../ImageUpload/ImageUploadModal';
 import CreatePostModal from '../ImageUpload/CreatePostModal';
 
@@ -12,6 +12,7 @@ export default function CreatePost() {
   const [files, setFiles] = useState([]);
   const [accept, setAccept] = useState('image/*');
   const [showCreatePost, setShowCreatePost] = useState(false);
+  const { pathname } = useLocation();
   return (
     <div className="bg-white rounded-lg shadow p-2 md:p-4 mb-4">
       <div className="flex gap-4 mb-4">
@@ -22,16 +23,27 @@ export default function CreatePost() {
             className="w-12 h-12 rounded-full object-cover"
           />
         </Link>
-        <button onClick={() => {setIsModalOpenForImage(true);setAccept("image/*")}} className="flex-1 text-left px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-full text-gray-500">
+        <button onClick={() => { setIsModalOpenForImage(true); setAccept("image/*") }} className="flex-1 text-left px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-full text-gray-500">
           Start a post
         </button>
       </div>
 
       <div className="w-full flex justify-between px-2">
-        <PostButton onclick={() => {setIsModalOpenForImage(true);setAccept("image/*")}} icon={<Image className="w-6 md:h-6 text-blue-500" />} label="Photo" />
+        <PostButton onclick={() => { setIsModalOpenForImage(true); setAccept("image/*") }} icon={<Image className="w-6 md:h-6 text-blue-500" />} label="Photo" />
         <PostButton onclick={() => { setIsModalOpenForVideo(true); setAccept("video/*") }} icon={<Video className="w-6 md:h-6 text-green-500" />} label="Video" />
-        <PostLink to={"/events"} icon={<Calendar className="w-6 md:h-6 text-orange-500" />} label="Event" />
-        <PostLink to={"/newsletters"} icon={<FileText className="w-6 h-6 text-red-500" />} label="Newsletter" />
+        {
+          !pathname.includes("/newsletter") && (
+            <>
+              <PostLink to={"/newsletters"} icon={<FileText className="w-6 h-6 text-red-500" />} label="Newsletter" />
+              <PostLink to={"/events"} icon={<Calendar className="w-6 md:h-6 text-orange-500" />} label="Event" />
+            </>
+          )
+        }
+        {
+          pathname.includes("/newsletter") && (
+            <PostLink to={`${pathname}/createarticle`} icon={<FileText className="w-6 h-6 text-red-500" />} label="write article" />
+          )
+        }
       </div>
       <ImageUploadModal
         isOpen={isModalOpenForImage}

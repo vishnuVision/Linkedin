@@ -15,3 +15,43 @@ body {
   display: none;
 }
 
+.ql-toolbar{
+  border: none !important;
+  border-bottom: 1px solid #ccc !important;
+  padding: 10px 0 !important;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.ql-container{
+  border: none !important;
+}
+
+.ql-subcontainer{
+  flex-grow: 1 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+}
+
+.ql-publish{
+  background-color: #0a66c2 !important;
+  color: #fff !important;
+  width: 100px !important;
+  height: 35px !important;
+  padding: 2px 5px 0px 5px !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 10px;
+}
+
+.ql-editor{
+  font-size: 16px !important;
+}
+
+.ql-editor img{
+  width: 500px;
+  align-items: center;
+}

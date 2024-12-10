@@ -1,6 +1,4 @@
-import { ThumbsUp, MessageSquare, Share2, Send } from 'lucide-react';
-import { Link } from "react-router-dom";
-import ImageGrid from './ImageGrid';
+import PostCard from './PostCard';
 
 export default function Feed() {
   const posts = [
@@ -98,51 +96,8 @@ export default function Feed() {
 
   return (
     <div className="space-y-4">
-      {posts.map(post => (
-        <div key={post._id} className="bg-white rounded-lg shadow mb-4 border border-gray-200">
-          <div className="p-4">
-            <Link to={post.author.isCompany ? `/company/${post.author.name}/` : `/profile/${post.author.name}`} className="flex items-start gap-3">
-              <img src={post.author.image} alt={post.author.name} className="w-12 h-12 rounded-full object-cover" />
-              <div>
-                <h3 className="font-semibold hover:underline hover:text-[#1da1f2]">{post.author.name}</h3>
-                <p className="text-sm text-gray-500">{post.author.title}</p>
-                <p className="text-xs text-gray-400">{post.time}</p>
-              </div>
-            </Link>
-
-            <p className="mt-3">{post.content}</p>
-
-            {post.images.length > 0 && (
-              <div className="mt-4">
-                <ImageGrid images={post.images} />
-              </div>
-            )}
-
-            <div className="flex gap-3 mt-3 text-sm text-gray-500">
-              <span>{post.likes} likes</span>
-              <span>{post.comments} comments</span>
-            </div>
-          </div>
-
-          <div className="border-t border-gray-100 py-2 flex justify-evenly">
-            <button className="flex items-center gap-2 py-2 hover:bg-gray-100 rounded-lg text-gray-600">
-              <ThumbsUp className="w-5 h-5" />
-              <span className='hidden sm:block'>Like</span>
-            </button>
-            <button className="flex items-center gap-2 py-2 hover:bg-gray-100 rounded-lg text-gray-600">
-              <MessageSquare className="w-5 h-5" />
-              <span className='hidden sm:block'>Comment</span>
-            </button>
-            <button className="flex items-center gap-2 py-2 hover:bg-gray-100 rounded-lg text-gray-600">
-              <Share2 className="w-5 h-5" />
-              <span className='hidden sm:block'>Share</span>
-            </button>
-            <button className="flex items-center gap-2 py-2 hover:bg-gray-100 rounded-lg text-gray-600">
-              <Send className="w-5 h-5" />
-              <span className='hidden sm:block'>Send</span>
-            </button>
-          </div>
-        </div>
+      {posts.map((post,idx) => (
+        <PostCard key={idx} post={post}/>
       ))}
     </div>
   );

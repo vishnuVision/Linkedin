@@ -1,8 +1,14 @@
-import { useState } from 'react';
-import { Image, Paperclip, Smile } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Image, Paperclip, Smile, X } from 'lucide-react';
+import EmojiPicker from "emoji-picker-react";
 
 const Chat = () => {
   const [message, setMessage] = useState('');
+  const imageRef = useRef(null);
+  const [image, setImage] = useState();
+  const [imageList, setImageList] = useState([]);
+  const [fileList, setFileList] = useState([]);
+  const [showPicker, setShowPicker] = useState(false);
 
   const handleSend = (e) => {
     e.preventDefault();
@@ -11,6 +17,28 @@ const Chat = () => {
       setMessage('');
     }
   };
+
+  const handleImageUpload = () => {
+    imageRef?.current.click();
+  }
+
+  const deleteImage = (index) => {
+    setImageList(imageList.filter((media, idx) => idx !== index));
+    setFileList(fileList.filter((skill, idx) => idx !== index))
+  }
+
+  useEffect(() => {
+    if (image && imageList.length <= 5) {
+      const previewURL = URL.createObjectURL(image);
+      setImageList(prev => [...prev, { name: image.name, preview: previewURL }]);
+      setFileList(prev => [...prev, image]);
+    }
+  }, [image])
+
+  const handleEmojiClick = (emojiData) => {
+    setMessage((prev) => prev + emojiData.emoji);
+    setShowPicker(false);
+};
 
   return (
     <div className="w-full flex flex-col h-full">
@@ -41,28 +69,51 @@ const Chat = () => {
         </div>
       </div>
 
+      <div className='flex flex-col'>
+        {
+          imageList && imageList.length > 0 && imageList.map((image, idx) => (
+            <div className='flex justify-between items-center p-4 border-y-[1px] border-gray-200' key={idx}>
+              <div className='flex gap-4 items-center'>
+                <img className='w-10' src={image.preview} alt="" />
+                <p>{image?.name}</p>
+              </div>
+              <div>
+                <button onClick={() => deleteImage(idx)}>
+                  <X />
+                </button>
+              </div>
+            </div>
+          ))
+        }
+      </div>
+
       <form onSubmit={handleSend} className="border-t-2 border-gray-200">
         <div className="flex flex-col items-center">
           <div className='w-full px-2 py-4'>
-            <input
-              type="text"
+            <textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Write a message..."
-              className="w-full border border-gray-300 rounded-lg px-1 py-2 focus:outline-none focus:border-blue-500"
+              className="w-full border-none rounded-lg px-1 py-2 bg-[#866f55] bg-opacity-10 focus:outline-none bg-"
             />
           </div>
 
-          <div className='flex justify-between w-full items-center border-t border-gray-200 p-2'>
-            <div className='flex items-center gap-2'>
-              <button type="button" className="text-gray-500 hover:text-gray-600">
+          <div className='flex justify-between w-full items-center border-t border-gray-200 p-2 py-2'>
+            <div className='flex items-center gap-4'>
+              <button onClick={handleImageUpload} type="button" className="text-gray-500 hover:text-gray-600">
                 <Image className="w-5 h-5" />
+                <input className='hidden' type='file' ref={imageRef} onChange={(e) => setImage(e.target.files[0])} />
               </button>
-              <button type="button" className="text-gray-500 hover:text-gray-600">
+              <button onClick={handleImageUpload} type="button" className="text-gray-500 hover:text-gray-600">
                 <Paperclip className="w-5 h-5" />
               </button>
-              <button type="button" className="text-gray-500 hover:text-gray-600">
+              <button onClick={() => setShowPicker((prev) => !prev)} type="button" className="relative text-gray-500 hover:text-gray-600">
                 <Smile className="w-5 h-5" />
+                {showPicker && (
+                  <div className="absolute bottom-8 left-0 z-10">
+                    <EmojiPicker onEmojiClick={handleEmojiClick} />
+                  </div>
+                )}
               </button>
             </div>
             <button
@@ -72,6 +123,7 @@ const Chat = () => {
               send
             </button>
           </div>
+
         </div>
       </form>
     </div>

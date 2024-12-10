@@ -175,7 +175,7 @@ function JobPostingForm() {
                                         <p className='text-sm mb-1 text-gray-600'>Add skill keywords (max 10) to make your job more visible to the right candidates.</p>
                                         <div className='flex gap-2 items-center mt-2'>
                                             <div className='w-52'>
-                                                <Input placeholder={"Enter Skill"} value={skill} setvalue={setSkill} />
+                                                <Input disable={skills.length >= 10 ? true : false} placeholder={"Enter Skill"} value={skill} setvalue={setSkill} />
                                             </div>
                                             <button onClick={addSkills} disabled={skills.length >= 10 ? true : false} className={`flex border items-center gap-1 border-gray-600 px-4 py-1 rounded-full ${skills.length >= 10 ? "cursor-not-allowed" : "hover:bg-gray-200 hover:ring-1 hover:ring-black"}`}>
                                                 <Plus size={20} /> Add Skill

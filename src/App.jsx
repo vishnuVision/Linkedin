@@ -28,6 +28,8 @@ import CompanyAdminDashboard from "./pages/CompanyAdminDashboard"
 import JobPostPage from "./pages/JobPostPage"
 import JobPostingForm from "./Forms/JobPostingForm"
 import JobConfirmation from "./Forms/JobConfirmation"
+import Writearticle from "./Forms/Writearticle"
+import SearchResult from "./pages/SearchResult"
 
 function App() {
   const [isChatDetailsOpen, setIsChatDetailsOpen] = useState(false);
@@ -51,6 +53,7 @@ function App() {
               <Route path="/event/:id/*" element={<EventDetails />} />
               <Route path="/newsletters" element={<Newsletters />} />
               <Route path="/newsletter/:id" element={<NewsletterDetails />} />
+              <Route path="/newsletter/:id/createarticle" element={<Writearticle />} />
               <Route path="/jobs/:id" element={<JobInfo />} />
               <Route path="/job-posting" element={<JobPostPage />} />
               <Route path="/job-posting/form" element={<JobPostingForm />} />
@@ -59,9 +62,10 @@ function App() {
               <Route path="/company/setup" element={<CompanyPageDashboard />} />
               <Route path="/company/setup/new" element={<CompanyForm />} />
               <Route path="/my-items/*" element={<JobPostingAccount />} />
+              <Route path="/search/results/all" element={<SearchResult />} />
           </Route>
           <Route path="/signup" element={<Signup />} />
-          <Route path="/signin" element={<Login />} />
+          <Route path="/signin/*" element={<Login />} />
           <Route path="*" element={<Notfound />} />
         </Routes>
       </Suspense>

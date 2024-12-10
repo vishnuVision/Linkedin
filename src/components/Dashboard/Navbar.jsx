@@ -3,6 +3,8 @@ import PropTypes from 'prop-types';
 import { Link, useLocation } from 'react-router-dom';
 import { TiArrowSortedDown } from "react-icons/ti";
 import { useEffect, useRef, useState } from 'react';
+import SearchInput from '../Ui/SearchInput';
+import SearchDropdown from '../Ui/SearchDropdown';
 
 export default function Navbar() {
 
@@ -13,6 +15,17 @@ export default function Navbar() {
   const divRef = useRef();
   const menuRef = useRef();
   const mainRef = useRef();
+  const [isDropdownVisible, setIsDropdownVisible] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const handleSearch = (value) => {
+    setSearchQuery(value);
+    setIsDropdownVisible(value.length > 0);
+  };
+
+  useEffect(()=>{
+    console.log(searchQuery)
+  },[searchQuery])
 
   useEffect(() => {
     const observer = new ResizeObserver((entries) => {
@@ -60,11 +73,10 @@ export default function Navbar() {
             <Link to={"/feed"} className='flex gap-1 text-2xl justify-center items-center font-bold text-[#0a66c2]'><span className='hidden md:block'>Linked</span><img src="/logo.png" alt="LinkedIn" className="w-6 h-6" /></Link>
             <div className="relative ml-2 md:m-0">
               <Search className="absolute left-3 top-2.5 h-5 w-3 md:w-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search"
-                className="pl-10 pr-4 py-2 bg-gray-100 rounded-md w-60 md:w-72 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+              <div className="relative w-full max-w-md">
+                <SearchInput onSearch={handleSearch} />
+                <SearchDropdown isVisible={isDropdownVisible} setIsVisible={setIsDropdownVisible}/>
+              </div>
             </div>
           </div>
           <div ref={mainRef} className={`${isMobile ? "fixed flex-col sm:flex-row top-20 right-2 bg-white overflow-x-scroll shadow-xl z-50 flex items-center border p-2 rounded-l-lg rounded-b-lg justify-center gap-4 lg:hidden" : "gap-2 h-full hidden lg:flex"}`}>
@@ -100,7 +112,7 @@ export default function Navbar() {
                     <div className='flex flex-col w-full justify-start border-t border-gray-300 py-2'>
                       <p className='px-4'>Account</p>
                       <Link to="/settings/" className="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 hover:underline hover:underline-offset-1">Settings & Privacy</Link>
-                      <Link to="/logout" className="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 hover:underline hover:underline-offset-1">Language</Link>
+                      <Link to="/settings/language" className="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 hover:underline hover:underline-offset-1">Language</Link>
                     </div>
                     <div className='flex flex-col w-full justify-start border-t border-gray-300 py-2'>
                       <p className='px-4'>Manage</p>
