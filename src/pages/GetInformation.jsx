@@ -1,11 +1,22 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import Input from "../components/Ui/Input";
 import Dropdown from "../components/Ui/Dropdown";
+import { useSelector } from "react-redux";
 
 function GetInformation() {
     const [page, setPage] = useState(0);
     const [isStudent, setIsStudent] = useState(false);
+
+    const { user } = useSelector(state => state.authReducer);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (user) {
+            console.log(user);
+            return navigate("/feed");
+        }
+    }, [user])
 
     return (
         <div className="bg-[#866f55] bg-opacity-10 w-screen h-screen flex flex-col justify-start p-2">

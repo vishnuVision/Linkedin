@@ -1,4 +1,4 @@
-import { Suspense, useState } from "react"
+import { Suspense, useEffect, useState } from "react"
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
 import Loader from "./components/Loaders/Loader"
 import Home from "./pages/Home"
@@ -31,15 +31,24 @@ import JobConfirmation from "./Forms/JobConfirmation"
 import Writearticle from "./Forms/Writearticle"
 import SearchResult from "./pages/SearchResult"
 import GetInformation from "./pages/GetInformation"
+import ProtectedRouting from "./components/auth/ProtectedRouting"
+import { useUser } from "@clerk/clerk-react"
 
 function App() {
   const [isChatDetailsOpen, setIsChatDetailsOpen] = useState(false);
+
+  const data = useUser();
+
+  useEffect(()=>{
+    console.log(data);
+  },[data])
+
   return (
     <Router>
       <Suspense fallback={<Loader />}>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route element={<AppLayout isChatDetailsOpen={isChatDetailsOpen} setIsChatDetailsOpen={setIsChatDetailsOpen}/>}>
+          <Route element={<ProtectedRouting><AppLayout isChatDetailsOpen={isChatDetailsOpen} setIsChatDetailsOpen={setIsChatDetailsOpen}/></ProtectedRouting>}>
               <Route path="/feed" element={<Dashboard />} />
               <Route path="/profile/:id/*" element={<Profile />} />
               <Route path="/company/:id/*" element={<CompanyProfile />} />

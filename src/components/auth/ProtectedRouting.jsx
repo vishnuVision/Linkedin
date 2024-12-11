@@ -3,11 +3,11 @@ import { useSelector } from "react-redux";
 import { Navigate, Outlet } from "react-router-dom"
 
 function ProtectedRouting({ children }) {
-    const { user } = useSelector(state=>state.authReducer);
+    const {user} = useSelector(state=>state.authReducer);
     
     if(!user)
     {
-        return <Navigate to="/login"/>
+        return <Navigate to={"/"}/>
     }
     else 
     {
@@ -17,7 +17,7 @@ function ProtectedRouting({ children }) {
         }
         else
         {
-            return <Outlet/>
+            return <Outlet/>;
         }
     }
 }

@@ -1,7 +1,20 @@
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { SignUp } from "@clerk/clerk-react";
+import { useSelector } from "react-redux";
+import { useEffect } from "react";
 
 function Signup() {
+
+    const { user } = useSelector(state => state.authReducer);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (user) {
+            console.log(user);
+            return navigate("/feed");
+        }
+    }, [user])
+
     return (
         <div className="bg-[#866f55] bg-opacity-10 w-screen h-screen flex flex-col justify-start p-2">
             <div className="flex justify-between py-4">
