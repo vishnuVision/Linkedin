@@ -23,10 +23,6 @@ export default function Navbar() {
     setIsDropdownVisible(value.length > 0);
   };
 
-  useEffect(()=>{
-    console.log(searchQuery)
-  },[searchQuery])
-
   useEffect(() => {
     const observer = new ResizeObserver((entries) => {
       for (let entry of entries) {
@@ -64,6 +60,10 @@ export default function Navbar() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  useEffect(()=>{
+    console.log(searchQuery);
+  },[searchQuery])
 
   return (
     <nav ref={divRef} className="fixed top-0 w-full bg-white border-b border-gray-200 z-50">

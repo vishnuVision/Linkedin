@@ -55,3 +55,7 @@ body {
   width: 500px;
   align-items: center;
 }
+
+.cl-component.secured-by-clerk {
+  display: none !important;
+}

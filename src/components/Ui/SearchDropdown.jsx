@@ -26,7 +26,7 @@ function SearchDropdown({ isVisible,setIsVisible }) {
         type="Jobs"
       />
       <div className="px-4 py-2 bg-gray-50 border-t border-gray-200">
-        <Link onClick={()=>setIsVisible(false)} to={"/search/results/all"} className="text-sm text-blue-600 hover:text-blue-800 font-medium">
+        <Link onClick={()=>setIsVisible(false)} to={"/search/results/all/"} className="text-sm text-blue-600 hover:text-blue-800 font-medium">
           See all results
         </Link>
       </div>

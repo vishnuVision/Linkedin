@@ -30,6 +30,7 @@ import JobPostingForm from "./Forms/JobPostingForm"
 import JobConfirmation from "./Forms/JobConfirmation"
 import Writearticle from "./Forms/Writearticle"
 import SearchResult from "./pages/SearchResult"
+import GetInformation from "./pages/GetInformation"
 
 function App() {
   const [isChatDetailsOpen, setIsChatDetailsOpen] = useState(false);
@@ -62,9 +63,10 @@ function App() {
               <Route path="/company/setup" element={<CompanyPageDashboard />} />
               <Route path="/company/setup/new" element={<CompanyForm />} />
               <Route path="/my-items/*" element={<JobPostingAccount />} />
-              <Route path="/search/results/all" element={<SearchResult />} />
+              <Route path="/search/results/all/*" element={<SearchResult />} />
           </Route>
           <Route path="/signup" element={<Signup />} />
+          <Route path="/provideInformation" element={<GetInformation />} />
           <Route path="/signin/*" element={<Login />} />
           <Route path="*" element={<Notfound />} />
         </Routes>
