@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom"
+import { Link, useLocation, useNavigate } from "react-router-dom"
 import Input from "../components/Ui/Input"
 import { useEffect, useState } from "react";
 import { useSignIn, useUser } from "@clerk/clerk-react";
@@ -18,6 +18,7 @@ function Login() {
     const { user: userData } = useSelector((state) => state.authReducer);
     const navigate = useNavigate();
     const {signOut} = useAuth();
+    const {search} = useLocation();
 
     useEffect(()=>{
         if(userData)
@@ -27,13 +28,19 @@ function Login() {
     },[userData])
 
     useEffect(() => {
-        if (user && !userData) {
+        if (search.replace("?","").split("=")[1] === "true") {
             login(user.emailAddresses[0].emailAddress)
         }
     }, [])
 
+    useEffect(()=>{
+        if(user?.emailAddresses[0]?.emailAddress && !userData)
+        {
+            navigate("/signup")
+        }
+    },[user])
+
     const login = async (email) => {
-        console.log("login")
         try {
             if (email) {
                 const response = await axios.post(`${import.meta.env.VITE_SERVER_URL}/api/v1/login`, { email, password }, {
@@ -54,8 +61,8 @@ function Login() {
                 }
             }
         } catch (error) {
-            console.error('Error during logout:', error);
             await signOut();
+            setError(err.errors ? err.errors[0].message : "Failed to sign in");
         }
     }
 
@@ -63,23 +70,13 @@ function Login() {
         if (!isLoaded) return;
 
         try {
-            console.log("start")
-            const attempt = await signIn.authenticateWithRedirect({
+            await signIn.authenticateWithRedirect({
                 strategy: "oauth_google",
-                redirectUrl: "/signin",
-                redirectUrlComplete: "/signin",
+                redirectUrl: "/signin?authenticate=true",
+                redirectUrlComplete: "/signin?authenticate=true",
             });
-
-            if (attempt.status === "complete") {
-                login(attempt?.identifier);
-
-            } else {
-                console.log("Additional steps required:", attempt);
-            }
         } catch (err) {
-            console.log(err);
-            navigate("/signin");
-            setError(err.errors ? err.errors[0].message : "Hii");
+            setError(err.errors ? err.errors[0].message : "Failed to sign in with Google");
         }
     };
 
@@ -87,19 +84,11 @@ function Login() {
         if (!isLoaded) return;
 
         try {
-            const attempt = await signIn.authenticateWithRedirect({
+            await signIn.authenticateWithRedirect({
                 strategy: "oauth_microsoft",
-                redirectUrl: "/signin",
-                redirectUrlComplete: "/signin",
+                redirectUrl: "/signin?authenticate=true",
+                redirectUrlComplete: "/signin?authenticate=true",
             });
-
-            if (attempt.status === "complete") {
-                login(attempt);
-
-            } else {
-                console.log("Additional steps required:", attempt);
-            }
-
         } catch (err) {
             setError(err.errors ? err.errors[0].message : "Failed to sign in with Microsoft");
         }
@@ -117,13 +106,8 @@ function Login() {
                 password
             });
 
-            console.log(attempt);
-            console.log("Login successful:", attempt);
-
             if (attempt.status === "complete") {
-                login(attempt);
-            } else {
-                console.log("Additional steps required:", attempt);
+                login(attempt?.identifier);
             }
         } catch (err) {
             if (err.message.includes("verification strategy is not valid")) {

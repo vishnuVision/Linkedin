@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom"
+import { Link, useLocation, useNavigate } from "react-router-dom"
 import Input from "../components/Ui/Input"
 import { useEffect, useState } from "react"
 import Dropdown from "../components/Ui/Dropdown";
@@ -38,6 +38,7 @@ function Signup() {
     const { signOut } = useAuth();
     const navigate = useNavigate();
     const { user:userData } = useSelector((state) => state.authReducer);
+    const {search} = useLocation();
 
     useEffect(()=>{
         if(userData)
@@ -47,13 +48,19 @@ function Signup() {
     },[userData])
 
     useEffect(() => {
+        if (search.replace("?","").split("=")[1] === "false") {
+            signOut();
+        }
+    }, [])
+
+    useEffect(() => {
         if (isFirst) {
             const currentYear = new Date().getFullYear();
             const yearsList = Array.from({ length: 100 }, (_, i) => currentYear - i);
             setYears(["--Select", ...yearsList]);
             setSelectedYear("");
             setIsFirst(false);
-            if (user.isSignedIn) {
+            if (user.isSignedIn && !userData) {
                 setPage(2);
             }
         }
@@ -67,7 +74,6 @@ function Signup() {
 
     const handleMonthChange = (e) => {
         setMonth(e.target.value);
-        console.log(e.target.value)
         const daysList = getDaysInMonth(e.target.value);
         setDays(["--Select", ...daysList]);
         setSelectedDay("");
@@ -119,7 +125,6 @@ function Signup() {
             }
         }
         catch (err) {
-            console.log(err);
             setError(err.errors ? err.errors[0].message : "Something went wrong");
         }
     }
@@ -179,6 +184,7 @@ function Signup() {
                 redirectUrlComplete: "/signup"
             });
         } catch (err) {
+            window.location.href = "/signin?authenticate=false";
             setError(err.errors ? err.errors[0].message : "Failed to sign up with Google");
         }
     };
@@ -193,6 +199,7 @@ function Signup() {
                 redirectUrlComplete: "/signup",
             });
         } catch (err) {
+            window.location.href = "/signin?authenticate=false";
             setError(err.errors ? err.errors[0].message : "Failed to sign up with Microsoft");
         }
     };

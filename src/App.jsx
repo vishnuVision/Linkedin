@@ -43,10 +43,6 @@ function App() {
   const data = useUser();
   const dispatch = useDispatch();
 
-  // useEffect(()=>{
-  //   console.log(data);
-  // },[data])
-
   const getUserDetails = async () => {
     try {
       const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/api/v1/getUserDetails`, { withCredentials: true });

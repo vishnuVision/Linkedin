@@ -12,7 +12,6 @@ function Home() {
 
   useEffect(() => {
     if (user) {
-      console.log(user);
       return navigate("/feed");
     }
   }, [user])

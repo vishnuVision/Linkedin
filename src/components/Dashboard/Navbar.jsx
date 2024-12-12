@@ -68,10 +68,6 @@ export default function Navbar() {
     };
   }, []);
 
-  useEffect(() => {
-    console.log(searchQuery);
-  }, [searchQuery])
-
   const handleLogout = async () => {
     try {
       await signOut();
