@@ -5,6 +5,11 @@ import { TiArrowSortedDown } from "react-icons/ti";
 import { useEffect, useRef, useState } from 'react';
 import SearchInput from '../Ui/SearchInput';
 import SearchDropdown from '../Ui/SearchDropdown';
+import axios from 'axios';
+import { useDispatch } from 'react-redux';
+import { assignUser } from '../../redux/slices/authReducer';
+import toast from 'react-hot-toast';
+import { useAuth } from "@clerk/clerk-react";
 
 export default function Navbar() {
 
@@ -17,6 +22,8 @@ export default function Navbar() {
   const mainRef = useRef();
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const dispatch = useDispatch();
+  const { signOut } = useAuth();
 
   const handleSearch = (value) => {
     setSearchQuery(value);
@@ -61,9 +68,27 @@ export default function Navbar() {
     };
   }, []);
 
-  useEffect(()=>{
+  useEffect(() => {
     console.log(searchQuery);
-  },[searchQuery])
+  }, [searchQuery])
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      const response = await axios.delete(`${import.meta.env.VITE_SERVER_URL}/api/v1/logout`, { withCredentials: true });
+      if (response.data) {
+        const { success, data, message } = await response.data;
+        if (success) {
+          dispatch(assignUser(false));
+        }
+        else {
+          toast.error(message);
+        }
+      }
+    } catch (error) {
+      console.error('Error during logout:', error);
+    }
+  }
 
   return (
     <nav ref={divRef} className="fixed top-0 w-full bg-white border-b border-gray-200 z-50">
@@ -75,7 +100,7 @@ export default function Navbar() {
               <Search className="absolute left-3 top-2.5 h-5 w-3 md:w-5 text-gray-400" />
               <div className="relative w-full max-w-md">
                 <SearchInput onSearch={handleSearch} />
-                <SearchDropdown isVisible={isDropdownVisible} setIsVisible={setIsDropdownVisible}/>
+                <SearchDropdown isVisible={isDropdownVisible} setIsVisible={setIsDropdownVisible} />
               </div>
             </div>
           </div>
@@ -121,7 +146,7 @@ export default function Navbar() {
                       <Link to="/my-items/" className="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 hover:underline hover:underline-offset-1">Job Posting Account</Link>
                     </div>
                     <div className='flex w-full justify-start items-start border-t border-gray-300'>
-                      <button to="/logout" className="flex justify-start px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:underline hover:underline-offset-1 flex-grow">Sign Out</button>
+                      <button type='button' onClick={handleLogout} className="flex justify-start px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:underline hover:underline-offset-1 flex-grow">Sign Out</button>
                     </div>
                   </div>
                 )
@@ -143,7 +168,7 @@ export default function Navbar() {
                         </div>
                         <div className='flex-grow border-l pl-4 border-gray-300 flex flex-col justify-start'>
                           <h1 className='text-sm px-1 py-2 font-semibold'>Explore more for business</h1>
-                          <Link to="/jobs" className="py-3 px-1 text-sm text-gray-700 flex flex-col group">
+                          <Link to="/job-posting/" className="py-3 px-1 text-sm text-gray-700 flex flex-col group">
                             <span className='font-semibold group-hover:underline'>Post a job for free</span>
                             <p className='text-xs group-hover:underline'>Get qualified applicants quickly</p>
                           </Link>
