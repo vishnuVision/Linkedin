@@ -59,6 +59,11 @@ function JobPostingForm() {
         setSkills(skills.filter((skill, idx) => idx !== index));
     }
 
+    const handleJobPost = () => {
+        console.log(jobDescription);
+        navigate("assesments");
+    }
+
     return (
         <div className="max-h-screen overflow-scroll py-8 px-4 pt-20">
             <div className="max-w-5xl mx-auto">
@@ -196,7 +201,7 @@ function JobPostingForm() {
                                         <button className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50">
                                             Back
                                         </button>
-                                        <button onClick={() => navigate("assesments")} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                                        <button onClick={handleJobPost} className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
                                             Next
                                         </button>
                                     </div>

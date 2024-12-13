@@ -31,7 +31,6 @@ import JobConfirmation from "./Forms/JobConfirmation"
 import Writearticle from "./Forms/Writearticle"
 import SearchResult from "./pages/SearchResult"
 import ProtectedRouting from "./components/auth/ProtectedRouting"
-import { useUser } from "@clerk/clerk-react"
 import axios from "axios"
 import { useDispatch } from "react-redux"
 import { assignUser } from "./redux/slices/authReducer";
@@ -39,8 +38,6 @@ import toast, { Toaster } from "react-hot-toast";
 
 function App() {
   const [isChatDetailsOpen, setIsChatDetailsOpen] = useState(false);
-
-  const data = useUser();
   const dispatch = useDispatch();
 
   const getUserDetails = async () => {

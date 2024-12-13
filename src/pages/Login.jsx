@@ -19,6 +19,7 @@ function Login() {
     const navigate = useNavigate();
     const {signOut} = useAuth();
     const {search} = useLocation();
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(()=>{
         if(userData)
@@ -41,6 +42,7 @@ function Login() {
     },[user])
 
     const login = async (email) => {
+        setIsLoading(true);
         try {
             if (email) {
                 const response = await axios.post(`${import.meta.env.VITE_SERVER_URL}/api/v1/login`, { email, password }, {
@@ -60,14 +62,16 @@ function Login() {
                     }
                 }
             }
-        } catch (error) {
+        } catch (err) {
             await signOut();
             setError(err.errors ? err.errors[0].message : "Failed to sign in");
         }
+        setIsLoading(false);
     }
 
     const handleGoogleSignin = async () => {
         if (!isLoaded) return;
+        setIsLoading(true);
 
         try {
             await signIn.authenticateWithRedirect({
@@ -82,6 +86,7 @@ function Login() {
 
     const handleMicrosoftSignin = async () => {
         if (!isLoaded) return;
+        setIsLoading(true);
 
         try {
             await signIn.authenticateWithRedirect({
@@ -96,6 +101,7 @@ function Login() {
 
     const handleEmailLogin = async (e) => {
         e.preventDefault();
+        setIsLoading(true);
         setError("");
 
         if (!isLoaded) return;
@@ -140,7 +146,8 @@ function Login() {
                             {error && <p className="text-red-600 text-sm">{error}</p>}
                             <button
                                 type="submit"
-                                className="w-full bg-[#0a66c2] text-white py-2 px-4 rounded-full hover:bg-blue-600 focus:ring-2 focus:ring-blue-500"
+                                disabled={isLoading}
+                                className={`${isLoading ? "opacity-50 cursor-not-allowed" : ""} w-full bg-[#0a66c2] text-white py-2 px-4 rounded-full hover:bg-blue-600 focus:ring-2 focus:ring-blue-500`}
                             >
                                 Agree & Join
                             </button>
@@ -154,11 +161,11 @@ function Login() {
                             </div>
                         </div>
                         <p className="break-words text-sm text-center mt-2 px-4">By clicking Continue to join or sign in, you agree to LinkedIn’s <span className="text-[#0a66c2] font-semibold">User Agreement, Privacy Policy,</span> and <span className="text-[#0a66c2] font-semibold">Cookie Policy.</span></p>
-                        <button type="button" onClick={handleGoogleSignin} className="flex w-full mt-4 gap-1 justify-center items-center py-2 text-left border rounded-full hover:bg-gray-100 font-medium">
+                        <button disabled={isLoading} type="button" onClick={handleGoogleSignin} className={`${isLoading ? "opacity-50 cursor-not-allowed" : ""} flex w-full mt-4 gap-1 justify-center items-center py-2 text-left border rounded-full hover:bg-gray-100 font-medium`}>
                             <img src="/google.webp" className="w-6 h-6" alt="icon" />
                             Continue With Google
                         </button>
-                        <button type="button" onClick={handleMicrosoftSignin} className="flex w-full mt-4 gap-2 justify-center items-center py-2 text-left border rounded-full hover:bg-gray-100 font-medium">
+                        <button disabled={isLoading} type="button" onClick={handleMicrosoftSignin} className={`${ isLoading ? "opacity-50 cursor-not-allowed" : ""} flex w-full mt-4 gap-2 justify-center items-center py-2 text-left border rounded-full hover:bg-gray-100 font-medium`}>
                             <img src="/microsoft.png" className="w-6 h-6" alt="icon" />
                             Continue With Microsoft
                         </button>

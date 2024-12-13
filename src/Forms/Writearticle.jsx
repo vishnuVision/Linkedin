@@ -14,40 +14,40 @@ const formats = [
     "image",
 ];
 
-const addCustomPublishButton = (handlePublish) => {
-    const publishButton = document.querySelector(".ql-publish");
-
-    if (!publishButton) {
-        const toolbar = Quill.import("modules/toolbar");
-        toolbar.DEFAULTS.handlers.publish = handlePublish;
-
-        const span = document.createElement("div");
-        span.className = "ql-formats ql-subcontainer";
-
-        const button = document.createElement("button");
-        button.innerHTML = "Publish";
-        button.className = "ql-publish";
-        button.onclick = handlePublish;
-
-        const toolbarElement = document.querySelector(".ql-toolbar");
-        if (toolbarElement) {
-            toolbarElement.appendChild(span);
-            span.appendChild(button);
-        }
-    }
-};
-
 function Writearticle() {
     const [content, setContent] = useState("");
 
-    const handlePublish = () => {
-        console.log("Publishing content:", content);
-        alert("Content Published!");
+    const addCustomPublishButton = (handlePublish) => {
+        const publishButton = document.querySelector(".ql-publish");
+
+        if (!publishButton) {
+            const toolbar = Quill.import("modules/toolbar");
+            toolbar.DEFAULTS.handlers.publish = handlePublish;
+
+            const span = document.createElement("div");
+            span.className = "ql-formats ql-subcontainer";
+
+            const button = document.createElement("button");
+            button.innerHTML = "Publish";
+            button.className = "ql-publish";
+            button.onclick = handlePublish;
+
+            const toolbarElement = document.querySelector(".ql-toolbar");
+            if (toolbarElement) {
+                toolbarElement.appendChild(span);
+                span.appendChild(button);
+            }
+        }
     };
 
     useEffect(() => {
         addCustomPublishButton(handlePublish);
     }, []);
+
+    const handlePublish = () => {
+
+        console.log(content);
+    };
 
     const modules = {
         toolbar: [

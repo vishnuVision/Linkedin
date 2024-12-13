@@ -37,21 +37,15 @@ function Signup() {
     const dispatch = useDispatch();
     const { signOut } = useAuth();
     const navigate = useNavigate();
-    const { user:userData } = useSelector((state) => state.authReducer);
-    const {search} = useLocation();
-
-    useEffect(()=>{
-        if(userData)
-        {
-            return navigate("/feed");
-        }
-    },[userData])
+    const { user: userData } = useSelector((state) => state.authReducer);
+    const { search } = useLocation();
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
-        if (search.replace("?","").split("=")[1] === "false") {
-            signOut();
+        if (userData) {
+            return navigate("/feed");
         }
-    }, [])
+    }, [userData])
 
     useEffect(() => {
         if (isFirst) {
@@ -60,9 +54,19 @@ function Signup() {
             setYears(["--Select", ...yearsList]);
             setSelectedYear("");
             setIsFirst(false);
+
             if (user.isSignedIn && !userData) {
                 setPage(2);
             }
+        }
+    }, [])
+
+    useEffect(() => {
+        if (search.replace("?", "").split("=")[1] === "false") {
+            async () => {
+                await signOut();
+            }
+            setError("email is aleady exists");
         }
     }, [])
 
@@ -81,12 +85,12 @@ function Signup() {
 
     const signUpUser = async (e) => {
         e.preventDefault();
+        setIsLoading(true);
         try {
             let data;
             let birthday;
 
-            if(month && selectedDay && selectedYear)
-            {
+            if (month && selectedDay && selectedYear) {
                 const date = new Date(selectedYear, month - 1, selectedDay);
                 birthday = date.toISOString();
             }
@@ -102,9 +106,8 @@ function Signup() {
                 }
             }
 
-            if(data)
-            {
-                const response = await axios.post(`${import.meta.env.VITE_SERVER_URL}/api/v1/register`,data, {
+            if (data) {
+                const response = await axios.post(`${import.meta.env.VITE_SERVER_URL}/api/v1/register`, data, {
                     withCredentials: true,
                     headers: {
                         "Content-Type": "application/json"
@@ -115,6 +118,7 @@ function Signup() {
                     const { success, data, message } = await response.data;
                     if (success) {
                         dispatch(assignUser(data));
+                        setError("");
                         navigate("/feed");
                     }
                     else {
@@ -123,9 +127,13 @@ function Signup() {
                     }
                 }
             }
+            setIsLoading(false);
         }
         catch (err) {
-            setError(err.errors ? err.errors[0].message : "Something went wrong");
+            setIsLoading(false);
+            // optional
+            // delete user
+            setError(err.errors ? err.errors[0].message : "User not signup Properly");
         }
     }
 
@@ -145,6 +153,7 @@ function Signup() {
     const handleSignup = async (e) => {
         e.preventDefault();
         if (!isLoaded) return;
+        setIsLoading(true);
 
         try {
             const signUpAttempt = await signUp.create({
@@ -153,8 +162,12 @@ function Signup() {
             });
 
             await signUpAttempt.prepareEmailAddressVerification();
+            setIsLoading(false);
+            setError("");
             setPage(1);
         } catch (err) {
+            setIsLoading(false);
+            await signOut();
             setError(err.errors ? err.errors[0].message : "Something went wrong");
         }
     };
@@ -166,40 +179,46 @@ function Signup() {
             });
 
             if (signUpAttempt.status === "complete") {
+                setError("");
                 await setActive({ session: signUpAttempt.createdSessionId });
             }
             setPage(2);
         } catch (err) {
-            setError(err.errors ? err.errors[0].message : "Invalid OTP. Please try again.");
+            setOtp("");
+            setError(err.errors ? "Invalid OTP. Please try again." : "Something went wrong");
         }
     };
 
     const handleGoogleSignup = async () => {
         if (!isLoaded) return;
+        setIsLoading(true);
 
         try {
             await signUp.authenticateWithRedirect({
                 strategy: "oauth_google",
-                redirectUrl: "/signup",
-                redirectUrlComplete: "/signup"
+                redirectUrl: "/signup?authenticate=true",
+                redirectUrlComplete: "/signup?authenticate=true",
             });
         } catch (err) {
-            window.location.href = "/signin?authenticate=false";
+            await signOut();
+            window.location.href = "/signup?authenticate=false";
             setError(err.errors ? err.errors[0].message : "Failed to sign up with Google");
         }
     };
 
     const handleMicrosoftSignup = async () => {
         if (!isLoaded) return;
+        setIsLoading(true);
 
         try {
             await signUp.authenticateWithRedirect({
                 strategy: "oauth_microsoft",
-                redirectUrl: "/signup",
-                redirectUrlComplete: "/signup",
+                redirectUrl: "/signup?authenticate=true",
+                redirectUrlComplete: "/signup?authenticate=true",
             });
         } catch (err) {
-            window.location.href = "/signin?authenticate=false";
+            await signOut();
+            window.location.href = "/signup?authenticate=false";
             setError(err.errors ? err.errors[0].message : "Failed to sign up with Microsoft");
         }
     };
@@ -227,7 +246,8 @@ function Signup() {
                                 <p className="break-words text-sm text-center mt-2 px-4">By clicking Continue to join or sign in, you agree to LinkedIn&apos;s <span className="text-[#0a66c2] font-semibold">User Agreement, Privacy Policy,</span> and <span className="text-[#0a66c2] font-semibold">Cookie Policy.</span></p>
                                 <button
                                     type="submit"
-                                    className="w-full bg-[#0a66c2] text-white py-2 px-4 rounded-full hover:bg-blue-600 focus:ring-2 focus:ring-blue-500"
+                                    disabled={isLoading}
+                                    className={`${isLoading ? "opacity-50 cursor-not-allowed" : ""}  w-full bg-[#0a66c2] text-white py-2 px-4 rounded-full hover:bg-blue-600 focus:ring-2 focus:ring-blue-500`}
                                 >
                                     Agree & Join
                                 </button>
@@ -240,11 +260,11 @@ function Signup() {
                                     <span className="bg-white px-2 text-gray-500">or</span>
                                 </div>
                             </div>
-                            <button type="button" onClick={handleGoogleSignup} className="flex w-full mt-4 gap-1 justify-center items-center py-2 text-left border rounded-full hover:bg-gray-100 font-medium">
+                            <button disabled={isLoading} type="button" onClick={handleGoogleSignup} className={`${isLoading ? "opacity-50 cursor-not-allowed" : ""} flex w-full mt-4 gap-1 justify-center items-center py-2 text-left border rounded-full hover:bg-gray-100 font-medium`}>
                                 <img src="/google.webp" className="w-6 h-6" alt="icon" />
                                 Continue With Google
                             </button>
-                            <button type="button" onClick={handleMicrosoftSignup} className="flex w-full mt-4 gap-2 justify-center items-center py-2 text-left border rounded-full hover:bg-gray-100 font-medium">
+                            <button disabled={isLoading} type="button" onClick={handleMicrosoftSignup} className={`${isLoading ? "opacity-50 cursor-not-allowed" : ""} flex w-full mt-4 gap-2 justify-center items-center py-2 text-left border rounded-full hover:bg-gray-100 font-medium`}>
                                 <img src="/microsoft.png" className="w-6 h-6" alt="icon" />
                                 Continue With Microsoft
                             </button>
@@ -335,8 +355,8 @@ function Signup() {
                                 <Input label="Location" type="text" placeholder="Enter your location" value={location} setvalue={setLocation} />
                                 <Input label="School or College/University" type="text" placeholder="" value={school} setvalue={setSchool} />
                                 <div className="flex justify-between gap-2">
-                                    <Dropdown label={"Start Year"} list={years} value={startYear} onChaneHandler={(e) => setStartYear(e.target.value)} />
-                                    <Dropdown label={"End Year"} list={years} value={endYear} onChaneHandler={(e) => setEndYear(e.target.value)} />
+                                    <Dropdown label={"Start Year"} isYear={true} list={years} value={startYear} onChaneHandler={(e) => setStartYear(e.target.value)} />
+                                    <Dropdown label={"End Year"} isYear={true} list={years} value={endYear} onChaneHandler={(e) => setEndYear(e.target.value)} />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-medium text-black">Date of birth</label>
