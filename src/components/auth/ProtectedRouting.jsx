@@ -7,7 +7,7 @@ function ProtectedRouting({ children }) {
     
     if(!user)
     {
-        return <Navigate to={"/"}/>
+        return <Navigate to={"/signin"}/>
     }
     else 
     {

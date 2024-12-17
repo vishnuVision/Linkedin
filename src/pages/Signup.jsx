@@ -48,25 +48,29 @@ function Signup() {
     }, [userData])
 
     useEffect(() => {
+        if (search.replace("?", "").split("=")[1] === "true") {
+            if(user?.user?.emailAddresses[0]?.emailAddress)
+            {
+                signUpUser();
+            }
+            else
+            {
+                setError("user already signup");
+            }
+        }
+
+        if (search.replace("?", "").split("=")[1] === "false") {
+            setError("email is aleady exists");
+        }
+    }, [])
+
+    useEffect(() => {
         if (isFirst) {
             const currentYear = new Date().getFullYear();
             const yearsList = Array.from({ length: 100 }, (_, i) => currentYear - i);
             setYears(["--Select", ...yearsList]);
             setSelectedYear("");
             setIsFirst(false);
-
-            if (user.isSignedIn && !userData) {
-                setPage(2);
-            }
-        }
-    }, [])
-
-    useEffect(() => {
-        if (search.replace("?", "").split("=")[1] === "false") {
-            async () => {
-                await signOut();
-            }
-            setError("email is aleady exists");
         }
     }, [])
 
@@ -83,31 +87,66 @@ function Signup() {
         setSelectedDay("");
     };
 
-    const signUpUser = async (e) => {
-        e.preventDefault();
+    // const updateUserDetails = async (e) => {
+    //     e.preventDefault();
+    //     setIsLoading(true);
+    //     try {
+    //         let data;
+    //         let birthday;
+
+    //         if (month && selectedDay && selectedYear) {
+    //             const date = new Date(selectedYear, month - 1, selectedDay);
+    //             birthday = date.toISOString();
+    //         }
+
+    //         if (isStudent) {
+    //             if (user?.user?.emailAddresses[0]?.emailAddress || firstName || lastName || !location || user?.user?.imageUrl || school || startYear || endYear || birthday) {
+    //                 data = { email: user?.user?.emailAddresses[0]?.emailAddress, firstName, lastName, location, avatar: user?.user?.imageUrl, school, startYear, endYear, birthday, isStudent };
+    //             }
+    //         }
+    //         else {
+    //             if (user?.user?.emailAddresses[0]?.emailAddress && firstName && lastName && location && user?.user?.imageUrl && recentJob && recentCompany && birthday) {
+    //                 data = { email: user?.user?.emailAddresses[0]?.emailAddress, firstName, lastName, location, avatar: user?.user?.imageUrl, mostRecentJob: recentJob, mostRecentCompany: recentCompany, birthday, isStudent };
+    //             }
+    //         }
+
+    //         if (data) {
+    //             const response = await axios.post(`${import.meta.env.VITE_SERVER_URL}/api/v1/register`, data, {
+    //                 withCredentials: true,
+    //                 headers: {
+    //                     "Content-Type": "application/json"
+    //                 }
+    //             });
+
+    //             if (response.data) {
+    //                 const { success, data, message } = await response.data;
+    //                 if (success) {
+    //                     dispatch(assignUser(data));
+    //                     setError("");
+    //                     navigate("/feed");
+    //                 }
+    //                 else {
+    //                     toast.error(message);
+    //                     await signOut();
+    //                 }
+    //             }
+    //         }
+    //         setIsLoading(false);
+    //     }
+    //     catch (err) {
+    //         setIsLoading(false);
+    //         // optional
+    //         // delete user
+    //         setError(err.errors ? err.errors[0].message : "User not signup Properly");
+    //     }
+    // }
+
+    const signUpUser = async () => {
+        console.log("inside");
         setIsLoading(true);
         try {
-            let data;
-            let birthday;
-
-            if (month && selectedDay && selectedYear) {
-                const date = new Date(selectedYear, month - 1, selectedDay);
-                birthday = date.toISOString();
-            }
-
-            if (isStudent) {
-                if (user?.user?.emailAddresses[0]?.emailAddress || firstName || lastName || !location || user?.user?.imageUrl || school || startYear || endYear || birthday) {
-                    data = { email: user?.user?.emailAddresses[0]?.emailAddress, firstName, lastName, location, avatar: user?.user?.imageUrl, school, startYear, endYear, birthday, isStudent };
-                }
-            }
-            else {
-                if (user?.user?.emailAddresses[0]?.emailAddress && firstName && lastName && location && user?.user?.imageUrl && recentJob && recentCompany && birthday) {
-                    data = { email: user?.user?.emailAddresses[0]?.emailAddress, firstName, lastName, location, avatar: user?.user?.imageUrl, mostRecentJob: recentJob, mostRecentCompany: recentCompany, birthday, isStudent };
-                }
-            }
-
-            if (data) {
-                const response = await axios.post(`${import.meta.env.VITE_SERVER_URL}/api/v1/register`, data, {
+            if (user?.user?.emailAddresses[0]?.emailAddress) {
+                const response = await axios.post(`${import.meta.env.VITE_SERVER_URL}/api/v1/register`, {email:user?.user?.emailAddresses[0]?.emailAddress,password}, {
                     withCredentials: true,
                     headers: {
                         "Content-Type": "application/json"
@@ -123,18 +162,16 @@ function Signup() {
                     }
                     else {
                         toast.error(message);
-                        await signOut();
+                        window.location.href = "/signin";
                     }
                 }
             }
-            setIsLoading(false);
         }
         catch (err) {
-            setIsLoading(false);
-            // optional
-            // delete user
+            window.location.href = "/signin";
             setError(err.errors ? err.errors[0].message : "User not signup Properly");
         }
+        setIsLoading(false);
     }
 
     const resetData = () => {
@@ -150,8 +187,7 @@ function Signup() {
         setEndYear("");
     }
 
-    const handleSignup = async (e) => {
-        e.preventDefault();
+    const handleSignup = async () => {
         if (!isLoaded) return;
         setIsLoading(true);
 
@@ -160,16 +196,16 @@ function Signup() {
                 emailAddress: email,
                 password: password,
             });
-
+            console.log(signUpAttempt);
             await signUpAttempt.prepareEmailAddressVerification();
-            setIsLoading(false);
             setError("");
             setPage(1);
         } catch (err) {
-            setIsLoading(false);
-            await signOut();
+            await signOut({ redirectTo: undefined });
+            window.location.href = "/signup?authenticate=false";
             setError(err.errors ? err.errors[0].message : "Something went wrong");
         }
+        setIsLoading(false);
     };
 
     const handleVerifyOTP = async () => {
@@ -179,12 +215,17 @@ function Signup() {
             });
 
             if (signUpAttempt.status === "complete") {
+                console.log("nddj");
+                console.log(signUpAttempt)
                 setError("");
+                signUpUser();
                 await setActive({ session: signUpAttempt.createdSessionId });
             }
             setPage(2);
         } catch (err) {
             setOtp("");
+            await signOut({ redirectTo: undefined });
+            window.location.href = "/signup?authenticate=false";
             setError(err.errors ? "Invalid OTP. Please try again." : "Something went wrong");
         }
     };
@@ -192,7 +233,6 @@ function Signup() {
     const handleGoogleSignup = async () => {
         if (!isLoaded) return;
         setIsLoading(true);
-
         try {
             await signUp.authenticateWithRedirect({
                 strategy: "oauth_google",
@@ -200,7 +240,7 @@ function Signup() {
                 redirectUrlComplete: "/signup?authenticate=true",
             });
         } catch (err) {
-            await signOut();
+            await signOut({ redirectTo: undefined });
             window.location.href = "/signup?authenticate=false";
             setError(err.errors ? err.errors[0].message : "Failed to sign up with Google");
         }
@@ -217,7 +257,7 @@ function Signup() {
                 redirectUrlComplete: "/signup?authenticate=true",
             });
         } catch (err) {
-            await signOut();
+            await signOut({ redirectTo: undefined });
             window.location.href = "/signup?authenticate=false";
             setError(err.errors ? err.errors[0].message : "Failed to sign up with Microsoft");
         }

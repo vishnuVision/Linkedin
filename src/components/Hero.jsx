@@ -1,4 +1,4 @@
-import { useSignIn, useUser } from "@clerk/clerk-react";
+import { useAuth, useSignIn, useUser } from "@clerk/clerk-react";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
@@ -13,20 +13,18 @@ export default function Hero() {
   const dispatch = useDispatch();
   const {search} = useLocation();
   const { user } = useUser();
-  const { user: userData } = useSelector((state) => state.authReducer);
-  const navigate = useNavigate();
+  const {signOut} = useAuth();
 
   useEffect(() => {
     if (search.replace("?", "").split("=")[1] === "true") {
       login(user.emailAddresses[0].emailAddress)
     }
-  }, [])
 
-  useEffect(() => {
-    if (user?.emailAddresses[0]?.emailAddress && !userData) {
-      navigate("/signup")
+    if(search.replace("?", "").split("=")[1] === "false")
+    {
+      setError("please signup!");
     }
-  }, [user])
+  }, [])
 
   const login = async (email) => {
     setIsLoading(true);
@@ -44,11 +42,14 @@ export default function Hero() {
             dispatch(assignUser(data));
           }
           else {
+            await signOut({ redirectTo: undefined });
             toast.error(message);
           }
         }
       }
     } catch (err) {
+      await signOut({ redirectTo: undefined });
+      window.location.href = "/?authenticate=false";
       setError(err.errors ? err.errors[0].message : "Failed to sign in");
     }
     setIsLoading(false);
@@ -65,6 +66,7 @@ export default function Hero() {
         redirectUrlComplete: "/?authenticate=true",
       });
     } catch (err) {
+      await signOut({ redirectTo: undefined });
       window.location.href = "/?authenticate=false";
       setError(err.errors ? err.errors[0].message : "Failed to sign in with Google");
     }
@@ -81,6 +83,7 @@ export default function Hero() {
         redirectUrlComplete: "/?authenticate=true",
       });
     } catch (err) {
+      await signOut({ redirectTo: undefined });
       window.location.href = "/?authenticate=false";
       setError(err.errors ? err.errors[0].message : "Failed to sign in with Microsoft");
     }

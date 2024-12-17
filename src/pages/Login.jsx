@@ -30,16 +30,16 @@ function Login() {
 
     useEffect(() => {
         if (search.replace("?","").split("=")[1] === "true") {
-            login(user.emailAddresses[0].emailAddress)
+            if(user.emailAddresses[0].emailAddress)
+            {
+                login(user.emailAddresses[0].emailAddress)
+            }
+        }
+
+        if (search.replace("?","").split("=")[1] === "false") {
+            setError("user not login!");
         }
     }, [])
-
-    useEffect(()=>{
-        if(user?.emailAddresses[0]?.emailAddress && !userData)
-        {
-            navigate("/signup")
-        }
-    },[user])
 
     const login = async (email) => {
         setIsLoading(true);
@@ -58,46 +58,18 @@ function Login() {
                     }
                     else {
                         toast.error(message);
-                        await signOut();
+                        await signOut({ redirectTo: undefined });
+                        window.location.href = "/signin?authenticate=false";
                     }
                 }
             }
         } catch (err) {
-            await signOut();
+            await signOut({ redirectTo: undefined });
+            window.location.href = "/signin?authenticate=false";
             setError(err.errors ? err.errors[0].message : "Failed to sign in");
         }
         setIsLoading(false);
     }
-
-    const handleGoogleSignin = async () => {
-        if (!isLoaded) return;
-        setIsLoading(true);
-
-        try {
-            await signIn.authenticateWithRedirect({
-                strategy: "oauth_google",
-                redirectUrl: "/signin?authenticate=true",
-                redirectUrlComplete: "/signin?authenticate=true",
-            });
-        } catch (err) {
-            setError(err.errors ? err.errors[0].message : "Failed to sign in with Google");
-        }
-    };
-
-    const handleMicrosoftSignin = async () => {
-        if (!isLoaded) return;
-        setIsLoading(true);
-
-        try {
-            await signIn.authenticateWithRedirect({
-                strategy: "oauth_microsoft",
-                redirectUrl: "/signin?authenticate=true",
-                redirectUrlComplete: "/signin?authenticate=true",
-            });
-        } catch (err) {
-            setError(err.errors ? err.errors[0].message : "Failed to sign in with Microsoft");
-        }
-    };
 
     const handleEmailLogin = async (e) => {
         e.preventDefault();
@@ -116,11 +88,45 @@ function Login() {
                 login(attempt?.identifier);
             }
         } catch (err) {
+            await signOut({ redirectTo: undefined });
             if (err.message.includes("verification strategy is not valid")) {
                 setError("This account requires social login or email verification.");
             } else {
                 setError("Invalid email or password.");
             }
+        }
+        setIsLoading(false);
+    };
+
+    const handleGoogleSignin = async () => {
+        if (!isLoaded) return;
+        setIsLoading(true);
+        try {
+            await signIn.authenticateWithRedirect({
+                strategy: "oauth_google",
+                redirectUrl: "/signin?authenticate=true",
+                redirectUrlComplete: "/signin?authenticate=true",
+            });
+        } catch (err) {
+            await signOut({ redirectTo: undefined });
+            window.location.href = "/signin?authenticate=false";
+            setError(err.errors ? err.errors[0].message : "Failed to sign in with Google");
+        }
+    };
+
+    const handleMicrosoftSignin = async () => {
+        if (!isLoaded) return;
+        setIsLoading(true);
+        try {
+            await signIn.authenticateWithRedirect({
+                strategy: "oauth_microsoft",
+                redirectUrl: "/signin?authenticate=true",
+                redirectUrlComplete: "/signin?authenticate=true",
+            });
+        } catch (err) {
+            await signOut({ redirectTo: undefined });
+            window.location.href = "/signin?authenticate=false";
+            setError(err.errors ? err.errors[0].message : "Failed to sign in with Microsoft");
         }
     };
 

@@ -1,5 +1,5 @@
 import { Suspense, useEffect, useState } from "react"
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
+import { BrowserRouter as Router, Routes, Route, useNavigate } from "react-router-dom"
 import Loader from "./components/Loaders/Loader"
 import Home from "./pages/Home"
 import Notfound from "./components/Notfound"
@@ -35,6 +35,7 @@ import axios from "axios"
 import { useDispatch } from "react-redux"
 import { assignUser } from "./redux/slices/authReducer";
 import toast, { Toaster } from "react-hot-toast";
+import ProvideDetails from "./pages/ProvideDetails"
 
 function App() {
   const [isChatDetailsOpen, setIsChatDetailsOpen] = useState(false);
@@ -46,7 +47,13 @@ function App() {
       if (response.data) {
         const { success, data, message } = await response.data;
         if (success) {
+          console.log(data);
+
           dispatch(assignUser(data));
+          if(!data.firstName && !data.lastName && !data.location && data?.educations?.length === 0 && data?.experiences?.length === 0)
+          {
+            // window.location.href = "/provide-details";
+          }
         }
         else {
           toast.error(message);
@@ -58,7 +65,7 @@ function App() {
   }
 
   useEffect(() => {
-    getUserDetails();
+      getUserDetails();
   }, [])
 
   return (
@@ -93,6 +100,7 @@ function App() {
             <Route path="/search/results/all/*" element={<SearchResult />} />
           </Route>
           <Route path="/signup" element={<Signup />} />
+          <Route path="/provide-details" element={<ProvideDetails />} />
           <Route path="/signin" element={<Login />} />
           <Route path="*" element={<Notfound />} />
         </Routes>
