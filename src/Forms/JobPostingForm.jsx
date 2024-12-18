@@ -60,7 +60,7 @@ function JobPostingForm() {
     }
 
     const handleJobPost = () => {
-        console.log(jobDescription);
+        // console.log(jobDescription);
         navigate("assesments");
     }
 

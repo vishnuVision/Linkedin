@@ -1,11 +1,12 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import Navbar from "../Dashboard/Navbar";
 import { ChevronUp, Search } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import MessageToggle from "../Message/MessageToggle";
 import Chat from "../../Dialogues/Chat";
 import PropTypes from "prop-types";
 import HandleModalContext from "../../contextApi/handleModalContext";
+import { useSelector } from "react-redux";
 
 const conversations = [
     {
@@ -91,7 +92,23 @@ const conversations = [
 ];
 
 const AppLayout = ({ isChatDetailsOpen, setIsChatDetailsOpen }) => {
-    const [isChatOpen, setIsChatOpen] = useState(true);
+    const [isChatOpen, setIsChatOpen] = useState(false);
+    const [isDisplay, setIsDisplay] = useState(false);
+    const { user } = useSelector(state => state.authReducer);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (user) {
+            if (!user?.firstName && !user?.lastName && !user?.location && user?.educations?.length === 0 && user?.experiences?.length === 0) {
+                navigate("/provide-details");
+            }
+            else {
+                setIsChatOpen(true);
+                setIsDisplay(true);
+            }
+        }
+    }, [])
+
     return (
         <HandleModalContext value={{ isChatDetailsOpen, setIsChatDetailsOpen }}>
             <div className="">
@@ -100,22 +117,25 @@ const AppLayout = ({ isChatDetailsOpen, setIsChatDetailsOpen }) => {
                     <Outlet />
                 </div>
                 <div className={`hidden lg:flex absolute w-72 shadow-2xl border bottom-0 right-8 bg-white flex-col rounded-t-lg`}>
-                    <div onClick={() => setIsChatOpen(prev => !prev)} className={`border-b-[1px] hover:bg-gray-100 cursor-pointer border-slate-200 flex px-4 py-2 justify-between items-center`}>
-                        <div className="flex justify-center items-center gap-2">
-                            <img className="w-8 h-8 rounded-full object-cover" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="User Avatar" />
-                            <p className="text-sm font-semibold">Messaging</p>
+                    {
+                        isDisplay &&
+                        <div onClick={() => setIsChatOpen(prev => !prev)} className={`border-b-[1px] hover:bg-gray-100 cursor-pointer border-slate-200 flex px-4 py-2 justify-between items-center`}>
+                            <div className="flex justify-center items-center gap-2">
+                                <img className="w-8 h-8 rounded-full object-cover" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="User Avatar" />
+                                <p className="text-sm font-semibold">Messaging</p>
+                            </div>
+                            <div className="flex justify-center items-center">
+                                {
+                                    isChatOpen &&
+                                    <ChevronUp className="rotate-180" />
+                                }
+                                {
+                                    !isChatOpen &&
+                                    <ChevronUp />
+                                }
+                            </div>
                         </div>
-                        <div className="flex justify-center items-center">
-                            {
-                                isChatOpen &&
-                                <ChevronUp className="rotate-180" />
-                            }
-                            {
-                                !isChatOpen &&
-                                <ChevronUp />
-                            }
-                        </div>
-                    </div>
+                    }
                     {
                         isChatOpen &&
                         <div className="h-[80vh] overflow-y-scroll">

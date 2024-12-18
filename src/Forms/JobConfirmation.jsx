@@ -97,7 +97,6 @@ function JobConfirmation() {
         setAskedQuestions(askedQuestions.filter((data,idx)=>idx!==index));
         setQuestionsList(questionsList.map((q) => {
             if (q[0] === question.type) {
-                console.log(q);
                 if(q[1])
                 {
                     return [q[0], q[1], !q[2]];

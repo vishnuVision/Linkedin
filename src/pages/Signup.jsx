@@ -1,38 +1,21 @@
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import Input from "../components/Ui/Input"
 import { useEffect, useState } from "react"
-import Dropdown from "../components/Ui/Dropdown";
 import { useAuth, useSignUp, useUser } from "@clerk/clerk-react";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { assignUser } from "../redux/slices/authReducer";
 import toast from "react-hot-toast";
-
-const list = ["--Select", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+import Loader from "../components/Loaders/Loader";
 
 function Signup() {
     const [page, setPage] = useState(0);
     const { isLoaded, signUp, setActive } = useSignUp();
     const [error, setError] = useState(null);
-    const [days, setDays] = useState(["--Select"]);
-    const [years, setYears] = useState([]);
-    const [isFirst, setIsFirst] = useState(true);
 
-    const [isStudent, setIsStudent] = useState(false);
-    const [month, setMonth] = useState(0);
-    const [selectedDay, setSelectedDay] = useState("");
-    const [selectedYear, setSelectedYear] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [otp, setOtp] = useState();
-    const [firstName, setFirstName] = useState("");
-    const [lastName, setLastName] = useState("");
-    const [location, setLocation] = useState("");
-    const [recentJob, setRecentJob] = useState("");
-    const [recentCompany, setRecentCompany] = useState("");
-    const [school, setSchool] = useState("");
-    const [startYear, setStartYear] = useState("");
-    const [endYear, setEndYear] = useState("");
     const user = useUser();
     const dispatch = useDispatch();
     const { signOut } = useAuth();
@@ -43,18 +26,22 @@ function Signup() {
 
     useEffect(() => {
         if (userData) {
-            return navigate("/feed");
+            if (!userData?.firstName && !userData?.lastName && !userData?.location && userData?.educations?.length === 0 && userData?.experiences?.length === 0) {
+                navigate("/provide-details");
+            }
+            else
+            {
+                navigate("/feed");
+            }
         }
     }, [userData])
 
     useEffect(() => {
         if (search.replace("?", "").split("=")[1] === "true") {
-            if(user?.user?.emailAddresses[0]?.emailAddress)
-            {
+            if (user?.user?.emailAddresses[0]?.emailAddress) {
                 signUpUser();
             }
-            else
-            {
+            else {
                 setError("user already signup");
             }
         }
@@ -64,89 +51,11 @@ function Signup() {
         }
     }, [])
 
-    useEffect(() => {
-        if (isFirst) {
-            const currentYear = new Date().getFullYear();
-            const yearsList = Array.from({ length: 100 }, (_, i) => currentYear - i);
-            setYears(["--Select", ...yearsList]);
-            setSelectedYear("");
-            setIsFirst(false);
-        }
-    }, [])
-
-    const getDaysInMonth = (month, year = new Date().getFullYear()) => {
-        if (!month) return [];
-        const days = new Date(year, month, 0).getDate();
-        return Array.from({ length: days }, (_, i) => (i + 1).toString());
-    };
-
-    const handleMonthChange = (e) => {
-        setMonth(e.target.value);
-        const daysList = getDaysInMonth(e.target.value);
-        setDays(["--Select", ...daysList]);
-        setSelectedDay("");
-    };
-
-    // const updateUserDetails = async (e) => {
-    //     e.preventDefault();
-    //     setIsLoading(true);
-    //     try {
-    //         let data;
-    //         let birthday;
-
-    //         if (month && selectedDay && selectedYear) {
-    //             const date = new Date(selectedYear, month - 1, selectedDay);
-    //             birthday = date.toISOString();
-    //         }
-
-    //         if (isStudent) {
-    //             if (user?.user?.emailAddresses[0]?.emailAddress || firstName || lastName || !location || user?.user?.imageUrl || school || startYear || endYear || birthday) {
-    //                 data = { email: user?.user?.emailAddresses[0]?.emailAddress, firstName, lastName, location, avatar: user?.user?.imageUrl, school, startYear, endYear, birthday, isStudent };
-    //             }
-    //         }
-    //         else {
-    //             if (user?.user?.emailAddresses[0]?.emailAddress && firstName && lastName && location && user?.user?.imageUrl && recentJob && recentCompany && birthday) {
-    //                 data = { email: user?.user?.emailAddresses[0]?.emailAddress, firstName, lastName, location, avatar: user?.user?.imageUrl, mostRecentJob: recentJob, mostRecentCompany: recentCompany, birthday, isStudent };
-    //             }
-    //         }
-
-    //         if (data) {
-    //             const response = await axios.post(`${import.meta.env.VITE_SERVER_URL}/api/v1/register`, data, {
-    //                 withCredentials: true,
-    //                 headers: {
-    //                     "Content-Type": "application/json"
-    //                 }
-    //             });
-
-    //             if (response.data) {
-    //                 const { success, data, message } = await response.data;
-    //                 if (success) {
-    //                     dispatch(assignUser(data));
-    //                     setError("");
-    //                     navigate("/feed");
-    //                 }
-    //                 else {
-    //                     toast.error(message);
-    //                     await signOut();
-    //                 }
-    //             }
-    //         }
-    //         setIsLoading(false);
-    //     }
-    //     catch (err) {
-    //         setIsLoading(false);
-    //         // optional
-    //         // delete user
-    //         setError(err.errors ? err.errors[0].message : "User not signup Properly");
-    //     }
-    // }
-
     const signUpUser = async () => {
-        console.log("inside");
         setIsLoading(true);
         try {
             if (user?.user?.emailAddresses[0]?.emailAddress) {
-                const response = await axios.post(`${import.meta.env.VITE_SERVER_URL}/api/v1/register`, {email:user?.user?.emailAddresses[0]?.emailAddress,password}, {
+                const response = await axios.post(`${import.meta.env.VITE_SERVER_URL}/api/v1/register`, { email: user?.user?.emailAddresses[0]?.emailAddress, password }, {
                     withCredentials: true,
                     headers: {
                         "Content-Type": "application/json"
@@ -174,19 +83,6 @@ function Signup() {
         setIsLoading(false);
     }
 
-    const resetData = () => {
-        setIsStudent(prev => !prev);
-        setSelectedDay(0);
-        setMonth(0);
-        setSelectedYear(0);
-        setLocation("");
-        setRecentJob("");
-        setRecentCompany("");
-        setSchool("");
-        setStartYear("");
-        setEndYear("");
-    }
-
     const handleSignup = async () => {
         if (!isLoaded) return;
         setIsLoading(true);
@@ -196,7 +92,6 @@ function Signup() {
                 emailAddress: email,
                 password: password,
             });
-            console.log(signUpAttempt);
             await signUpAttempt.prepareEmailAddressVerification();
             setError("");
             setPage(1);
@@ -215,8 +110,6 @@ function Signup() {
             });
 
             if (signUpAttempt.status === "complete") {
-                console.log("nddj");
-                console.log(signUpAttempt)
                 setError("");
                 signUpUser();
                 await setActive({ session: signUpAttempt.createdSessionId });
@@ -262,6 +155,11 @@ function Signup() {
             setError(err.errors ? err.errors[0].message : "Failed to sign up with Microsoft");
         }
     };
+
+    if(userData)
+    {
+        return <Loader />
+    }
 
     return (
         <div className="bg-[#866f55] bg-opacity-10 w-screen h-screen flex flex-col justify-start p-2">
@@ -335,90 +233,6 @@ function Signup() {
                                     className="w-full bg-[#0a66c2] text-white py-2 px-4 rounded-full hover:bg-blue-600 focus:ring-2 focus:ring-blue-500"
                                 >
                                     Verify & Continue
-                                </button>
-                            </form>
-                        </div>
-                    }
-                    {
-                        page === 2 &&
-                        <div className="bg-white shadow-lg rounded-lg max-w-md w-full p-6">
-                            <form className="space-y-4">
-                                <Input label="First name" type="text" placeholder="Enter First name" value={firstName} setvalue={setFirstName} />
-                                <Input label="Last name" type="text" placeholder="Enter Last name" value={lastName} setvalue={setLastName} />
-                                {error && <p className="text-red-600 text-sm">{error}</p>}
-                                <button
-                                    type="button"
-                                    className="w-full bg-[#0a66c2] text-white py-2 px-4 rounded-full hover:bg-blue-600 focus:ring-2 focus:ring-blue-500"
-                                    onClick={() => setPage(3)}
-                                >
-                                    Continue
-                                </button>
-                            </form>
-                        </div>
-                    }
-                    {
-                        page === 3 && !isStudent &&
-                        <div className="bg-white shadow-lg rounded-lg max-w-md w-full p-6">
-                            <form onSubmit={signUpUser} className="space-y-4">
-                                <Input label="Location" type="text" placeholder="Enter your location" value={location} setvalue={setLocation} />
-                                <Input label="Most recent job title" type="text" placeholder="Enter recent job" value={recentJob} setvalue={setRecentJob} />
-                                <Input label="Most recent company" type="text" placeholder="Enter recent company" value={recentCompany} setvalue={setRecentCompany} />
-                                <div>
-                                    <label className="block text-sm font-medium text-black">Date of birth</label>
-                                    <div className="flex justify-between gap-2 mt-2">
-                                        <Dropdown label={"Month"} value={month} onChaneHandler={handleMonthChange} list={list} />
-                                        <Dropdown label={"Day"} value={selectedDay} onChaneHandler={(e) => setSelectedDay(e.target.value)} list={days} />
-                                        <Dropdown label={"Year"} isYear={true} value={selectedYear} onChaneHandler={(e) => setSelectedYear(e.target.value)} list={years} />
-                                    </div>
-                                </div>
-                                {error && <p className="text-red-600 text-sm">{error}</p>}
-                                <button
-                                    type="submit"
-                                    className="w-full text-black py-2 px-4 rounded-lg hover:bg-gray-100"
-                                    onClick={resetData}
-                                >
-                                    {"I'm a Student"}
-                                </button>
-                                <button
-                                    type="submit"
-                                    className="w-full bg-[#0a66c2] text-white py-2 px-4 rounded-full hover:bg-blue-600 focus:ring-2 focus:ring-blue-500"
-                                >
-                                    Continue
-                                </button>
-                            </form>
-                        </div>
-                    }
-                    {
-                        page === 3 && isStudent &&
-                        <div className="bg-white shadow-lg rounded-lg max-w-md w-full p-6">
-                            <form onSubmit={signUpUser} className="space-y-4">
-                                <Input label="Location" type="text" placeholder="Enter your location" value={location} setvalue={setLocation} />
-                                <Input label="School or College/University" type="text" placeholder="" value={school} setvalue={setSchool} />
-                                <div className="flex justify-between gap-2">
-                                    <Dropdown label={"Start Year"} isYear={true} list={years} value={startYear} onChaneHandler={(e) => setStartYear(e.target.value)} />
-                                    <Dropdown label={"End Year"} isYear={true} list={years} value={endYear} onChaneHandler={(e) => setEndYear(e.target.value)} />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-black">Date of birth</label>
-                                    <div className="flex justify-between gap-2 mt-2">
-                                        <Dropdown label={"Month"} value={month} onChaneHandler={handleMonthChange} list={list} />
-                                        <Dropdown label={"Day"} value={selectedDay} onChaneHandler={(e) => setSelectedDay(e.target.value)} list={days} />
-                                        <Dropdown label={"Year"} isYear={true} value={selectedYear} onChaneHandler={(e) => setSelectedYear(e.target.value)} list={years} />
-                                    </div>
-                                </div>
-                                {error && <p className="text-red-600 text-sm">{error}</p>}
-                                <button
-                                    type="submit"
-                                    className="w-full text-black py-2 px-4 rounded-lg hover:bg-gray-100"
-                                    onClick={resetData}
-                                >
-                                    {"I'm not a Student"}
-                                </button>
-                                <button
-                                    type="submit"
-                                    className="w-full bg-[#0a66c2] text-white py-2 px-4 rounded-full hover:bg-blue-600 focus:ring-2 focus:ring-blue-500"
-                                >
-                                    Continue
                                 </button>
                             </form>
                         </div>

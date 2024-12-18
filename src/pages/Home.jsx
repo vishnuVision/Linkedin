@@ -5,6 +5,7 @@ import Footer from '../components/Footer';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { useEffect } from 'react';
+import Loader from "../components/Loaders/Loader";
 
 function Home() {
   const { user } = useSelector(state => state.authReducer);
@@ -12,9 +13,21 @@ function Home() {
 
   useEffect(() => {
     if (user) {
-      return navigate("/feed");
+      if (!user?.firstName && !user?.lastName && !user?.location && user?.educations?.length === 0 && user?.experiences?.length === 0) {
+        navigate("/provide-details");
+      }
+      else {
+        navigate("/feed");
+      }
     }
   }, [user])
+
+  console.log(user);
+
+  if(user)
+  {
+    return <Loader />
+  }
 
   return (
     <div className="min-h-screen bg-linkedin-gray">

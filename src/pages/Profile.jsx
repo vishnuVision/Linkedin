@@ -31,8 +31,7 @@ function Profile() {
 const ProfilePage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleSave = (profile) => {
-    console.log('Saving profile:', profile);
+  const handleSave = () => {
     setIsModalOpen(false);
   };
 

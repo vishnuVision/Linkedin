@@ -2,8 +2,8 @@ import { useAuth, useSignIn, useUser } from "@clerk/clerk-react";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { useDispatch, useSelector } from "react-redux";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { Link, useLocation } from "react-router-dom";
 import { assignUser } from "../redux/slices/authReducer";
 
 export default function Hero() {
@@ -17,7 +17,14 @@ export default function Hero() {
 
   useEffect(() => {
     if (search.replace("?", "").split("=")[1] === "true") {
-      login(user.emailAddresses[0].emailAddress)
+      if (user?.emailAddresses[0]?.emailAddress)
+      {
+        login(user.emailAddresses[0].emailAddress)
+      }
+      else
+      {
+        setError("please signup!");
+      }
     }
 
     if(search.replace("?", "").split("=")[1] === "false")

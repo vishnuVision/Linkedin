@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { assignUser } from "../redux/slices/authReducer";
 import toast from "react-hot-toast";
 import { useAuth } from "@clerk/clerk-react";
+import Loader from "../components/Loaders/Loader";
 
 function Login() {
     const { signIn, isLoaded } = useSignIn();
@@ -17,26 +18,33 @@ function Login() {
     const { user } = useUser();
     const { user: userData } = useSelector((state) => state.authReducer);
     const navigate = useNavigate();
-    const {signOut} = useAuth();
-    const {search} = useLocation();
+    const { signOut } = useAuth();
+    const { search } = useLocation();
     const [isLoading, setIsLoading] = useState(false);
 
-    useEffect(()=>{
-        if(userData)
-        {
-            return navigate("/feed");
+    useEffect(() => {
+        if (userData) {
+            if (!userData?.firstName && !userData?.lastName && !userData?.location && userData?.educations?.length === 0 && userData?.experiences?.length === 0) {
+                navigate("/provide-details");
+            }
+            else {
+                navigate("/feed");
+            }
         }
-    },[userData])
+    }, [userData])
 
     useEffect(() => {
-        if (search.replace("?","").split("=")[1] === "true") {
-            if(user.emailAddresses[0].emailAddress)
-            {
+        if (search.replace("?", "").split("=")[1] === "true") {
+            if (user?.emailAddresses[0]?.emailAddress) {
                 login(user.emailAddresses[0].emailAddress)
+            }
+            else
+            {
+                setError("please signup!");
             }
         }
 
-        if (search.replace("?","").split("=")[1] === "false") {
+        if (search.replace("?", "").split("=")[1] === "false") {
             setError("user not login!");
         }
     }, [])
@@ -130,6 +138,10 @@ function Login() {
         }
     };
 
+    if (userData) {
+        return <Loader />
+    }
+
     return (
         <div className="bg-[#866f55] bg-opacity-10 w-screen h-screen flex flex-col justify-start p-2">
             <div className="flex justify-between py-4">
@@ -171,7 +183,7 @@ function Login() {
                             <img src="/google.webp" className="w-6 h-6" alt="icon" />
                             Continue With Google
                         </button>
-                        <button disabled={isLoading} type="button" onClick={handleMicrosoftSignin} className={`${ isLoading ? "opacity-50 cursor-not-allowed" : ""} flex w-full mt-4 gap-2 justify-center items-center py-2 text-left border rounded-full hover:bg-gray-100 font-medium`}>
+                        <button disabled={isLoading} type="button" onClick={handleMicrosoftSignin} className={`${isLoading ? "opacity-50 cursor-not-allowed" : ""} flex w-full mt-4 gap-2 justify-center items-center py-2 text-left border rounded-full hover:bg-gray-100 font-medium`}>
                             <img src="/microsoft.png" className="w-6 h-6" alt="icon" />
                             Continue With Microsoft
                         </button>

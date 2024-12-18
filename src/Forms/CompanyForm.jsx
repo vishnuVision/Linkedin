@@ -37,7 +37,6 @@ function CompanyForm() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
     navigate("/company/1/admin/dashboard/");
   };
 
