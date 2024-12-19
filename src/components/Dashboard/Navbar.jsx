@@ -10,6 +10,7 @@ import { useDispatch } from 'react-redux';
 import { assignUser } from '../../redux/slices/authReducer';
 import toast from 'react-hot-toast';
 import { useAuth } from "@clerk/clerk-react";
+import { useTranslation } from 'react-i18next';
 
 export default function Navbar() {
 
@@ -24,6 +25,7 @@ export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState('');
   const dispatch = useDispatch();
   const { signOut } = useAuth();
+  const { t } = useTranslation();
 
   const handleSearch = (value) => {
     setSearchQuery(value);
@@ -73,7 +75,7 @@ export default function Navbar() {
       await signOut();
       const response = await axios.delete(`${import.meta.env.VITE_SERVER_URL}/api/v1/logout`, { withCredentials: true });
       if (response.data) {
-        const { success, data, message } = await response.data;
+        const { success, message } = await response.data;
         if (success) {
           dispatch(assignUser(false));
         }
@@ -102,18 +104,18 @@ export default function Navbar() {
           </div>
           <div ref={mainRef} className={`${isMobile ? "fixed flex-col sm:flex-row top-20 right-2 bg-white overflow-x-scroll shadow-xl z-50 flex items-center border p-2 rounded-l-lg rounded-b-lg justify-center gap-4 lg:hidden" : "gap-2 h-full hidden lg:flex"}`}>
             <div className={`flex gap-2 ${isMobile ? "flex-col" : ""}`}>
-              <NavItem onClick={() => setIsMobile(false)} icon={<Home />} to='/feed' label="Home" active={url === '/feed' ? true : false} />
-              <NavItem onClick={() => setIsMobile(false)} icon={<Users />} to='/mynetwork/grow' label="Network" active={url.includes('/mynetwork') ? true : false} />
-              <NavItem onClick={() => setIsMobile(false)} icon={<BriefcaseBusiness />} to='/jobs' label="Jobs" active={url === '/jobs' ? true : false} />
-              <NavItem onClick={() => setIsMobile(false)} icon={<MessageSquareMore />} to='/messaging' label="Messages" active={url === '/messaging' ? true : false} />
-              <NavItem onClick={() => setIsMobile(false)} icon={<Bell />} to='/notifications' label="Notifications" active={url === '/notifications' ? true : false} />
+              <NavItem onClick={() => setIsMobile(false)} icon={<Home />} to='/feed' label={t("nav1")} active={url === '/feed' ? true : false} />
+              <NavItem onClick={() => setIsMobile(false)} icon={<Users />} to='/mynetwork/grow' label={t("nav2")} active={url.includes('/mynetwork') ? true : false} />
+              <NavItem onClick={() => setIsMobile(false)} icon={<BriefcaseBusiness />} to='/jobs' label={t("nav3")} active={url === '/jobs' ? true : false} />
+              <NavItem onClick={() => setIsMobile(false)} icon={<MessageSquareMore />} to='/messaging' label={t("nav4")} active={url === '/messaging' ? true : false} />
+              <NavItem onClick={() => setIsMobile(false)} icon={<Bell />} to='/notifications' label={t("nav5")} active={url === '/notifications' ? true : false} />
             </div>
             <div className='relative'>
               <NavButton onClick={() => setShowProfile((prev) => !prev)} icon={<img
                 src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
                 alt="Profile"
                 className="w-8 h-8 rounded-full object-cover"
-              />} label={<span className="flex items-center justify-center">Me <TiArrowSortedDown className='text-lg' /></span>} />
+              />} label={<span className="flex items-center justify-center">{t("nav6")} <TiArrowSortedDown className='text-lg' /></span>} />
               {
                 showProfile && (
                   <div onClick={() => setShowProfile(false)} ref={menuRef} className="fixed z-10 lg:absolute right-0 sm:right-10 mt-4 lg:right-0 lg:mt-2 w-72 bg-white border border-gray-200 rounded-md shadow-xl">
@@ -127,22 +129,22 @@ export default function Navbar() {
                           />
                           <p>Vishnu Mandlesara</p>
                         </Link>
-                        <Link to={"/profile/1"} className='flex justify-center items-center w-full py-1 text-[#0a66c2] border border-[#0a66c2] hover:bg-blue-100 rounded-full'>View Profile</Link>
+                        <Link to={"/profile/1"} className='flex justify-center items-center w-full py-1 text-[#0a66c2] border border-[#0a66c2] hover:bg-blue-100 rounded-full'>{t("view")}</Link>
                       </div>
                     </div>
                     <div className='flex flex-col w-full justify-start border-t border-gray-300 py-2'>
-                      <p className='px-4'>Account</p>
-                      <Link to="/settings/" className="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 hover:underline hover:underline-offset-1">Settings & Privacy</Link>
-                      <Link to="/settings/language" className="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 hover:underline hover:underline-offset-1">Language</Link>
+                      <p className='px-4'>{t("hed")}</p>
+                      <Link to="/settings/" className="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 hover:underline hover:underline-offset-1">{t("setting")}</Link>
+                      <Link to="/settings/language" className="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 hover:underline hover:underline-offset-1">{t("subhea5")}</Link>
                     </div>
                     <div className='flex flex-col w-full justify-start border-t border-gray-300 py-2'>
-                      <p className='px-4'>Manage</p>
-                      <Link to="/profile/1/all-posts" className="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 hover:underline hover:underline-offset-1">Posts & Activity</Link>
-                      <Link to="/company/1/admin/dashboard/" className="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 hover:underline hover:underline-offset-1">Company: Vishnu Mandlesara</Link>
-                      <Link to="/my-items/" className="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 hover:underline hover:underline-offset-1">Job Posting Account</Link>
+                      <p className='px-4'>{t("hed1")}</p>
+                      <Link to="/profile/1/all-posts" className="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 hover:underline hover:underline-offset-1">{t("posts")}</Link>
+                      <Link to="/company/1/admin/dashboard/" className="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 hover:underline hover:underline-offset-1">{t("com")} Vishnu Mandlesara</Link>
+                      <Link to="/my-items/" className="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 hover:underline hover:underline-offset-1">{t("job")}</Link>
                     </div>
                     <div className='flex w-full justify-start items-start border-t border-gray-300'>
-                      <button type='button' onClick={handleLogout} className="flex justify-start px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:underline hover:underline-offset-1 flex-grow">Sign Out</button>
+                      <button type='button' onClick={handleLogout} className="flex justify-start px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:underline hover:underline-offset-1 flex-grow">{t("subhea6")}</button>
                     </div>
                   </div>
                 )
@@ -150,30 +152,30 @@ export default function Navbar() {
             </div>
             <div className='md:border-s border-gray-300 px-4'>
               <div className='relative h-full'>
-                <NavButton onClick={() => setShowBusiness(prev => !prev)} icon={<Grip />} label={<span className="flex items-center justify-center">For Business <TiArrowSortedDown className='text-lg' /></span>} />
+                <NavButton onClick={() => setShowBusiness(prev => !prev)} icon={<Grip />} label={<span className="flex items-center justify-center">{t("nav7")} <TiArrowSortedDown className='text-lg' /></span>} />
                 {
                   showBusiness && (
                     <div onClick={() => setShowBusiness(false)} ref={menuRef} className="fixed z-10 lg:absolute right-0 sm:right-10 mt-4 lg:right-0 lg:mt-2 w-80 sm:w-96 bg-white border border-gray-200 rounded-md shadow-xl p-4">
                       <div className='flex sm:flex-row gap-2 justify-evenly items-start'>
                         <div className='flex flex-col justify-start items-start'>
-                          <h1 className='text-sm px-1 py-2 font-semibold'>My Apps</h1>
-                          <Link to="/jobs" className="py-2 px-1 text-sm text-gray-700 flex gap-2 group"> <Compass /> <span className='group-hover:underline'>Find New Clients</span></Link>
-                          <Link to="/groups" className="py-2 px-1 text-sm text-gray-700 flex gap-2 group"><Users /> <span className='group-hover:underline'>Groups</span></Link>
-                          <Link to="/events" className="py-2 px-1 text-sm text-gray-700 flex gap-2 group"><CalendarClock /> <span className='group-hover:underline'>Events</span></Link>
-                          <Link to="/notifications" className="py-2 px-1 text-sm text-gray-700 flex gap-2 group"><ReceiptText /> <span className='group-hover:underline'>Newsletters</span></Link>
+                          <h1 className='text-sm px-1 py-2 font-semibold'>{t("ap")}</h1>
+                          <Link to="/jobs" className="py-2 px-1 text-sm text-gray-700 flex gap-2 group"> <Compass /> <span className='group-hover:underline'>{t("client")}</span></Link>
+                          <Link to="/groups" className="py-2 px-1 text-sm text-gray-700 flex gap-2 group"><Users /> <span className='group-hover:underline'>{t("grp")}</span></Link>
+                          <Link to="/events" className="py-2 px-1 text-sm text-gray-700 flex gap-2 group"><CalendarClock /> <span className='group-hover:underline'>{t("evt")}</span></Link>
+                          <Link to="/notifications" className="py-2 px-1 text-sm text-gray-700 flex gap-2 group"><ReceiptText /> <span className='group-hover:underline'>{t("news")}</span></Link>
                         </div>
                         <div className='flex-grow border-l pl-4 border-gray-300 flex flex-col justify-start'>
-                          <h1 className='text-sm px-1 py-2 font-semibold'>Explore more for business</h1>
+                          <h1 className='text-sm px-1 py-2 font-semibold'>{t("exp")}</h1>
                           <Link to="/job-posting/" className="py-3 px-1 text-sm text-gray-700 flex flex-col group">
-                            <span className='font-semibold group-hover:underline'>Post a job for free</span>
-                            <p className='text-xs group-hover:underline'>Get qualified applicants quickly</p>
+                            <span className='font-semibold group-hover:underline'>{t("free")}</span>
+                            <p className='text-xs group-hover:underline'>{t("apc")}</p>
                           </Link>
                           <Link to="/jobs" className="py-3 px-1 text-sm text-gray-700 flex flex-col group">
-                            <span className='font-semibold group-hover:underline'>Get Started With Premium</span>
-                            <p className='text-xs group-hover:underline'>Expand and leverage your network</p>
+                            <span className='font-semibold group-hover:underline'>{t("pro")}</span>
+                            <p className='text-xs group-hover:underline'>{t("expa")}</p>
                           </Link>
                           <Link to="/company/setup" className="py-3 px-1 text-sm text-gray-700 flex gap-1 mt-2 group">
-                            <span className='font-semibold text-sm group-hover:underline'>Create a company page</span>
+                            <span className='font-semibold text-sm group-hover:underline'>{t("page")}</span>
                             <Plus />
                           </Link>
                         </div>

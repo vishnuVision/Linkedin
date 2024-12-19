@@ -7,6 +7,7 @@ import Chat from "../../Dialogues/Chat";
 import PropTypes from "prop-types";
 import HandleModalContext from "../../contextApi/handleModalContext";
 import { useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
 
 const conversations = [
     {
@@ -96,6 +97,12 @@ const AppLayout = ({ isChatDetailsOpen, setIsChatDetailsOpen }) => {
     const [isDisplay, setIsDisplay] = useState(false);
     const { user } = useSelector(state => state.authReducer);
     const navigate = useNavigate();
+    const { t, i18n } = useTranslation();
+    const { language } = useSelector((state) => state?.languageReducer);
+
+    useEffect(() => {
+        i18n.changeLanguage(language);
+    }, [language])
 
     useEffect(() => {
         if (user) {
@@ -122,7 +129,7 @@ const AppLayout = ({ isChatDetailsOpen, setIsChatDetailsOpen }) => {
                         <div onClick={() => setIsChatOpen(prev => !prev)} className={`border-b-[1px] hover:bg-gray-100 cursor-pointer border-slate-200 flex px-4 py-2 justify-between items-center`}>
                             <div className="flex justify-center items-center gap-2">
                                 <img className="w-8 h-8 rounded-full object-cover" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="User Avatar" />
-                                <p className="text-sm font-semibold">Messaging</p>
+                                <p className="text-sm font-semibold">{t("messaging")}</p>
                             </div>
                             <div className="flex justify-center items-center">
                                 {
@@ -144,7 +151,7 @@ const AppLayout = ({ isChatDetailsOpen, setIsChatDetailsOpen }) => {
                                     <Search className="w-5 h-5 text-gray-500" />
                                     <input
                                         type="text"
-                                        placeholder="Search messages"
+                                        placeholder={t("searchmsg")}
                                         className="bg-transparent w-full focus:outline-none text-sm"
                                     />
                                 </div>
