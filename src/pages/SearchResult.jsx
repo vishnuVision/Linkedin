@@ -8,33 +8,35 @@ import Jobs from '../components/SearchPage/Jobs';
 import Company from '../components/SearchPage/Company';
 import Schools from '../components/SearchPage/Schools';
 import Events from '../components/SearchPage/Events';
+import { useContext } from 'react';
+import { filterContext } from '../contextApi/filterContext';
 
-const searchResults = [
-    {
-        name: "Sarah Johnson",
-        title: "Senior Software Engineer",
-        location: "San Francisco Bay Area",
-        imageUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150",
-        connections: "500+ connections"
-    },
-    {
-        name: "Michael Chen",
-        title: "Product Manager",
-        location: "New York City",
-        imageUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150",
-        connections: "1,234 connections"
-    },
-    {
-        name: "Emily Williams",
-        title: "UX Designer",
-        location: "London, UK",
-        imageUrl: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=150",
-        connections: "892 connections"
-    }
-];
+// const searchResults = [
+//     {
+//         name: "Sarah Johnson",
+//         title: "Senior Software Engineer",
+//         location: "San Francisco Bay Area",
+//         imageUrl: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150",
+//         connections: "500+ connections"
+//     },
+//     {
+//         name: "Michael Chen",
+//         title: "Product Manager",
+//         location: "New York City",
+//         imageUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=150",
+//         connections: "1,234 connections"
+//     },
+//     {
+//         name: "Emily Williams",
+//         title: "UX Designer",
+//         location: "London, UK",
+//         imageUrl: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=150",
+//         connections: "892 connections"
+//     }
+// ];
 
 function App() {
-    
+    const searchResults = useContext(filterContext);
     return (
         <div className="min-h-screen bg-transparent" >
             <main className="pt-20">

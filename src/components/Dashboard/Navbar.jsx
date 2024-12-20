@@ -12,7 +12,7 @@ import toast from 'react-hot-toast';
 import { useAuth } from "@clerk/clerk-react";
 import { useTranslation } from 'react-i18next';
 
-export default function Navbar() {
+export default function Navbar({setSearchQuery,searchResults={}}) {
 
   const { pathname: url } = useLocation();
   const [showProfile, setShowProfile] = useState(false);
@@ -22,7 +22,6 @@ export default function Navbar() {
   const menuRef = useRef();
   const mainRef = useRef();
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
   const dispatch = useDispatch();
   const { signOut } = useAuth();
   const { t } = useTranslation();
@@ -98,7 +97,7 @@ export default function Navbar() {
               <Search className="absolute left-3 top-2.5 h-5 w-3 md:w-5 text-gray-400" />
               <div className="relative w-full max-w-md">
                 <SearchInput onSearch={handleSearch} />
-                <SearchDropdown isVisible={isDropdownVisible} setIsVisible={setIsDropdownVisible} />
+                <SearchDropdown searchResults={searchResults} isVisible={isDropdownVisible} setIsVisible={setIsDropdownVisible} />
               </div>
             </div>
           </div>
@@ -229,4 +228,9 @@ NavButton.propTypes = {
   icon: PropTypes.element.isRequired,
   label: PropTypes.any,
   onClick: PropTypes.func
+}
+
+Navbar.propTypes = {
+  searchResults: PropTypes.object,
+  setSearchQuery: PropTypes.func
 }

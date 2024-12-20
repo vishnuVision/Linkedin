@@ -20,25 +20,23 @@ function JobCard({
           </h3>
           <p className="text-gray-600">{company}</p>
           <p className="text-gray-500 text-sm">{location}</p>
-          
+
           <div className="mt-2 flex flex-wrap gap-2">
-            {jobType.map((type, index) => (
-              <span
-                key={index}
-                className="px-2 py-1 text-sm text-gray-600 bg-gray-100 rounded-full"
-              >
-                {type}
-              </span>
-            ))}
+            <span
+
+              className="px-2 py-1 text-sm text-gray-600 bg-gray-100 rounded-full"
+            >
+              {jobType}
+            </span>
           </div>
-          
+
           <div className="mt-3 text-sm text-gray-500">
             <span>{postedDate}</span>
             <span className="mx-2">•</span>
             <span>{applicants} applicants</span>
           </div>
         </div>
-        
+
         <div className="flex gap-2">
           <button>
             <BookmarkPlus className="h-10 w-10 px-2 hover:bg-gray-100 rounded-full text-gray-600" />

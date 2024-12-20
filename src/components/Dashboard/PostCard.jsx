@@ -3,7 +3,8 @@ import PropTypes from "prop-types"
 import ImageGrid from "./ImageGrid"
 import { Link } from "react-router-dom"
 import { useState } from "react"
-import CommentCard from "../Event/CommentCard"
+import CommentCard from "../Event/CommentCard";
+import moment from "moment";
 
 function PostCard({ post }) {
     const [isLiked, setIsLiked] = useState(false);
@@ -11,26 +12,26 @@ function PostCard({ post }) {
     return (
         <div key={post._id} className="bg-white rounded-lg shadow mb-4 border border-gray-200">
             <div className="p-4">
-                <Link to={post.author.isCompany ? `/company/${post.author.name}/` : `/profile/${post.author.name}`} className="flex items-start gap-3">
-                    <img src={post.author.image} alt={post.author.name} className="w-12 h-12 rounded-full object-cover" />
+                <Link to={post.authorType === "page" ? `/company/${post.authorDetails._id}/` :  post.authorType === "group" ? `/groups/${post.authorDetails._id}` : post.authorType === "event" ? `/events/${post.authorDetails._id}` : post.authorType === "company" ? `/company/${post.authorDetails._id}` : `/profile/${post.authorDetails._id}`} className="flex items-start gap-3">
+                    <img src={post.authorDetails.avatar} alt={post.authorDetails.name} className="w-12 h-12 border rounded-full object-cover" />
                     <div>
-                        <h3 className="font-semibold hover:underline hover:text-[#1da1f2]">{post.author.name}</h3>
-                        <p className="text-sm text-gray-500">{post.author.title}</p>
-                        <p className="text-xs text-gray-400">{post.time}</p>
+                        <h3 className="font-semibold hover:underline hover:text-[#1da1f2]">{post.authorDetails.name}</h3>
+                        <p className="text-sm text-gray-500 leading-tight">{post.authorDetails.description}</p>
+                        <p className="text-xs text-gray-400 leading-none">{moment(post.createdAt).fromNow()}</p>
                     </div>
                 </Link>
 
-                <p className="mt-3">{post.content}</p>
+                <p className="mt-3">{post.text}</p>
 
-                {post.images.length > 0 && (
+                {post?.media && post?.media.length > 0 && (
                     <div className="mt-4">
-                        <ImageGrid images={post.images} />
+                        <ImageGrid images={post.media} />
                     </div>
                 )}
 
                 <div className="flex gap-3 mt-3 text-sm text-gray-500">
-                    <span>{post.likes} likes</span>
-                    <span>{post.comments} comments</span>
+                    <span>{post.likeCount} likes</span>
+                    <span>{post?.comment?.length || 0} comments</span>
                 </div>
             </div>
 
@@ -74,9 +75,9 @@ function PostCard({ post }) {
                             </div>
                         </div>
                         <div className="mt-4">
-                            <CommentCard />
-                            <CommentCard />
-                            <CommentCard />
+                            {
+                                post?.comment && post.comment.length > 0  && post?.comment?.map(comment => <CommentCard key={comment._id} comment={comment} />)
+                            }
                         </div>
                     </div>
                 )

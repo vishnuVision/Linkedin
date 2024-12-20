@@ -8,6 +8,9 @@ import PropTypes from "prop-types";
 import HandleModalContext from "../../contextApi/handleModalContext";
 import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
+import axios from "axios";
+import toast from "react-hot-toast";
+import FilterContextProvider from "../../contextApi/filterContext";
 
 const conversations = [
     {
@@ -99,10 +102,68 @@ const AppLayout = ({ isChatDetailsOpen, setIsChatDetailsOpen }) => {
     const navigate = useNavigate();
     const { t, i18n } = useTranslation();
     const { language } = useSelector((state) => state?.languageReducer);
+    const [searchQuery, setSearchQuery] = useState("");
+    const [searchResults, setSearchResults] = useState([]);
+    const [allData,setAllData] = useState();
 
     useEffect(() => {
         i18n.changeLanguage(language);
     }, [language])
+
+    useEffect(() => {
+        getResult();
+    }, [searchQuery])
+
+    function shuffleArray(array) {
+        array = array.filter(item => item !== undefined);
+        for (let i = array.length - 1; i > 0; i--) {
+            const randomIndex = Math.floor(Math.random() * (i + 1));
+            [array[i], array[randomIndex]] = [array[randomIndex], array[i]];
+        }
+        return array;
+    }
+
+    const getResult = async () => {
+        try {
+            const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/api/v1/filter/getAllData/${searchQuery}`, { withCredentials: true });
+            if (response.data) {
+                const { success, data, message } = await response.data;
+                if (success) {
+                    setAllData(data);
+                    const persons = data?.peoples?.map((person) => ({ ...person, type: "person" })) || [];
+                    const jobs = data?.jobs?.map((job) => ({ ...job, type: "job" })) || [];
+                    const events = data?.events?.map((event) => ({ ...event, type: "event" })) || [];
+                    const groups = data?.groups?.map((group) => ({ ...group, type: "group" })) || [];
+                    const newsLetters = data?.newsLetters?.map((newsletter) => ({ ...newsletter, type: "newsLetter" })) || [];
+                    const company = data?.pages?.map((company) => {
+                        if (company.type === "company")
+                            return ({ ...company, type: "company" });
+                    }) || [];
+                    const school = data?.pages?.map((school) => {
+                        if (school.type === "school")
+                            return ({ ...school, type: "school" });
+                    }) || [];
+                    const articles = data?.posts?.map((post) => {
+                        if (post.type === "article")
+                            return ({ ...post, type: "article" });
+                    }) || [];
+                    const posts = data?.posts?.map((post) => {
+                        if (post.type === "post")
+                            return ({ ...post, type: "post" });
+                    }) || [];
+
+                    const resultData = shuffleArray([...persons, ...jobs, ...events, ...groups, ...newsLetters, ...company, ...school, ...articles, ...posts]);
+                    setSearchResults(resultData.slice(0, 10));
+                    return resultData;
+                }
+                else {
+                    toast.error(message);
+                }
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
 
     useEffect(() => {
         if (user) {
@@ -119,9 +180,11 @@ const AppLayout = ({ isChatDetailsOpen, setIsChatDetailsOpen }) => {
     return (
         <HandleModalContext value={{ isChatDetailsOpen, setIsChatDetailsOpen }}>
             <div className="">
-                <Navbar />
+                <Navbar setSearchQuery={setSearchQuery} searchResults={searchResults} />
                 <div className="h-[100vh] overflow-scroll md:overflow-hidden bg-[#866f55] bg-opacity-10">
-                    <Outlet />
+                    <FilterContextProvider value={allData}>
+                        <Outlet />
+                    </FilterContextProvider>
                 </div>
                 <div className={`hidden lg:flex absolute w-72 shadow-2xl border bottom-0 right-8 bg-white flex-col rounded-t-lg`}>
                     {

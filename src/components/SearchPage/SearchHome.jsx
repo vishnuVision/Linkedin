@@ -8,13 +8,14 @@ import PropTypes from "prop-types";
 import FilterTabs from "./FilterTabs";
 
 function SearchHome({ searchResults }) {
+    
     const { hash } = useLocation();
     return (
-        <div className="max-w-6xl relative flex justify-center mx-auto px-4">
+        <div className="max-w-7xl relative flex justify-center mx-auto px-4">
             <div className='fixed z-40 top-16 left-0 flex justify-center items-center w-full bg-gray-50'>
                 <FilterTabs />
             </div>
-            <div className="md:fixed max-w-6xl px-2 pt-14 grid grid-cols-12 gap-4">
+            <div className="md:fixed w-full md:max-w-7xl px-4 pt-14 grid grid-cols-12 gap-4">
                 <div className="col-span-12 lg:col-span-3 md:col-span-4">
                     <div className="w-full flex-shrink-0">
                         <div className="bg-white rounded-lg shadow">
@@ -34,12 +35,19 @@ function SearchHome({ searchResults }) {
                     <div id="peoples" className="flex-1">
                         <div className="bg-white rounded-lg shadow">
                             <h1 className='px-4 pt-4 font-semibold text-xl'>People</h1>
-                            {searchResults.map((result, index) => (
+                            {searchResults?.peoples && searchResults?.peoples.length > 0 && searchResults?.peoples.map(({firstName, lastName, bio, location, avatar,followers}, index) => (
                                 <React.Fragment key={index}>
-                                    <SearchResult {...result} />
+                                    <SearchResult name={firstName + " " + lastName} title={bio} location={location} imageUrl={avatar} connections={followers.length}/>
                                     {index < searchResults.length - 1 && <div className="border-b" />}
                                 </React.Fragment>
                             ))}
+                            {
+                                searchResults?.peoples && searchResults?.peoples.length === 0 && (
+                                    <div className="p-4">
+                                        <p className="text-gray-500">No results found</p>
+                                    </div>
+                                )
+                            }
                         </div>
                     </div>
 
@@ -47,7 +55,16 @@ function SearchHome({ searchResults }) {
                         <div className="bg-white rounded-lg shadow">
                             <h1 className='px-4 pt-4 font-semibold text-xl'>Posts</h1>
                             <div className='p-2'>
-                                <Feed />
+                                {
+                                    searchResults?.posts && searchResults.posts.length > 0 && <Feed posts={searchResults.posts}/>
+                                }
+                                {
+                                    searchResults?.posts && searchResults.posts.length === 0 && (
+                                        <div className="p-4">
+                                            <p className="text-gray-500">No results found</p>
+                                        </div>
+                                    )
+                                }
                             </div>
                         </div>
                     </div>
@@ -55,7 +72,16 @@ function SearchHome({ searchResults }) {
                     <div id="groups" className="flex-1">
                         <div className="bg-white rounded-lg shadow">
                             <h1 className='px-4 pt-4 font-semibold text-xl'>Groups</h1>
-                            <GroupCard />
+                            {
+                                searchResults?.groups && searchResults.groups.length > 0 && <GroupCard groups={searchResults.groups}/>
+                            }
+                            {
+                                searchResults?.groups &&  searchResults.groups.length === 0 && (
+                                    <div className="p-4">
+                                        <p className="text-gray-500">No results found</p>
+                                    </div>
+                                )
+                            }
                         </div>
                     </div>
 
@@ -63,7 +89,16 @@ function SearchHome({ searchResults }) {
                         <div className="bg-white rounded-lg shadow">
                             <h1 className='px-4 pt-4 font-semibold text-xl'>Jobs</h1>
                             <div className='p-2'>
-                                <JobList />
+                                {
+                                    searchResults?.jobs && searchResults.jobs.length > 0 && <JobList isJobPage={true} searchResults={searchResults.jobs}/>
+                                }
+                                {
+                                    searchResults?.jobs && searchResults.jobs.length === 0 && (
+                                        <div className="p-4">
+                                            <p className="text-gray-500">No results found</p>
+                                        </div>
+                                    )
+                                }
                             </div>
                         </div>
                     </div>
@@ -71,17 +106,24 @@ function SearchHome({ searchResults }) {
                     <div id='more' className="flex-1">
                         <div className="bg-white rounded-lg shadow">
                             <h1 className='px-4 pt-4 font-semibold text-xl'>More People</h1>
-                            {searchResults.map((result, index) => (
+                            {searchResults?.peoples && searchResults?.peoples.length > 0 && searchResults?.peoples.map(({firstName, lastName, bio, location, avatar,followers}, index) => (
                                 <React.Fragment key={index}>
-                                    <SearchResult {...result} />
+                                    <SearchResult name={firstName + " " + lastName} title={bio} location={location} imageUrl={avatar} connections={followers.length}/>
                                     {index < searchResults.length - 1 && <div className="border-b" />}
                                 </React.Fragment>
                             ))}
+                            {
+                                searchResults?.peoples && searchResults?.peoples.length === 0 && (
+                                    <div className="p-4">
+                                        <p className="text-gray-500">No results found</p>
+                                    </div>
+                                )
+                            }
                         </div>
                     </div>
                 </div>
 
-                <div className='col-span-12 lg:col-span-3 hidden md:block'>
+                <div className='col-span-12 lg:col-span-3 hidden lg:block'>
                     <Link to="/jobs">
                         <img src="/feed_ads.png" alt="Ad" className="w-full rounded-lg" />
                     </Link>
