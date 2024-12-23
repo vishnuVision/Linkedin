@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { useEffect } from 'react';
 import moment from 'moment';
 
-function JobList({ onSelectJob, selectedJobId,isJobPage=true,jobId,searchResults }) {
+function JobList({ onSelectJob, selectedJobId, isJobPage=true, jobId, searchResults }) {
   useEffect(()=>{
     if(!isJobPage){
       const job = searchResults.filter((job) => job.id === jobId);
@@ -39,7 +39,6 @@ const JobLink = ({onSelectJob,selectedJobId,jobs}) => {
 }
 
 const JobListCard = ({jobs}) => {
-  console.log(jobs);
   return (
     <div className="flex flex-col gap-4">
       {jobs.map((job) => (

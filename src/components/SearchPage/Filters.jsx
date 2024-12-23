@@ -1,8 +1,9 @@
 import { ChevronDown } from 'lucide-react';
 import { useState } from 'react';
 import AddContent from './AddContent';
+import PropTypes from 'prop-types';
 
-const Filters = () => {
+const Filters = ({setSearchResults,searchResults}) => {
   const [isDrop,setIsDrop] = useState(false);
   const [isDropCompany,setIsDropCompany] = useState(false);
   const [content,setContent] = useState("");
@@ -35,7 +36,7 @@ const Filters = () => {
         </button>
         {
           isDrop && (
-            <AddContent content={content} setContent={setContent} contentList={contentList} setContentList={setContentList}/>
+            <AddContent label="Location" searchResults={searchResults} setSearchResults={setSearchResults} content={content} setContent={setContent} contentList={contentList} setContentList={setContentList}/>
           )
         }
       </div>
@@ -48,12 +49,17 @@ const Filters = () => {
         </button>
         {
           isDropCompany && (
-            <AddContent content={company} setContent={setCompany} contentList={companyList} setContentList={setCompanyList}/>
+            <AddContent label="Company" searchResults={searchResults} setSearchResults={setSearchResults} content={company} setContent={setCompany} contentList={companyList} setContentList={setCompanyList}/>
           )
         }
       </div>
     </div>
   );
 };
+
+Filters.propTypes = {
+  setSearchResults: PropTypes.func,
+  searchResults: PropTypes.array
+}
 
 export default Filters;

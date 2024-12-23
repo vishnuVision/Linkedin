@@ -8,9 +8,8 @@ import PropTypes from "prop-types";
 import HandleModalContext from "../../contextApi/handleModalContext";
 import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
-import axios from "axios";
-import toast from "react-hot-toast";
 import FilterContextProvider from "../../contextApi/filterContext";
+import useApi from "../../hook/useApi";
 
 const conversations = [
     {
@@ -104,7 +103,9 @@ const AppLayout = ({ isChatDetailsOpen, setIsChatDetailsOpen }) => {
     const { language } = useSelector((state) => state?.languageReducer);
     const [searchQuery, setSearchQuery] = useState("");
     const [searchResults, setSearchResults] = useState([]);
-    const [allData,setAllData] = useState();
+    const [allData, setAllData] = useState();
+    const [isDropdownVisible, setIsDropdownVisible] = useState(false);
+    const { apiAction } = useApi();
 
     useEffect(() => {
         i18n.changeLanguage(language);
@@ -125,40 +126,38 @@ const AppLayout = ({ isChatDetailsOpen, setIsChatDetailsOpen }) => {
 
     const getResult = async () => {
         try {
-            const response = await axios.get(`${import.meta.env.VITE_SERVER_URL}/api/v1/filter/getAllData/${searchQuery}`, { withCredentials: true });
-            if (response.data) {
-                const { success, data, message } = await response.data;
-                if (success) {
-                    setAllData(data);
-                    const persons = data?.peoples?.map((person) => ({ ...person, type: "person" })) || [];
-                    const jobs = data?.jobs?.map((job) => ({ ...job, type: "job" })) || [];
-                    const events = data?.events?.map((event) => ({ ...event, type: "event" })) || [];
-                    const groups = data?.groups?.map((group) => ({ ...group, type: "group" })) || [];
-                    const newsLetters = data?.newsLetters?.map((newsletter) => ({ ...newsletter, type: "newsLetter" })) || [];
-                    const company = data?.pages?.map((company) => {
-                        if (company.type === "company")
-                            return ({ ...company, type: "company" });
-                    }) || [];
-                    const school = data?.pages?.map((school) => {
-                        if (school.type === "school")
-                            return ({ ...school, type: "school" });
-                    }) || [];
-                    const articles = data?.posts?.map((post) => {
-                        if (post.type === "article")
-                            return ({ ...post, type: "article" });
-                    }) || [];
-                    const posts = data?.posts?.map((post) => {
-                        if (post.type === "post")
-                            return ({ ...post, type: "post" });
-                    }) || [];
+            const { success, data } = await apiAction({
+                url: `/api/v1/filter/getAllData/${searchQuery}`,
+                method: "GET",
+            });
 
-                    const resultData = shuffleArray([...persons, ...jobs, ...events, ...groups, ...newsLetters, ...company, ...school, ...articles, ...posts]);
-                    setSearchResults(resultData.slice(0, 10));
-                    return resultData;
-                }
-                else {
-                    toast.error(message);
-                }
+            if (success) {
+                setAllData(data);
+                const persons = data?.peoples?.map((person) => ({ ...person, type: "person" })) || [];
+                const jobs = data?.jobs?.map((job) => ({ ...job, type: "job" })) || [];
+                const events = data?.events?.map((event) => ({ ...event, type: "event" })) || [];
+                const groups = data?.groups?.map((group) => ({ ...group, type: "group" })) || [];
+                const newsLetters = data?.newsLetters?.map((newsletter) => ({ ...newsletter, type: "newsLetter" })) || [];
+                const company = data?.pages?.map((company) => {
+                    if (company.type === "company")
+                        return ({ ...company, type: "company" });
+                }) || [];
+                const school = data?.pages?.map((school) => {
+                    if (school.type === "school")
+                        return ({ ...school, type: "school" });
+                }) || [];
+                const articles = data?.posts?.map((post) => {
+                    if (post.type === "article")
+                        return ({ ...post, type: "article" });
+                }) || [];
+                const posts = data?.posts?.map((post) => {
+                    if (post.type === "post")
+                        return ({ ...post, type: "post" });
+                }) || [];
+
+                const resultData = shuffleArray([...persons, ...jobs, ...events, ...groups, ...newsLetters, ...company, ...school, ...articles, ...posts]);
+                setSearchResults(resultData.slice(0, 10));
+                return resultData;
             }
         } catch (error) {
             console.log(error);
@@ -179,8 +178,8 @@ const AppLayout = ({ isChatDetailsOpen, setIsChatDetailsOpen }) => {
 
     return (
         <HandleModalContext value={{ isChatDetailsOpen, setIsChatDetailsOpen }}>
-            <div className="">
-                <Navbar setSearchQuery={setSearchQuery} searchResults={searchResults} />
+            <div className="" onClick={() => setIsDropdownVisible(false)}>
+                <Navbar setSearchQuery={setSearchQuery} searchResults={searchResults} isDropdownVisible={isDropdownVisible} setIsDropdownVisible={setIsDropdownVisible} />
                 <div className="h-[100vh] overflow-scroll md:overflow-hidden bg-[#866f55] bg-opacity-10">
                     <FilterContextProvider value={allData}>
                         <Outlet />

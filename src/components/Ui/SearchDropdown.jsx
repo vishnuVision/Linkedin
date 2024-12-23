@@ -13,7 +13,7 @@ function SearchDropdown({ isVisible, setIsVisible, searchResults }) {
           <SearchSuggestion
             key={index}
             icon={result.type === "person" || result.type === "group" || result.type === "newsletter" ? result.avatar ? <ImageIcon url={result.avatar} /> : <Users className="w-6 h-6 text-gray-400" /> : result.type === "job" ? <Briefcase className="w-6 h-6 text-gray-400" /> : result.type === "company" ? result.logo ? <ImageIcon url={result.logo} /> : <Building2 className="w-6 h-6 text-gray-400" /> : result.type === "event" ? result.backgroundImage ? <ImageIcon url={result.backgroundImage} /> : <Building2 className="w-6 h-6 text-gray-400" /> : <Newspaper className="w-6 h-6 text-gray-400" />}
-            primary={result.type === "person" ? result.firstName + " " + result.lastName : result.type === "article" || result.type === "post" || result.type === "newsLetter" || result.type === "job" ? result.title : result.name}
+            primary={result.type === "person" ? result.firstName + " " + result.lastName : result.type === "article"  || result.type === "newsLetter" || result.type === "job" ? result.title : result.type === "post" ? result.text : result.name}
             type={result.type}
           />
         ))

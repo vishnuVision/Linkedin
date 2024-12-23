@@ -12,13 +12,16 @@ import Feed from '../components/Dashboard/Feed';
 import { useState } from 'react';
 import Modal from '../Modal/Modal';
 import EditIntroForm from '../Forms/EditIntroForm';
+import { useSelector } from 'react-redux';
+import PropTypes from 'prop-types';
 
 function Profile() {
+  const { user } = useSelector(state => state.authReducer);
   return (
     <div className="min-h-screen pt-20">
       <div className="max-w-4xl max-h-[90vh] overflow-y-scroll someElement mx-auto px-4 pb-2">
         <Routes>
-          <Route path="/" element={<ProfilePage />} />
+          <Route path="/" element={<ProfilePage user={user} />} />
           <Route path="/all-posts" element={<ActivityPage />} />
           <Route path="/all-skills" element={<SkillPage />} />
           <Route path="*" element={<Notfound />} />
@@ -28,7 +31,7 @@ function Profile() {
   );
 }
 
-const ProfilePage = () => {
+const ProfilePage = ({user}) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleSave = () => {
@@ -37,10 +40,10 @@ const ProfilePage = () => {
 
   return (
     <>
-      <ProfileHeader setIsModalOpen={setIsModalOpen} />
-      <Analytics />
-      <About />
-      <Activity />
+      <ProfileHeader setIsModalOpen={setIsModalOpen} user={user}/>
+      <Analytics views={user?.views || 0}/>
+      <About about={user?.about}/>
+      <Activity followers={user?.followers?.length} />
       <Experience />
       <Educations />
       <Skills />
@@ -75,7 +78,7 @@ const ActivityPage = () => {
 }
 
 const SkillPage = () => {
-  const [isOpen,setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   const skills = [
     { name: 'React.js', endorsements: 42 },
     { name: 'JavaScript', endorsements: 38 },
@@ -108,12 +111,16 @@ const SkillPage = () => {
           </div>
         ))}
       </div>
-      <Modal isOpen={isOpen} onClose={()=>setIsOpen(false)} title='Add skill'>
+      <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} title='Add skill'>
         Add Skill
       </Modal>
     </div>
   )
 }
+
+ProfilePage.propTypes = {
+  user: PropTypes.object,
+};
 
 const handleBack = () => {
   window.history.back();

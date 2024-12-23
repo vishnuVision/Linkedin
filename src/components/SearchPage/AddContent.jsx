@@ -2,16 +2,24 @@ import { Plus, X } from "lucide-react"
 import Input from "../Ui/Input"
 import PropTypes from "prop-types";
 
-function AddContent({ content, setContent, contentList=[], setContentList, label }) {
+function AddContent({ content, setContent, contentList=[], setContentList, label, setSearchResults, searchResults=[] }) {
 
     const addContent = () => {
         if (contentList.length <= 10) {
+            console.log(searchResults);
+            setSearchResults(searchResults.map((data)=>{
+                if(contentList.some(item => item.toLowerCase() === data.region.toLowerCase()))
+                {
+                    console.log(data.region);
+                }
+            }));
             setContentList(prev => [...prev, content]);
             setContent("");
         }
     }
 
     const deleteContent = (index) => {
+        console.log(searchResults);
         setContentList(contentList.filter((skill, idx) => idx !== index));
     }
 
@@ -46,7 +54,9 @@ AddContent.propTypes = {
     setContent: PropTypes.func,
     contentList: PropTypes.array,
     setContentList: PropTypes.func,
-    label: PropTypes.string
+    label: PropTypes.string,
+    setSearchResults: PropTypes.func,
+    searchResults: PropTypes.array
 };
 
 export default AddContent

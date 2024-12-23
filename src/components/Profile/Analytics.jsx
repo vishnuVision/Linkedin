@@ -1,6 +1,7 @@
 import { ChartColumnBig, Search, Users } from "lucide-react"
+import PropTypes from "prop-types"
 
-function Analytics() {
+function Analytics({views}) {
     return (
         <div className="bg-white rounded-lg shadow p-6 mt-4">
             <h2 className="text-xl font-bold text-gray-900 mb-4">Analytics</h2>
@@ -10,7 +11,7 @@ function Analytics() {
                         <Users />
                     </div>
                     <div>
-                        <p className="flex gap-2 font-semibold">78 Profile Views</p>
+                        <p className="flex gap-2 font-semibold">{views} Profile Views</p>
                         <p className="text-sm">People viewed your profile.</p>
                     </div>
                 </div>
@@ -35,6 +36,10 @@ function Analytics() {
             </div>
         </div>
     )
+}
+
+Analytics.propTypes = {
+    views: PropTypes.number
 }
 
 export default Analytics

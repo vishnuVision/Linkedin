@@ -7,8 +7,8 @@ function SearchSuggestion({ icon, primary, type }) {
       <div className="flex-shrink-0 flex items-center w-8 h-8">
         {icon || <Search className="w-5 h-5 text-gray-400" />}
       </div>
-      <div className="flex-grow">
-        <div className="text-sm text-gray-900">{primary}</div>
+      <div className="flex-grow overflow-hidden">
+        <div className="text-sm text-gray-900 text-ellipsis truncate">{primary}</div>
       </div>
       {type && (
         <div className="ml-2 text-xs text-gray-500 whitespace-nowrap">
@@ -20,9 +20,9 @@ function SearchSuggestion({ icon, primary, type }) {
 }
 
 SearchSuggestion.propTypes = {
-    icon:PropTypes.any,
-    primary:PropTypes.any,
-    type:PropTypes.any
+  icon: PropTypes.any,
+  primary: PropTypes.any,
+  type: PropTypes.any
 }
 
 export default SearchSuggestion

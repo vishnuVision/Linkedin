@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import ImageUploadModal from '../ImageUpload/ImageUploadModal';
 import CreatePostModal from '../ImageUpload/CreatePostModal';
+import { useSelector } from 'react-redux';
 
 export default function CreatePost() {
   const [isModalOpenForImage, setIsModalOpenForImage] = useState(false);
@@ -13,13 +14,15 @@ export default function CreatePost() {
   const [accept, setAccept] = useState('image/*');
   const [showCreatePost, setShowCreatePost] = useState(false);
   const { pathname } = useLocation();
+  const {user} = useSelector(state=>state.authReducer);  
+  
   return (
     <div className="bg-white rounded-lg shadow p-2 md:p-4 mb-4">
       <div className="flex gap-4 mb-4">
         <Link to={"/profile/1"} className='hover:underline hover:underline-offset-2'>
           <img
-            src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
-            alt="Profile"
+            src={user?.avatar}
+            alt={user?.name}
             className="w-12 h-12 rounded-full object-cover"
           />
         </Link>
