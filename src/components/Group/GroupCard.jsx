@@ -3,13 +3,13 @@ import PropTypes from 'prop-types';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
-function GroupCard({ to, groups, isEventPage = false, isAdmin = false }) {
+function GroupCard({ to, groups, isEventPage = false, isAdmin = false,isLimit=false }) {
     const [isShow, setIsShow] = useState(false);
     return (
         <div className="flex-grow">
             <div className="">
                 {
-                    groups && groups?.length > 0 && groups?.map((group, index) => (
+                    (groups && groups?.length > 0 && isLimit ? groups?.slice(0, 3) : groups)?.map((group, index) => (
                         <React.Fragment key={index}>
                             <div className="flex flex-wrap gap-2 items-center p-4 mb-6">
                                 <div className='flex justify-between'>
@@ -72,7 +72,8 @@ GroupCard.propTypes = {
     to: PropTypes.string,
     groups: PropTypes.array,
     isEventPage: PropTypes.bool,
-    isAdmin: PropTypes.bool
+    isAdmin: PropTypes.bool,
+    isLimit:PropTypes.bool
 }
 
 export default GroupCard

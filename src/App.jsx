@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux"
 import { assignUser } from "./redux/slices/authReducer";
 import { Toaster } from "react-hot-toast";
 import useApi from "./hook/useApi";
+import ForgotPasswordPage from "./components/auth/ForgotPasswordPage";
 
 const RoutesPage = lazy(() => import('./RoutesPage'));
 const Loader = lazy(() => import('./components/Loaders/Loader'));
@@ -41,6 +42,7 @@ function App() {
             <Route path="/*" element={<RoutesPage />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/signin" element={<Login />} />
+            <Route path="/forgot" element={<ForgotPasswordPage />} />
             <Route path="*" element={<Notfound />} />
           </Route>
         </Routes>

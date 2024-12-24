@@ -29,7 +29,7 @@ function App() {
                 </div>
                 <div className='pt-14'>
                     <Routes>
-                        <Route path="/" element={<SearchHome />} />
+                        <Route path="/" element={<SearchHome setSelectedTab={setSelectedTab}/>} />
                         <Route path="People" element={<People handleBack={handleBack} />} />
                         <Route path="Posts" element={<Post handleBack={handleBack} />} />
                         <Route path="Groups" element={<Groups handleBack={handleBack} />} />

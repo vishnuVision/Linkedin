@@ -20,7 +20,7 @@ function Company({ handleBack }) {
                     <div className="col-span-12 lg:col-span-4 md:col-span-5">
                         <div className="w-full flex-shrink-0">
                             <div className="bg-white p-4 rounded-lg shadow">
-                                <CompanyFilter />
+                                <CompanyFilter searchResults={searchResults} setSearchResults={setSearchResults}/>
                             </div>
                         </div>
                     </div>

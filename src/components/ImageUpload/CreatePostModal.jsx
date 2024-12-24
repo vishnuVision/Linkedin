@@ -23,9 +23,12 @@ function CreatePostModal({ accept = "image/*", videos, previews, isOpen, setIsOp
     };
 
     const handleFormSubmit = () => {
-        setIsOpen(false);
-        setVideos([]);
-        setPreviews([]);
+        console.log(content);
+        console.log(videos);
+        console.log(accept);
+        // setIsOpen(false);
+        // setVideos([]);
+        // setPreviews([]);
     }
 
     const handleFileChange = (files) => {

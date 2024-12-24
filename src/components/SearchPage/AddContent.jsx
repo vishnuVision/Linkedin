@@ -1,27 +1,23 @@
 import { Plus, X } from "lucide-react"
 import Input from "../Ui/Input"
 import PropTypes from "prop-types";
+import { useEffect } from "react";
 
-function AddContent({ content, setContent, contentList=[], setContentList, label, setSearchResults, searchResults=[] }) {
-
+function AddContent({ content, setContent, contentList = [], setContentList, label, filterData }) {
     const addContent = () => {
         if (contentList.length <= 10) {
-            console.log(searchResults);
-            setSearchResults(searchResults.map((data)=>{
-                if(contentList.some(item => item.toLowerCase() === data.region.toLowerCase()))
-                {
-                    console.log(data.region);
-                }
-            }));
             setContentList(prev => [...prev, content]);
             setContent("");
         }
     }
 
     const deleteContent = (index) => {
-        console.log(searchResults);
         setContentList(contentList.filter((skill, idx) => idx !== index));
     }
+
+    useEffect(() => {
+        filterData(label);
+    }, [contentList])
 
     return (
         <div>
@@ -55,8 +51,7 @@ AddContent.propTypes = {
     contentList: PropTypes.array,
     setContentList: PropTypes.func,
     label: PropTypes.string,
-    setSearchResults: PropTypes.func,
-    searchResults: PropTypes.array
+    filterData: PropTypes.func,
 };
 
 export default AddContent
