@@ -8,6 +8,7 @@ import { assignUser } from "../redux/slices/authReducer";
 import toast from "react-hot-toast";
 import { useAuth } from "@clerk/clerk-react";
 import Loader from "../components/Loaders/Loader";
+import ReCAPTCHA from "react-google-recaptcha";
 
 function Login() {
     const { signIn, isLoaded } = useSignIn();
@@ -21,6 +22,7 @@ function Login() {
     const { signOut } = useAuth();
     const { search } = useLocation();
     const [isLoading, setIsLoading] = useState(false);
+    const [captchaValue, setCaptchaValue] = useState(null);
 
     useEffect(() => {
         if (userData) {
@@ -38,8 +40,7 @@ function Login() {
             if (user?.emailAddresses[0]?.emailAddress) {
                 login(user.emailAddresses[0].emailAddress)
             }
-            else
-            {
+            else {
                 setError("please signup!");
             }
         }
@@ -138,6 +139,10 @@ function Login() {
         }
     };
 
+    const handleCaptchaChange = (value) => {
+        setCaptchaValue(value);
+    };
+
     if (userData) {
         return <Loader />
     }
@@ -164,12 +169,23 @@ function Login() {
                             {error && <p className="text-red-600 text-sm">{error}</p>}
                             <button
                                 type="submit"
-                                disabled={isLoading}
-                                className={`${isLoading ? "opacity-50 cursor-not-allowed" : ""} w-full bg-[#0a66c2] text-white py-2 px-4 rounded-full hover:bg-blue-600 focus:ring-2 focus:ring-blue-500`}
+                                disabled={isLoading || !captchaValue}
+                                className={`${isLoading || !captchaValue ? "opacity-50 cursor-not-allowed" : ""} w-full bg-[#0a66c2] text-white py-2 px-4 rounded-full hover:bg-blue-600 focus:ring-2 focus:ring-blue-500`}
                             >
                                 Agree & Join
                             </button>
                         </form>
+                        {
+                            captchaValue===null &&
+                            <div className="flex justify-center items-center mt-4">
+                                <ReCAPTCHA
+                                    sitekey="6LekZKUqAAAAAMZ5FCTLw5oQ8SZdtXq5c7VlT_xV"
+                                    onChange={handleCaptchaChange}
+                                    onExpired={() => setError("CAPTCHA expired. Please try again.")}
+                                    onErrored={() => setError("CAPTCHA verification failed. Please try again.")}
+                                />
+                            </div>
+                        }
                         <div className="relative my-6">
                             <div className="absolute inset-0 flex items-center">
                                 <div className="w-full border-t border-gray-300"></div>
@@ -179,11 +195,11 @@ function Login() {
                             </div>
                         </div>
                         <p className="break-words text-sm text-center mt-2 px-4">By clicking Continue to join or sign in, you agree to LinkedIn’s <span className="text-[#0a66c2] font-semibold">User Agreement, Privacy Policy,</span> and <span className="text-[#0a66c2] font-semibold">Cookie Policy.</span></p>
-                        <button disabled={isLoading} type="button" onClick={handleGoogleSignin} className={`${isLoading ? "opacity-50 cursor-not-allowed" : ""} flex w-full mt-4 gap-1 justify-center items-center py-2 text-left border rounded-full hover:bg-gray-100 font-medium`}>
+                        <button disabled={isLoading || !captchaValue} type="button" onClick={handleGoogleSignin} className={`${isLoading || !captchaValue ? "opacity-50 cursor-not-allowed" : ""} flex w-full mt-4 gap-1 justify-center items-center py-2 text-left border rounded-full hover:bg-gray-100 font-medium`}>
                             <img src="/google.webp" className="w-6 h-6" alt="icon" />
                             Continue With Google
                         </button>
-                        <button disabled={isLoading} type="button" onClick={handleMicrosoftSignin} className={`${isLoading ? "opacity-50 cursor-not-allowed" : ""} flex w-full mt-4 gap-2 justify-center items-center py-2 text-left border rounded-full hover:bg-gray-100 font-medium`}>
+                        <button disabled={isLoading || !captchaValue} type="button" onClick={handleMicrosoftSignin} className={`${isLoading || !captchaValue ? "opacity-50 cursor-not-allowed" : ""} flex w-full mt-4 gap-2 justify-center items-center py-2 text-left border rounded-full hover:bg-gray-100 font-medium`}>
                             <img src="/microsoft.png" className="w-6 h-6" alt="icon" />
                             Continue With Microsoft
                         </button>

@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { assignUser } from "../redux/slices/authReducer";
 import toast from "react-hot-toast";
 import Loader from "../components/Loaders/Loader";
+import ReCAPTCHA from "react-google-recaptcha";
 
 function Signup() {
     const [page, setPage] = useState(0);
@@ -19,18 +20,19 @@ function Signup() {
     const user = useUser();
     const dispatch = useDispatch();
     const { signOut } = useAuth();
+    const data = useAuth();
     const navigate = useNavigate();
     const { user: userData } = useSelector((state) => state.authReducer);
     const { search } = useLocation();
     const [isLoading, setIsLoading] = useState(false);
+    const [captchaValue, setCaptchaValue] = useState(null);
 
     useEffect(() => {
         if (userData) {
             if (!userData?.firstName && !userData?.lastName && !userData?.location && userData?.educations?.length === 0 && userData?.experiences?.length === 0) {
                 navigate("/provide-details");
             }
-            else
-            {
+            else {
                 navigate("/feed");
             }
         }
@@ -98,10 +100,9 @@ function Signup() {
             setError("");
             setPage(1);
         } catch (err) {
-            console.log(err);
-            // await signOut({ redirectTo: undefined });
-            // window.location.href = "/signup?authenticate=false";
-            // setError(err.errors ? err.errors[0].message : "Something went wrong");
+            await signOut({ redirectTo: undefined });
+            window.location.href = "/signup?authenticate=false";
+            setError(err.errors ? err.errors[0].message : "Something went wrong");
         }
         setIsLoading(false);
     };
@@ -130,7 +131,7 @@ function Signup() {
         if (!isLoaded) return;
         setIsLoading(true);
         try {
-            await signUp.authenticateWithRedirect({
+            const data = await signUp.authenticateWithRedirect({
                 strategy: "oauth_google",
                 redirectUrl: "/signup?authenticate=true",
                 redirectUrlComplete: "/signup?authenticate=true",
@@ -145,7 +146,6 @@ function Signup() {
     const handleMicrosoftSignup = async () => {
         if (!isLoaded) return;
         setIsLoading(true);
-
         try {
             await signUp.authenticateWithRedirect({
                 strategy: "oauth_microsoft",
@@ -159,8 +159,11 @@ function Signup() {
         }
     };
 
-    if(userData)
-    {
+    const handleCaptchaChange = (value) => {
+        setCaptchaValue(value);
+    };
+
+    if (userData) {
         return <Loader />
     }
 
@@ -187,12 +190,23 @@ function Signup() {
                                 <p className="break-words text-sm text-center mt-2 px-4">By clicking Continue to join or sign in, you agree to LinkedIn&apos;s <span className="text-[#0a66c2] font-semibold">User Agreement, Privacy Policy,</span> and <span className="text-[#0a66c2] font-semibold">Cookie Policy.</span></p>
                                 <button
                                     type="submit"
-                                    disabled={isLoading}
-                                    className={`${isLoading ? "opacity-50 cursor-not-allowed" : ""}  w-full bg-[#0a66c2] text-white py-2 px-4 rounded-full hover:bg-blue-600 focus:ring-2 focus:ring-blue-500`}
+                                    disabled={isLoading || !captchaValue}
+                                    className={`${isLoading || !captchaValue ? "opacity-50 cursor-not-allowed" : ""}  w-full bg-[#0a66c2] text-white py-2 px-4 rounded-full hover:bg-blue-600 focus:ring-2 focus:ring-blue-500`}
                                 >
                                     Agree & Join
                                 </button>
                             </form>
+                            {
+                                captchaValue===null &&
+                                <div className="flex justify-center items-center mt-4">
+                                    <ReCAPTCHA
+                                        sitekey="6LekZKUqAAAAAMZ5FCTLw5oQ8SZdtXq5c7VlT_xV"
+                                        onChange={handleCaptchaChange}
+                                        onExpired={() => setError("CAPTCHA expired. Please try again.")}
+                                        onErrored={() => setError("CAPTCHA verification failed. Please try again.")}
+                                    />
+                                </div>
+                            }
                             <div className="relative my-6">
                                 <div className="absolute inset-0 flex items-center">
                                     <div className="w-full border-t border-gray-300"></div>
@@ -201,11 +215,11 @@ function Signup() {
                                     <span className="bg-white px-2 text-gray-500">or</span>
                                 </div>
                             </div>
-                            <button disabled={isLoading} type="button" onClick={handleGoogleSignup} className={`${isLoading ? "opacity-50 cursor-not-allowed" : ""} flex w-full mt-4 gap-1 justify-center items-center py-2 text-left border rounded-full hover:bg-gray-100 font-medium`}>
+                            <button disabled={isLoading || !captchaValue} type="button" onClick={handleGoogleSignup} className={`${isLoading || !captchaValue ? "opacity-50 cursor-not-allowed" : ""} flex w-full mt-4 gap-1 justify-center items-center py-2 text-left border rounded-full hover:bg-gray-100 font-medium`}>
                                 <img src="/google.webp" className="w-6 h-6" alt="icon" />
                                 Continue With Google
                             </button>
-                            <button disabled={isLoading} type="button" onClick={handleMicrosoftSignup} className={`${isLoading ? "opacity-50 cursor-not-allowed" : ""} flex w-full mt-4 gap-2 justify-center items-center py-2 text-left border rounded-full hover:bg-gray-100 font-medium`}>
+                            <button disabled={isLoading || !captchaValue} type="button" onClick={handleMicrosoftSignup} className={`${isLoading || !captchaValue ? "opacity-50 cursor-not-allowed" : ""} flex w-full mt-4 gap-2 justify-center items-center py-2 text-left border rounded-full hover:bg-gray-100 font-medium`}>
                                 <img src="/microsoft.png" className="w-6 h-6" alt="icon" />
                                 Continue With Microsoft
                             </button>
