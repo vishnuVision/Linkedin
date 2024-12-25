@@ -2,9 +2,12 @@ import axios from "axios";
 import { toast } from "react-hot-toast";
 import { useDispatch } from "react-redux";
 import { setIsLoading } from "../redux/slices/state.reducer";
+import { assignUser } from "../redux/slices/authReducer";
+import { useAuth } from "@clerk/clerk-react";
 
 const useApi = () => {
     const dispatch = useDispatch();
+    const { signOut } = useAuth();
 
     const apiAction = async ({
         baseURL = import.meta.env.VITE_SERVER_URL,
@@ -15,7 +18,7 @@ const useApi = () => {
         message = null,
         isLoading = false,
     }) => {
-        
+
         if (isLoading) {
             dispatch(setIsLoading(true));
         }
@@ -47,13 +50,18 @@ const useApi = () => {
         } catch (err) {
             dispatch(setIsLoading(false));
 
+            if (err?.response?.status === 401) {
+                dispatch(assignUser(false));
+                await signOut();
+            }
+
             const errorMessage =
                 err?.response?.status === 401
                     ? "Session expired. Please login again."
                     : err?.response?.data?.message || err?.message || "Something went wrong. Please try again later.";
 
             toast.error(errorMessage);
-            throw new Error(errorMessage);
+            return { success: false, message: errorMessage };
         }
     };
     return { apiAction };

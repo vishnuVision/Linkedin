@@ -22,8 +22,6 @@ function Home() {
     }
   }, [user])
 
-  console.log(user);
-
   if(user)
   {
     return <Loader />

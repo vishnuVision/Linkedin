@@ -9,13 +9,12 @@ export default function ProfileCard() {
   const [lastCompany, setLastCompany] = useState("");
 
   useEffect(() => {
-    console.log(user);
     if (user) {
-      const lastEducation = user?.educations.reduce((max, education) => {
+      const lastEducation = user?.educations?.reduce((max, education) => {
         return Number(education.endYear) > (Number(max.endYear) || 0) ? education : max;
       }, {});
 
-      const lastExperience = user?.experiences.reduce((max, experience) => {
+      const lastExperience = user?.experiences?.reduce((max, experience) => {
         if (!experience?.endYear) return max;
 
         const endDate = new Date(experience.endYear).getTime();

@@ -112,8 +112,23 @@ const AppLayout = ({ isChatDetailsOpen, setIsChatDetailsOpen }) => {
     }, [language])
 
     useEffect(() => {
-        getResult();
+        if(searchQuery)
+        {
+            getResult();   
+        }
     }, [searchQuery])
+
+    useEffect(() => {
+        if (user) {
+            if (!user?.firstName && !user?.lastName && !user?.location && user?.educations?.length === 0 && user?.experiences?.length === 0) {
+                navigate("/provide-details");
+            }
+            else {
+                setIsChatOpen(true);
+                setIsDisplay(true);
+            }
+        }
+    }, [])
 
     function shuffleArray(array) {
         array = array.filter(item => item !== undefined);
@@ -163,18 +178,6 @@ const AppLayout = ({ isChatDetailsOpen, setIsChatDetailsOpen }) => {
             console.log(error);
         }
     }
-
-    useEffect(() => {
-        if (user) {
-            if (!user?.firstName && !user?.lastName && !user?.location && user?.educations?.length === 0 && user?.experiences?.length === 0) {
-                navigate("/provide-details");
-            }
-            else {
-                setIsChatOpen(true);
-                setIsDisplay(true);
-            }
-        }
-    }, [])
 
     return (
         <HandleModalContext value={{ isChatDetailsOpen, setIsChatDetailsOpen }}>

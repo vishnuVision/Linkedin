@@ -51,11 +51,12 @@ function Signup() {
         }
     }, [])
 
-    const signUpUser = async () => {
+    const signUpUser = async (emailAddress) => {
         setIsLoading(true);
+        let email = emailAddress || user?.user?.emailAddresses[0]?.emailAddress;
         try {
-            if (user?.user?.emailAddresses[0]?.emailAddress) {
-                const response = await axios.post(`${import.meta.env.VITE_SERVER_URL}/api/v1/register`, { email: user?.user?.emailAddresses[0]?.emailAddress, password }, {
+            if (email) {
+                const response = await axios.post(`${import.meta.env.VITE_SERVER_URL}/api/v1/register`, { email: email, password }, {
                     withCredentials: true,
                     headers: {
                         "Content-Type": "application/json"
@@ -83,7 +84,8 @@ function Signup() {
         setIsLoading(false);
     }
 
-    const handleSignup = async () => {
+    const handleSignup = async (e) => {
+        e.preventDefault();
         if (!isLoaded) return;
         setIsLoading(true);
 
@@ -96,9 +98,10 @@ function Signup() {
             setError("");
             setPage(1);
         } catch (err) {
-            await signOut({ redirectTo: undefined });
-            window.location.href = "/signup?authenticate=false";
-            setError(err.errors ? err.errors[0].message : "Something went wrong");
+            console.log(err);
+            // await signOut({ redirectTo: undefined });
+            // window.location.href = "/signup?authenticate=false";
+            // setError(err.errors ? err.errors[0].message : "Something went wrong");
         }
         setIsLoading(false);
     };
@@ -111,7 +114,7 @@ function Signup() {
 
             if (signUpAttempt.status === "complete") {
                 setError("");
-                signUpUser();
+                signUpUser(signUpAttempt.emailAddress);
                 await setActive({ session: signUpAttempt.createdSessionId });
             }
             setPage(2);
