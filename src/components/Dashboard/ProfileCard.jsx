@@ -56,18 +56,30 @@ export default function ProfileCard() {
           </Link>
           <p className="text-gray-600 mb-4 break-words">{user?.bio}</p>
           <div className="space-y-2 text-sm text-gray-600">
-            <div className="flex items-center gap-2">
-              <Building2 className="w-4 h-4" />
-              <span>{lastCompany}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <GraduationCap className="w-4 h-4" />
-              <span>{lastSchool}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <MapPin className="w-4 h-4" />
-              <span>{user?.location}</span>
-            </div>
+            {
+              lastCompany && (
+                <div className="flex items-center gap-2">
+                  <Building2 className="w-4 h-4" />
+                  <span>{lastCompany}</span>
+                </div>
+              )
+            }
+            {
+              lastSchool && (
+                <div className="flex items-center gap-2">
+                  <GraduationCap className="w-4 h-4" />
+                  <span>{lastSchool}</span>
+                </div>
+              )
+            }
+            {
+              user?.location && (
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-4 h-4" />
+                  <span>{user?.location}</span>
+                </div>
+              )
+            }
           </div>
         </div>
         <Link to={"/mynetwork/grow"} className='justify-between items-center border-t flex gap-1 px-4 py-2 border-gray-200 text-sm text-gray-600 hover:bg-gray-100 cursor-pointer'>

@@ -4,11 +4,15 @@ import VideoGrid from "./VideoGrid"
 import PropTypes from "prop-types"
 import { useRef, useState } from "react";
 import ReactPlayer from 'react-player';
+import useApi from "../../hook/useApi";
+import { useSelector } from "react-redux";
 
-function CreatePostModal({ accept = "image/*", videos, previews, isOpen, setIsOpen, setPreviews, setVideos }) {
+function CreatePostModal({ accept = "image/*", videos, previews, isOpen, setIsOpen, setPreviews, setVideos, refereshData }) {
     const textareaRef = useRef(null);
     const [content, setContent] = useState("");
     const [isValid, setIsValid] = useState(false);
+    const user = useSelector((state) => state.authReducer.user);
+    const { apiAction } = useApi();
 
     if (!isOpen) return null;
 
@@ -22,13 +26,33 @@ function CreatePostModal({ accept = "image/*", videos, previews, isOpen, setIsOp
         textarea.style.height = `${textarea.scrollHeight}px`;
     };
 
-    const handleFormSubmit = () => {
-        console.log(content);
-        console.log(videos);
-        console.log(accept);
-        // setIsOpen(false);
-        // setVideos([]);
-        // setPreviews([]);
+    const handleFormSubmit = async () => {
+        if (!content && !videos) return;
+        
+        const media = videos.map((file) => file);
+        const formData = new FormData();
+        media.forEach((file) => {
+            formData.append("media", file);
+        });
+        formData.append("text", content);
+        formData.append("viewPriority", "anyone");
+        formData.append("referenceId", user._id);
+        formData.append("isVideo",accept==="video/*"?true:false);
+        // formData.append("authorType", "");
+
+        const { success, data } = await apiAction({
+            url: `/api/v1/post/createPost`,
+            method: "POST",
+            isFormData: true,
+            data: formData
+        });
+
+        if (success && data) {
+            refereshData();
+        }
+        setIsOpen(false);
+        setVideos([]);
+        setPreviews([]);
     }
 
     const handleFileChange = (files) => {
@@ -53,6 +77,7 @@ function CreatePostModal({ accept = "image/*", videos, previews, isOpen, setIsOp
         setVideos([]);
         setPreviews([]);
         setIsOpen(false);
+        setContent("");
     }
 
     return (
@@ -127,7 +152,8 @@ CreatePostModal.propTypes = {
     isOpen: PropTypes.bool,
     setIsOpen: PropTypes.func,
     setVideos: PropTypes.func,
-    setPreviews: PropTypes.func
+    setPreviews: PropTypes.func,
+    refereshData: PropTypes.func
 }
 
 export default CreatePostModal

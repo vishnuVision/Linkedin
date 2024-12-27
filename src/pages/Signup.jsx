@@ -20,7 +20,6 @@ function Signup() {
     const user = useUser();
     const dispatch = useDispatch();
     const { signOut } = useAuth();
-    const data = useAuth();
     const navigate = useNavigate();
     const { user: userData } = useSelector((state) => state.authReducer);
     const { search } = useLocation();
@@ -131,7 +130,7 @@ function Signup() {
         if (!isLoaded) return;
         setIsLoading(true);
         try {
-            const data = await signUp.authenticateWithRedirect({
+            await signUp.authenticateWithRedirect({
                 strategy: "oauth_google",
                 redirectUrl: "/signup?authenticate=true",
                 redirectUrlComplete: "/signup?authenticate=true",

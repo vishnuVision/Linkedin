@@ -38,7 +38,7 @@ const Chat = () => {
   const handleEmojiClick = (emojiData) => {
     setMessage((prev) => prev + emojiData.emoji);
     setShowPicker(false);
-};
+  };
 
   return (
     <div className="w-full flex flex-col h-full">

@@ -20,5 +20,5 @@ export default function Feed({ posts, isLimit = false }) {
 
 Feed.propTypes = {
   posts: PropTypes.array,
-  isLimit: PropTypes.bool
+  isLimit: PropTypes.bool,
 }

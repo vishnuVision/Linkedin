@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap, Tooltip } from 'react-leaflet';
 import axios from 'axios';
 import 'leaflet/dist/leaflet.css';
 import PropTypes from 'prop-types';
@@ -64,6 +64,7 @@ const Map = ({ addresses }) => {
                     click: handleClick,
                 }}
             >
+                <Tooltip>{addresses[index]}</Tooltip>
                 <Popup>
                     Location: {addresses[index]}
                 </Popup>

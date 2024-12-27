@@ -46,7 +46,7 @@ function Writearticle() {
 
     const handlePublish = () => {
 
-        // console.log(content);
+        
     };
 
     const modules = {

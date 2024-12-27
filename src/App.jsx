@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useSelector } from "react-redux"
 import { Toaster } from "react-hot-toast";
 import ForgotPasswordPage from "./components/auth/ForgotPasswordPage";
-import { useAuth, useUser } from "@clerk/clerk-react";
+import { useAuth } from "@clerk/clerk-react";
 
 const RoutesPage = lazy(() => import('./RoutesPage'));
 const Loader = lazy(() => import('./components/Loaders/Loader'));
@@ -16,8 +16,6 @@ function App() {
   const { isLoading } = useSelector(state => state.stateReducer);
   const { user } = useSelector(state => state.authReducer);
   const { signOut } = useAuth();
-  const userData = useUser();
-  const data = useAuth();
 
   useEffect(() => {
     if (document.cookie.includes("userToken") && !user) {

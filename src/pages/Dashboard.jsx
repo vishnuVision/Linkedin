@@ -32,7 +32,7 @@ function Dashboard() {
 
   return (
     <div className='pb-10 max-h-[90vh]'>
-      <CreatePost />
+      <CreatePost refereshData={fetchData}/>
       {
         isLoading && (
           <div className="lg:col-span-2">
@@ -49,7 +49,7 @@ function Dashboard() {
           </div>
         )
       }
-      <Feed posts={posts} />
+      <Feed posts={posts}/>
     </div>
   );
 }

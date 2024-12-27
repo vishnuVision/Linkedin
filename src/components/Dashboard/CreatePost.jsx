@@ -6,7 +6,7 @@ import ImageUploadModal from '../ImageUpload/ImageUploadModal';
 import CreatePostModal from '../ImageUpload/CreatePostModal';
 import { useSelector } from 'react-redux';
 
-export default function CreatePost() {
+function CreatePost({refereshData}) {
   const [isModalOpenForImage, setIsModalOpenForImage] = useState(false);
   const [isModalOpenForVideo, setIsModalOpenForVideo] = useState(false);
   const [previews, setPreviews] = useState([]);
@@ -68,10 +68,16 @@ export default function CreatePost() {
         images={files}
         previews={previews}
       />
-      <CreatePostModal isOpen={showCreatePost} setIsOpen={setShowCreatePost} accept={accept} previews={previews} setPreviews={setPreviews} setVideos={setFiles} videos={files} />
+      <CreatePostModal isOpen={showCreatePost} setIsOpen={setShowCreatePost} accept={accept} previews={previews} setPreviews={setPreviews} setVideos={setFiles} videos={files} refereshData={refereshData}/>
     </div>
   );
 }
+
+CreatePost.propTypes = {
+  refereshData: PropTypes.func
+}
+
+export default CreatePost;
 
 function PostButton({ icon, label, onclick }) {
   return (

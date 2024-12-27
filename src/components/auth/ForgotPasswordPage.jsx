@@ -29,8 +29,7 @@ const ForgotPasswordPage = () => {
         strategy: 'reset_password_email_code',
         identifier: email,
       })
-      .then((data) => {
-        console.log(data)
+      .then(() => {
         setSuccessfulCreation(true)
         setError('')
       })
@@ -56,8 +55,6 @@ const ForgotPasswordPage = () => {
         } else if (result.status === 'complete') {
           setActive({ session: result.createdSessionId })
           setError('')
-        } else {
-          console.log(result)
         }
       })
       .catch((err) => {

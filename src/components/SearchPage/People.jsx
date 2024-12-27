@@ -13,7 +13,6 @@ function People({ handleBack }) {
         setSearchResults(allData?.peoples || []);
     }, [allData])
 
-    console.log(searchResults);
     
     return (
         <div className="max-w-6xl mx-auto px-4">

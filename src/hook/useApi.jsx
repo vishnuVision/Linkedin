@@ -14,6 +14,7 @@ const useApi = () => {
         method = "get",
         data = null,
         url,
+        header,
         isFormData = false,
         message = null,
         isLoading = false,
@@ -32,7 +33,7 @@ const useApi = () => {
             url,
             method,
             data,
-            headers: {
+            headers: header ? header : {
                 "Content-Type": isFormData ? "multipart/form-data" : "application/json",
             },
         };
