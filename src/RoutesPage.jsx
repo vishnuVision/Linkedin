@@ -11,7 +11,7 @@ const AppLayout = lazy(() => import('./components/layouts/AppLayout'));
 const Group = lazy(() => import('./pages/Groups'));
 const Events = lazy(() => import('./pages/Events'));
 const Newsletters = lazy(() => import('./pages/Newsletters'));
-const GroupDetails = lazy(() => import('./pages/GroupDetails'));
+const GroupDetails = lazy(() => import('./pages/Groupdetails'));
 const EventDetails = lazy(() => import('./pages/EventDetails'));
 const NewsletterDetails = lazy(() => import('./pages/NewsletterDetails'));
 const Setting = lazy(() => import('./pages/Setting'));

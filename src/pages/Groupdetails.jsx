@@ -3,7 +3,7 @@ import CreatePost from "../components/Dashboard/CreatePost"
 import Feed from "../components/Dashboard/Feed"
 import DashboardLayout from "../components/layouts/DashboardLayout" 
 
-function GroupDetails() {
+function Groupdetails() {
   return (
     <div className="min-h-screen">
       <div className="max-w-4xl max-h-[90vh] md:overflow-y-scroll someElement mx-auto">
@@ -18,4 +18,4 @@ function GroupDetails() {
   )
 }
 
-export default DashboardLayout()(GroupDetails)
+export default DashboardLayout()(Groupdetails)
