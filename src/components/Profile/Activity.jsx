@@ -5,14 +5,14 @@ import CreatePostModal from "../ImageUpload/CreatePostModal";
 import { Link, useParams } from "react-router-dom";
 import PropTypes from "prop-types";
 
-function Activity({followers}) {
+function Activity({followers,posts}) {
     const [isVisible, setIsVisible] = useState(false);
     const [previews, setPreviews] = useState([]);
     const [files, setFiles] = useState([]);
     const {id} = useParams();
     return (
         <>
-            <div className="bg-white rounded-lg shadow pt-6 mt-4">
+            <div className="bg-white rounded-lg shadow pt-6 mt-4 overflow-hidden">
                 <div className="mb-4 flex justify-between px-4">
                     <div>
                         <h2 className="text-xl font-bold text-gray-900">Activity</h2>
@@ -23,9 +23,11 @@ function Activity({followers}) {
                     </div>
                 </div>
                 <div className="flex flex-col px-4">
-                    <PostCard />
-                    <PostCard />
-                    <PostCard />
+                    {
+                        posts && posts.length > 0 && posts.map((post, idx) => (
+                            <PostCard key={idx} post={post} />
+                        ))
+                    }
                 </div>
                 <div className="hover:bg-gray-100 border-t border-gray-200">
                     <Link to={`/profile/${id}/all-posts`} className="w-full p-2 flex justify-center items-center gap-2 text-lg font-semibold">
@@ -41,7 +43,8 @@ function Activity({followers}) {
 
 Activity.propTypes = {
     followers: PropTypes.number,
-    user: PropTypes.any
+    user: PropTypes.any,
+    posts: PropTypes.array
 }
 
 export default Activity

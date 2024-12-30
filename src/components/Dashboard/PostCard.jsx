@@ -1,7 +1,7 @@
 import { Image, MessageSquare, Send, Share2, Smile, ThumbsUp, X } from "lucide-react"
 import PropTypes from "prop-types"
 import ImageGrid from "./ImageGrid"
-import { Link } from "react-router-dom"
+import { Link, useParams } from "react-router-dom"
 import { useEffect, useRef, useState } from "react"
 import moment from "moment";
 import useApi from "../../hook/useApi"
@@ -21,12 +21,14 @@ function PostCard({ post }) {
     const { apiAction } = useApi();
     const [imagePreview, setImagePreview] = useState("");
     const [showPicker, setShowPicker] = useState(false);
-    const user = useSelector((state) => state.authReducer.user);
+    const user = useSelector((state) => state.authReducer.user); 
+    const {id} = useParams();
+    const isAuthor = id === user._id;
 
     const handleLike = async () => {
         if (isLiked) {
             const { success } = await apiAction({
-                url: `/api/v1/post/like/removeLike/${post._id}`,
+                url: `/api/v1/post/like/removeLike/${post?._id}`,
                 method: "DELETE",
                 header: {}
             });
@@ -134,11 +136,11 @@ function PostCard({ post }) {
     return (
         <div key={post._id} className="bg-white rounded-lg shadow mb-4 border border-gray-200">
             <div className="p-4">
-                <Link to={post.authorType === "page" ? `/company/${post.authorDetails._id}/` : post.authorType === "group" ? `/groups/${post.authorDetails._id}` : post.authorType === "event" ? `/events/${post.authorDetails._id}` : post.authorType === "company" ? `/company/${post.authorDetails._id}` : `/profile/${post.authorDetails._id}`} className="flex items-start gap-3">
-                    <img src={post.authorDetails.avatar} alt={post.authorDetails.name} className="w-12 h-12 border rounded-full object-cover" />
+                <Link to={post.authorType === "page" ? `/company/${isAuthor ? post.author : post.authorDetails?._id}/` : post.authorType === "group" ? `/groups/${isAuthor ? post.author : post.authorDetails?._id}` : post.authorType === "event" ? `/events/${isAuthor ? post.author : post.authorDetails?._id}` : post.authorType === "company" ? `/company/${isAuthor ? post.author : post.authorDetails?._id}` : `/profile/${isAuthor ? post.author : post.authorDetails?._id}`} className="flex items-start gap-3">
+                    <img src={isAuthor ? user?.avatar : post.authorDetails?.avatar} alt={isAuthor ? user?.firstName+" "+user?.lastName : post.authorDetails?.name} className="w-12 h-12 border rounded-full object-cover" />
                     <div>
-                        <h3 className="font-semibold hover:underline hover:text-[#1da1f2]">{post.authorDetails.name}</h3>
-                        <p className="text-sm text-gray-500 leading-tight">{post.authorDetails.description}</p>
+                        <h3 className="font-semibold hover:underline hover:text-[#1da1f2]">{isAuthor ? user?.firstName+" "+user?.lastName : post.authorDetails?.name}</h3>
+                        <p className="text-sm text-gray-500 leading-tight">{isAuthor ? user?.description : post.authorDetails?.description}</p>
                         <p className="text-xs text-gray-400 leading-none">{moment(post.createdAt).fromNow()}</p>
                     </div>
                 </Link>

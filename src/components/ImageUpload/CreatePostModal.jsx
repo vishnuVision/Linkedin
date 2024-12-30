@@ -53,6 +53,7 @@ function CreatePostModal({ accept = "image/*", videos, previews, isOpen, setIsOp
         setIsOpen(false);
         setVideos([]);
         setPreviews([]);
+        setContent("");
     }
 
     const handleFileChange = (files) => {

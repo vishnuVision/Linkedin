@@ -34,7 +34,7 @@ function ImageGrid({ images = [] }) {
                 <video
                   src={image}
                   alt={`Post image ${index + 1}`}
-                  className="w-full h-full object-contain rounded-md cursor-pointer"
+                  className={`w-full h-full object-contain rounded-md cursor-pointer ${images.length > 1 ?'border border-gray-300' : ''}`}
                   style={{ aspectRatio: '1/1' }}
                   onClick={() => setSelectedImage(image)}
                   autoPlay
@@ -47,7 +47,7 @@ function ImageGrid({ images = [] }) {
                   <img
                     src={image}
                     alt={`Post image ${index + 1}`}
-                    className="w-full h-full object-cover rounded-md cursor-pointer"
+                    className={`w-full h-full object-cover rounded-md cursor-pointer border border-gray-300 ${images.length > 1 ?'border border-gray-300' : ''}`}
                     style={{ aspectRatio: '1/1' }}
                     onClick={() => setSelectedImage(image)}
                   />

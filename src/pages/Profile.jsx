@@ -5,25 +5,93 @@ import Skills from '../components/Profile/Skills';
 import Analytics from '../components/Profile/Analytics';
 import Activity from '../components/Profile/Activity';
 import Educations from '../components/Profile/Educations';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useParams } from 'react-router-dom';
 import Notfound from '../components/Notfound';
-import { MoveLeft, Plus, Trash2 } from 'lucide-react';
+import { MoveLeft, Plus, Trash2, Users } from 'lucide-react';
 import Feed from '../components/Dashboard/Feed';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Modal from '../Modal/Modal';
 import EditIntroForm from '../Forms/EditIntroForm';
 import { useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
+import useApi from '../hook/useApi';
+import Loader from '../components/Loaders/Loader';
 
 function Profile() {
   const { user } = useSelector(state => state.authReducer);
+  const { apiAction } = useApi();
+  const [isLoading, setIsLoading] = useState(true);
+  const [posts, setPosts] = useState([]);
+  const [educations, setEducations] = useState([]);
+  const [experiences, setExperiences] = useState([]);
+  const [skills, setSkills] = useState([]);
+  const { id } = useParams();
+
+  useEffect(() => {
+    setIsLoading(true);
+    if (user) {
+      fetchData();
+      getEducationsData();
+      getExperiencesData();
+      getSkills();
+      setIsLoading(false);
+    }
+  }, [user])
+
+  const fetchData = async () => {
+    const { success, data } = await apiAction({
+      url: `/api/v1/post/listAllPost/${id}`,
+      method: "GET",
+    });
+
+    if (success) {
+      setPosts(data);
+    }
+  };
+
+  const getEducationsData = async () => {
+    const { success, data } = await apiAction({
+      url: `/api/v1/profile/education/${id}`,
+      method: "GET",
+    });
+
+    if (success) {
+      setEducations(data);
+    }
+  };
+
+  const getExperiencesData = async () => {
+    const { success, data } = await apiAction({
+      url: `/api/v1/profile/experience/${id}`,
+      method: "GET",
+    });
+
+    if (success) {
+      setExperiences(data);
+    }
+  };
+
+  const getSkills = async () => {
+    const { success, data } = await apiAction({
+      url: `/api/v1/profile/skill/getAllSkill/${id}`,
+      method: "GET",
+    });
+
+    if (success) {
+      setSkills(data);
+    }
+  };
+
+  if (isLoading)
+    return <Loader />;
+
   return (
     <div className="min-h-screen pt-20">
       <div className="max-w-4xl max-h-[90vh] overflow-y-scroll someElement mx-auto px-4 pb-2">
         <Routes>
-          <Route path="/" element={<ProfilePage user={user} />} />
-          <Route path="/all-posts" element={<ActivityPage />} />
-          <Route path="/all-skills" element={<SkillPage />} />
+          <Route path="/" element={<ProfilePage user={user} posts={posts.length > 3 ? posts.slice(0, 3) : posts || []} educations={educations} experiences={experiences} skills={skills.length > 3 ? skills.slice(0, 3) : skills || []} />} />
+          <Route path="/all-posts" element={<ActivityPage posts={posts} />} />
+          <Route path="/all-skills" element={<SkillPage skills={skills} />} />
           <Route path="*" element={<Notfound />} />
         </Routes>
       </div>
@@ -31,7 +99,7 @@ function Profile() {
   );
 }
 
-const ProfilePage = ({user}) => {
+const ProfilePage = ({ user, posts, educations, experiences, skills }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleSave = () => {
@@ -40,13 +108,13 @@ const ProfilePage = ({user}) => {
 
   return (
     <>
-      <ProfileHeader setIsModalOpen={setIsModalOpen} user={user}/>
-      <Analytics views={user?.views || 0}/>
-      <About about={user?.about}/>
-      <Activity followers={user?.followers?.length} />
-      <Experience />
-      <Educations />
-      <Skills />
+      <ProfileHeader setIsModalOpen={setIsModalOpen} user={user} />
+      <Analytics views={user?.views || 0} />
+      <About about={user?.about} />
+      <Activity followers={user?.followers?.length} posts={posts} />
+      <Experience experiences={experiences} />
+      <Educations educations={educations} />
+      <Skills skills={skills} />
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -61,7 +129,7 @@ const ProfilePage = ({user}) => {
   )
 }
 
-const ActivityPage = () => {
+const ActivityPage = ({ posts }) => {
   return (
     <div className="bg-white rounded-lg shadow pt-6 mt-4">
       <div className='flex items-center gap-2 px-6 mb-4'>
@@ -71,21 +139,14 @@ const ActivityPage = () => {
         <h2 className="text-xl font-bold text-gray-900">All Posts</h2>
       </div>
       <div className="grid grid-cols-1 gap-4 px-4 pb-4">
-        <Feed />
+        <Feed posts={posts} />
       </div>
     </div>
   )
 }
 
-const SkillPage = () => {
+const SkillPage = ({skills}) => {
   const [isOpen, setIsOpen] = useState(false);
-  const skills = [
-    { name: 'React.js', endorsements: 42 },
-    { name: 'JavaScript', endorsements: 38 },
-    { name: 'Node.js', endorsements: 35 },
-    { name: 'TypeScript', endorsements: 29 },
-    { name: 'AWS', endorsements: 25 },
-  ];
 
   return (
     <div className="bg-white rounded-lg shadow pt-6 mt-4">
@@ -99,14 +160,31 @@ const SkillPage = () => {
         </div>
       </div>
       <div className="grid grid-cols-1 gap-4 px-4 pb-4">
-        {skills.map((skill, index) => (
-          <div
-            key={index}
-            className={`border-b border-gray-200 flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg ${index === skills.length - 1 ? 'border-b-0' : ''}`}
-          >
-            <span className="text-gray-700">{skill.name}</span>
+        {skills && skills.length > 0 && skills.map((skill, index) => (
+          <div key={index} className={`flex items-start justify-between p-3 hover:bg-gray-50 rounded-lg border-b ${skills.length - 1 === index ? 'border-b-0' : ''}`}>
+            <div className='flex flex-col gap-4'>
+              <span className="text-gray-800 font-semibold text-lg">{skill.name}</span>
+              {
+                skill?.references && skill.references.length > 0 && skill.references.map((ref, index) => (
+                  <div key={index} className='flex gap-2 items-center'>
+                    <img src={ref?.logo} alt={ref?.name} className="w-8 h-8 object-cover" />
+                    <span className="text-md text-gray-700">{skill.name + " at " + ref?.name}</span>
+                  </div>
+                ))
+              }
+              {
+                skill.endorsedBy && skill.endorsedBy.length > 0 && (
+                  <div className='flex gap-2 items-center'>
+                    <Users className='w-6 h-6 text-gray-600' />
+                    <span className="text-sm font-semibold text-gray-600">{skill.endorsedBy.length} endorsement</span>
+                  </div>
+                )
+              }
+            </div>
             <div className="flex items-center gap-2 text-gray-500">
-              <button className='p-2 hover:bg-[#866f55] hover:bg-opacity-10 rounded-full'><Trash2 /></button>
+              <div className="flex items-center gap-2 text-gray-500">
+                <button className='p-2 hover:bg-[#866f55] hover:bg-opacity-10 rounded-full'><Trash2 /></button>
+              </div>
             </div>
           </div>
         ))}
@@ -118,12 +196,24 @@ const SkillPage = () => {
   )
 }
 
+ActivityPage.propTypes = {
+  posts: PropTypes.array,
+};
+
 ProfilePage.propTypes = {
   user: PropTypes.object,
+  posts: PropTypes.array,
+  educations: PropTypes.array,
+  experiences: PropTypes.array,
+  skills: PropTypes.array
 };
 
 const handleBack = () => {
   window.history.back();
+};
+
+SkillPage.propTypes = {
+  skills: PropTypes.array,
 };
 
 export default Profile;

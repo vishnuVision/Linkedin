@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 import SearchInput from '../Ui/SearchInput';
 import SearchDropdown from '../Ui/SearchDropdown';
 import axios from 'axios';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { assignUser } from '../../redux/slices/authReducer';
 import toast from 'react-hot-toast';
 import { useAuth } from "@clerk/clerk-react";
@@ -24,6 +24,7 @@ export default function Navbar({setSearchQuery,searchResults=[],isDropdownVisibl
   const dispatch = useDispatch();
   const { signOut } = useAuth();
   const { t } = useTranslation();
+  const { user } = useSelector(state => state.authReducer);
 
   const handleSearch = (value) => {
     setIsDropdownVisible(true);
@@ -128,7 +129,7 @@ export default function Navbar({setSearchQuery,searchResults=[],isDropdownVisibl
                           />
                           <p>Vishnu Mandlesara</p>
                         </Link>
-                        <Link to={"/profile/1"} className='flex justify-center items-center w-full py-1 text-[#0a66c2] border border-[#0a66c2] hover:bg-blue-100 rounded-full'>{t("view")}</Link>
+                        <Link to={`/profile/${user._id}`} className='flex justify-center items-center w-full py-1 text-[#0a66c2] border border-[#0a66c2] hover:bg-blue-100 rounded-full'>{t("view")}</Link>
                       </div>
                     </div>
                     <div className='flex flex-col w-full justify-start border-t border-gray-300 py-2'>
