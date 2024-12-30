@@ -1,9 +1,10 @@
 import { defineConfig } from 'vite';
-import { resolve } from 'path';
+import react from '@vitejs/plugin-react';
 import { viteStaticCopy } from 'vite-plugin-static-copy';
 
 export default defineConfig({
   plugins: [
+    react(), // React plugin for Vite
     viteStaticCopy({
       targets: [
         {
@@ -13,4 +14,7 @@ export default defineConfig({
       ]
     })
   ],
+  build: {
+    outDir: 'dist', // Ensure the output directory is correctly specified
+  },
 });
