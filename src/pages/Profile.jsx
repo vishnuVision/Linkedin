@@ -91,7 +91,7 @@ function Profile() {
         <Routes>
           <Route path="/" element={<ProfilePage refreshPost={fetchData} refreshEducation={getEducationsData} refreshExperience={getExperiencesData} refreshSkill={getSkills} user={user} posts={posts.length > 3 ? posts.slice(0, 3) : posts || []} educations={educations} experiences={experiences} skills={skills.length > 3 ? skills.slice(0, 3) : skills || []} />} />
           <Route path="/all-posts" element={<ActivityPage posts={posts} />} />
-          <Route path="/all-skills" element={<SkillPage skills={skills} />} />
+          <Route path="/all-skills" element={<SkillPage skills={skills} refreshSkill={getSkills} />} />
           <Route path="*" element={<Notfound />} />
         </Routes>
       </div>
@@ -145,7 +145,7 @@ const ActivityPage = ({ posts }) => {
   )
 }
 
-const SkillPage = ({skills}) => {
+const SkillPage = ({skills,refreshSkill}) => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (

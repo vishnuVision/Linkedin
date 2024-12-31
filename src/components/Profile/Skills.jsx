@@ -5,10 +5,24 @@ import Modal from '../../Modal/Modal';
 import { useState } from 'react';
 import SkillForm from '../../Forms/SkillForm';
 import PropTypes from 'prop-types';
+import useApi from '../../hook/useApi';
 
 function Skills({ skills, refreshSkill }) {
   const { id } = useParams();
   const [isAddSkill, setIsSkill] = useState(false);
+  const { apiAction } = useApi();
+
+  const handleDeleteSkill = async (id) => {
+    const { success, data } = await apiAction({
+      url: `api/v1/profile/skill/deleteSkill/${id}`,
+      method: "DELETE",
+      data:{}
+    });
+
+    if (success && data) {
+      refreshSkill();
+    }
+  }
 
   return (
     <div className="bg-white rounded-lg shadow pt-6 mt-4 overflow-hidden">
@@ -40,7 +54,7 @@ function Skills({ skills, refreshSkill }) {
             </div>
             <div className="flex items-center gap-2 text-gray-500">
               <div className="flex items-center gap-2 text-gray-500">
-                <button className='p-2 hover:bg-[#866f55] hover:bg-opacity-10 rounded-full'><Trash2 /></button>
+                <button onClick={() => handleDeleteSkill(skill._id)} className='p-2 hover:bg-[#866f55] hover:bg-opacity-10 rounded-full'><Trash2 /></button>
               </div>
             </div>
           </div>
@@ -62,7 +76,7 @@ function Skills({ skills, refreshSkill }) {
         )
       }
       <Modal isOpen={isAddSkill} onClose={() => setIsSkill(false)} title='Add skill'>
-        <SkillForm refreshSkill={refreshSkill} setIsOpen={setIsSkill}/>
+        <SkillForm refreshSkill={refreshSkill} setIsOpen={setIsSkill} />
       </Modal>
     </div>
   );
