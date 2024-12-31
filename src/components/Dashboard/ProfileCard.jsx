@@ -44,11 +44,22 @@ export default function ProfileCard() {
         <div className='px-4 pb-4'>
           <div className="-mt-12 mb-4">
             <Link to={"/profile/1"}>
-              <img
-                src={user?.avatar}
-                alt={user?.firstName + " " + user?.lastName}
-                className="w-24 h-24 rounded-full border-4 border-white object-cover"
-              />
+              {
+                !user?.avatar &&
+                <img
+                  src={`https://ui-avatars.com/api/?name=${user?.firstName + " " + user?.lastName}`}
+                  alt={user?.firstName + " " + user?.lastName}
+                  className="w-24 h-24 rounded-full border-4 border-white object-cover"
+                />
+              }
+              {
+                user?.avatar &&
+                <img
+                  src={user?.avatar}
+                  alt={user?.firstName + " " + user?.lastName}
+                  className="w-24 h-24 rounded-full border-4 border-white object-cover"
+                />
+              }
             </Link>
           </div>
           <Link to={"/profile/1"} className='hover:underline hover:underline-offset-2'>

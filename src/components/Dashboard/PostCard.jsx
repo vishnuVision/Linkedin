@@ -137,7 +137,16 @@ function PostCard({ post }) {
         <div key={post._id} className="bg-white rounded-lg shadow mb-4 border border-gray-200">
             <div className="p-4">
                 <Link to={post.authorType === "page" ? `/company/${isAuthor ? post.author : post.authorDetails?._id}/` : post.authorType === "group" ? `/groups/${isAuthor ? post.author : post.authorDetails?._id}` : post.authorType === "event" ? `/events/${isAuthor ? post.author : post.authorDetails?._id}` : post.authorType === "company" ? `/company/${isAuthor ? post.author : post.authorDetails?._id}` : `/profile/${isAuthor ? post.author : post.authorDetails?._id}`} className="flex items-start gap-3">
-                    <img src={post.authorDetails?.avatar} alt={isAuthor ? user?.firstName+" "+user?.lastName : post.authorDetails?.name} className="w-12 h-12 border rounded-full object-cover" />
+                    {
+                        !post.authorDetails?.avatar && (
+                            <img src={user?.avatar} alt={isAuthor ? user?.firstName+" "+user?.lastName : post.authorDetails?.name} className="w-12 h-12 border rounded-full object-cover" />
+                        )
+                    }
+                    {
+                        post.authorDetails?.avatar && (
+                            <img src={post.authorDetails?.avatar} alt={isAuthor ? user?.firstName+" "+user?.lastName : post.authorDetails?.name} className="w-12 h-12 border rounded-full object-cover" />       
+                        )
+                    }
                     <div>
                         <h3 className="font-semibold hover:underline hover:text-[#1da1f2]">{isAuthor ? user?.firstName+" "+user?.lastName : post.authorDetails?.name}</h3>
                         <p className="text-sm text-gray-500 leading-tight">{isAuthor ? user?.description : post.authorDetails?.description}</p>
