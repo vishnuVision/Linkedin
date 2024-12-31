@@ -36,7 +36,11 @@ function Experience({ experiences }) {
                   </div>
                 </div>
                 <div className="flex gap-2 items-center">
-                  <p className="text-sm text-gray-500">{exp.startYear.slice(0, 4)} - {exp.endYear.slice(0, 4)}</p>
+                  {
+                    exp.startYear && exp.endYear && (
+                      <p className="text-sm text-gray-500">{exp.startYear?.slice(0, 4)} - {exp.endYear?.slice(0, 4)}</p>   
+                    )
+                  }
                   <div className="flex items-center gap-2">
                     <div className="h-1 p-[3px] w-1 rounded-full bg-slate-500"></div>
                     <p className="text-sm text-gray-500">
@@ -97,6 +101,7 @@ function Experience({ experiences }) {
                     </div>
                   )
                 }
+                
               </div>
               <div className='text-gray-500'>
                 <button onClick={() => setIsOpen(true)} className='p-2 hover:bg-[#866f55] hover:bg-opacity-10 rounded-full'><Pen /></button>
@@ -104,6 +109,11 @@ function Experience({ experiences }) {
             </div>
           </div>
         ))}
+        {
+          experiences && experiences.length === 0 && (
+            <p className='text-gray-500'>No experience found.</p>
+          )
+        }
       </div>
       <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} title='Add Experience'>
         <ExperienceForm />

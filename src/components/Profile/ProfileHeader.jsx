@@ -13,7 +13,7 @@ function ProfileHeader({ setIsModalOpen, user }) {
   const [image, setImage] = useState();
   const [lastSchool, setLastSchool] = useState("");
   const [lastCompany, setLastCompany] = useState("");
-  
+
   useEffect(() => {
     if (user) {
       const lastEducation = user?.educations.reduce((max, education) => {
@@ -85,16 +85,27 @@ function ProfileHeader({ setIsModalOpen, user }) {
             <h1 className="text-2xl font-bold text-gray-900">{user.firstName + " " + user.lastName}</h1>
             <p className="text-lg text-gray-600">{user?.bio}</p>
             <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
-              <span className="flex items-center gap-1">
-                <MapPin className="w-4 h-4" /> {user?.location}
-              </span>
-              <span className="flex items-center gap-1">
-                <Briefcase className="w-4 h-4" /> {lastCompany}
-              </span>
-              <div className="flex items-center gap-2">
-                <GraduationCap className="w-4 h-4" />
-                {lastSchool}
-              </div>
+              {
+                user?.location && (
+                  <span className="flex items-center gap-1">
+                    <MapPin className="w-4 h-4" /> {user?.location}
+                  </span>
+                )
+              }
+              {
+                lastCompany && (
+                  <span className="flex items-center gap-1">
+                    <Briefcase className="w-4 h-4" /> {lastCompany}
+                  </span>
+                )
+              }
+              {
+                lastSchool && (
+                  <span className="flex items-center gap-1">
+                    <GraduationCap className="w-4 h-4" /> {lastSchool}
+                  </span>
+                )
+              }
             </div>
           </div>
           <div className="flex gap-2 mt-4 md:mt-0">
@@ -109,7 +120,7 @@ function ProfileHeader({ setIsModalOpen, user }) {
           </div>
         </div>
         <div>
-          <Link to={"/"} className="font-semibold text-[#0a66c2] text-sm hover:underline">{user?.followers.length+user.following.length || 0} connections</Link>
+          <Link to={"/"} className="font-semibold text-[#0a66c2] text-sm hover:underline">{user?.followers.length + user.following.length || 0} connections</Link>
         </div>
       </div>
     </div>

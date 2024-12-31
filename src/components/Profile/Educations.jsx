@@ -52,6 +52,11 @@ function Educations({ educations }) {
                         </div>
                     </div>
                 ))}
+                {
+                    educations && educations.length === 0 && (
+                        <p className="text-gray-500">No educations found.</p>
+                    )
+                }
             </div>
             <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} title="Add Education">
                 <EducationForm />
