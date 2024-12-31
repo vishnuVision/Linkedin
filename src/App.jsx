@@ -14,15 +14,15 @@ const LoadinData = lazy(() => import('./pages/LoadinData'));
 
 function App() {
   const { isLoading } = useSelector(state => state.stateReducer);
-  const { user } = useSelector(state => state.authReducer);
-  const { signOut } = useAuth();
+  // const { user } = useSelector(state => state.authReducer);
+  // const { signOut } = useAuth();
 
-  useEffect(() => {
-    if (document.cookie.includes("userToken") && !user) {
-      document.cookie = "userToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-      signOut();
-    }
-  }, [user])
+  // useEffect(() => {
+  //   if (document.cookie.includes("userToken") && !user) {
+  //     document.cookie = "userToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+  //     signOut();
+  //   }
+  // }, [user])
 
   return (
     <Router>
