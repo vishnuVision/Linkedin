@@ -7,6 +7,7 @@ import axios from "axios";
 import { useDispatch } from "react-redux";
 import { assignUser } from "../redux/slices/authReducer";
 import toast from "react-hot-toast";
+import useApi from "../hook/useApi";
 
 const list = ["--Select", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
@@ -27,6 +28,7 @@ function ProvideDetails() {
   const [location, setLocation] = useState("");
   const [recentJob, setRecentJob] = useState("");
   const [recentCompany, setRecentCompany] = useState("");
+  const [companyList, setCompanyList] = useState([]);
   const [school, setSchool] = useState("");
   const [startYear, setStartYear] = useState("");
   const [endYear, setEndYear] = useState("");
@@ -34,6 +36,7 @@ function ProvideDetails() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
+  const { apiAction } = useApi();
 
   useEffect(() => {
     if (isFirst) {
@@ -44,6 +47,21 @@ function ProvideDetails() {
       setIsFirst(false);
     }
   }, [])
+
+  useEffect(() => {
+    getAllCompanies();
+  }, [isStudent])
+
+  const getAllCompanies = async () => {
+    const { success, data } = await apiAction({
+      url: `/api/v1/getAllPages/${isStudent ? "school" : "company"}`,
+      method: "GET",
+    });
+
+    if (success && data) {
+      setCompanyList(data);
+    }
+  }
 
   const getDaysInMonth = (month, year = new Date().getFullYear()) => {
     if (!month) return [];
@@ -59,54 +77,57 @@ function ProvideDetails() {
   };
 
   const updateUserDetails = async (e) => {
-      e.preventDefault();
-      setIsLoading(true);
-      try {
-          let data;
-          let birthday;
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      let data;
+      let birthday;
 
-          if (month && selectedDay && selectedYear) {
-              const date = new Date(selectedYear, month - 1, selectedDay);
-              birthday = date.toISOString();
+      if (month && selectedDay && selectedYear) {
+        const date = new Date(selectedYear, month - 1, selectedDay);
+        birthday = date.toISOString();
+      }
+
+      if (isStudent) {
+        if (user?.user?.emailAddresses[0]?.emailAddress || firstName || lastName || !location || user?.user?.imageUrl || school || startYear || endYear || birthday) {
+          data = { firstName, lastName, location, avatar: user?.user?.imageUrl, school, startYear, endYear, birthday, isStudent };
+        }
+      }
+      else {
+        if (user?.user?.emailAddresses[0]?.emailAddress && firstName && lastName && location && user?.user?.imageUrl && recentJob && recentCompany && birthday) {
+          data = { firstName, lastName, location, avatar: user?.user?.imageUrl, mostRecentJob: recentJob, mostRecentCompany: recentCompany, birthday, isStudent };
+        }
+        else {
+          setError("All fields are required");
+        }
+      }
+
+      if (data) {
+        const response = await axios.put(`${import.meta.env.VITE_SERVER_URL}/api/v1/updateUserRequiredDetails`, data, {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "application/json"
           }
+        });
 
-          if (isStudent) {
-              if (user?.user?.emailAddresses[0]?.emailAddress || firstName || lastName || !location || user?.user?.imageUrl || school || startYear || endYear || birthday) {
-                  data = { firstName, lastName, location, avatar: user?.user?.imageUrl, school, startYear, endYear, birthday, isStudent };
-              }
+        if (response.data) {
+          const { success, data, message } = await response.data;
+          if (success) {
+            dispatch(assignUser(data));
+            setError("");
+            navigate("/feed");
           }
           else {
-              if (user?.user?.emailAddresses[0]?.emailAddress && firstName && lastName && location && user?.user?.imageUrl && recentJob && recentCompany && birthday) {
-                  data = { firstName, lastName, location, avatar: user?.user?.imageUrl, mostRecentJob: recentJob, mostRecentCompany: recentCompany, birthday, isStudent };
-              }
+            toast.error(message);
           }
-
-          if (data) {
-              const response = await axios.put(`${import.meta.env.VITE_SERVER_URL}/api/v1/updateUserRequiredDetails`, data, {
-                  withCredentials: true,
-                  headers: {
-                      "Content-Type": "application/json"
-                  }
-              });
-
-              if (response.data) {
-                  const { success, data, message } = await response.data;
-                  if (success) {
-                      dispatch(assignUser(data));
-                      setError("");
-                      navigate("/feed");
-                  }
-                  else {
-                      toast.error(message);
-                  }
-              }
-          }
+        }
       }
-      catch (err) {
-          setPage(0);
-          setError(err.errors ? err.errors[0].message : "User not signup Properly");
-      }
-      setIsLoading(false);
+    }
+    catch (err) {
+      setPage(0);
+      setError(err.errors ? err.errors[0].message : "User not signup Properly");
+    }
+    setIsLoading(false);
   }
 
   const resetData = () => {
@@ -159,7 +180,17 @@ function ProvideDetails() {
               <form onSubmit={updateUserDetails} className="space-y-4">
                 <Input disable={isLoading} label="Location" type="text" placeholder="Enter your location" value={location} setvalue={setLocation} />
                 <Input disable={isLoading} label="Most recent job title" type="text" placeholder="Enter recent job" value={recentJob} setvalue={setRecentJob} />
-                <Input disable={isLoading} label="Most recent company" type="text" placeholder="Enter recent company" value={recentCompany} setvalue={setRecentCompany} />
+                <div className="flex flex-col flex-grow">
+                  <label className="block text-sm font-medium text-gray-700">Most recent company</label>
+                  <select disabled={isLoading} value={recentCompany} onChange={(e) => setRecentCompany(e.target.value)} className={` ${isLoading ? "cursor-not-allowed" : ""} w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}>
+                    <option value={""}>--Select</option>
+                    {
+                      companyList && companyList.length > 0 && companyList.map((item, index) => (
+                        <option key={index} value={item._id}>{item?.name}</option>
+                      ))
+                    }
+                  </select>
+                </div>
                 <div>
                   <label className="block text-sm font-medium text-black">Date of birth</label>
                   <div className="flex justify-between gap-2 mt-2">
@@ -192,7 +223,18 @@ function ProvideDetails() {
             <div className="bg-white shadow-lg rounded-lg max-w-md w-full p-6">
               <form onSubmit={updateUserDetails} className="space-y-4">
                 <Input disable={isLoading} label="Location" type="text" placeholder="Enter your location" value={location} setvalue={setLocation} />
-                <Input disable={isLoading} label="School or College/University" type="text" placeholder="" value={school} setvalue={setSchool} />
+                {/* <Input disable={isLoading} label="School or College/University" type="text" placeholder="" value={school} setvalue={setSchool} /> */}
+                <div className="flex flex-col flex-grow">
+                  <label className="block text-sm font-medium text-gray-700">School or College/University</label>
+                  <select disabled={isLoading} value={school} onChange={(e) => setSchool(e.target.value)} className={` ${isLoading ? "cursor-not-allowed" : ""} w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}>
+                    <option value={""}>--Select</option>
+                    {
+                      companyList && companyList.length > 0 && companyList.map((item, index) => (
+                        <option key={index} value={item._id}>{item?.name}</option>
+                      ))
+                    }
+                  </select>
+                </div>
                 <div className="flex justify-between gap-2">
                   <Dropdown disable={isLoading} label={"Start Year"} isYear={true} list={years} value={startYear} onChaneHandler={(e) => setStartYear(e.target.value)} />
                   <Dropdown disable={isLoading} label={"End Year"} isYear={true} list={years} value={endYear} onChaneHandler={(e) => setEndYear(e.target.value)} />
