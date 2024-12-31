@@ -5,7 +5,7 @@ import EducationForm from "../../Forms/EducationForm";
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 
-function Educations({ educations }) {
+function Educations({ educations, refreshEducation }) {
     const [isOpen, setIsOpen] = useState(false);
     return (
         <div className="bg-white rounded-lg shadow p-6 mt-4">
@@ -30,7 +30,7 @@ function Educations({ educations }) {
                                 <p className="text-sm text-gray-500">{edu.startYear} - {edu.endYear}</p>
                                 <p className="text-sm text-gray-500"><span className="font-semibold">Grade:</span> {edu.grade}</p>
                                 <p className="text-sm text-gray-500"><span className="font-semibold">Activities:</span> {edu.activities}</p>
-                                <p className="mt-2 text-gray-600">{edu.description}</p>
+                                <p className="line-clamp-2">{edu.description}</p>
                                 {
                                     edu?.media && edu?.media.length > 0 && (
                                         <div className="flex gap-2 mt-2">
@@ -59,7 +59,7 @@ function Educations({ educations }) {
                 }
             </div>
             <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} title="Add Education">
-                <EducationForm />
+                <EducationForm refreshEducation={refreshEducation} setIsOpen={setIsOpen} />
             </Modal>
         </div>
     )
@@ -67,6 +67,8 @@ function Educations({ educations }) {
 
 Educations.propTypes = {
     educations: PropTypes.array,
+    refreshEducation: PropTypes.func,
+
 }
 
 export default Educations

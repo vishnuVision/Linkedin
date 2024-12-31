@@ -89,7 +89,7 @@ function Profile() {
     <div className="min-h-screen pt-20">
       <div className="max-w-4xl max-h-[90vh] overflow-y-scroll someElement mx-auto px-4 pb-2">
         <Routes>
-          <Route path="/" element={<ProfilePage refreshPost={fetchData} user={user} posts={posts.length > 3 ? posts.slice(0, 3) : posts || []} educations={educations} experiences={experiences} skills={skills.length > 3 ? skills.slice(0, 3) : skills || []} />} />
+          <Route path="/" element={<ProfilePage refreshPost={fetchData} refreshEducation={getEducationsData} refreshExperience={getExperiencesData} refreshSkill={getSkills} user={user} posts={posts.length > 3 ? posts.slice(0, 3) : posts || []} educations={educations} experiences={experiences} skills={skills.length > 3 ? skills.slice(0, 3) : skills || []} />} />
           <Route path="/all-posts" element={<ActivityPage posts={posts} />} />
           <Route path="/all-skills" element={<SkillPage skills={skills} />} />
           <Route path="*" element={<Notfound />} />
@@ -99,7 +99,7 @@ function Profile() {
   );
 }
 
-const ProfilePage = ({ user, posts, educations, experiences, skills, refreshPost }) => {
+const ProfilePage = ({ user, posts, educations, experiences, skills, refreshPost, refreshEducation, refreshExperience, refreshSkill }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleSave = () => {
@@ -112,9 +112,9 @@ const ProfilePage = ({ user, posts, educations, experiences, skills, refreshPost
       <Analytics views={user?.views || 0} />
       <About about={user?.about} />
       <Activity followers={user?.followers?.length} posts={posts} refreshPost={refreshPost} />
-      <Experience experiences={experiences} />
-      <Educations educations={educations} />
-      <Skills skills={skills} />
+      <Experience experiences={experiences} refreshExperience={refreshExperience} />
+      <Educations educations={educations} refreshEducation={refreshEducation} />
+      <Skills skills={skills} refreshSkill={refreshSkill} />
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -206,7 +206,10 @@ ProfilePage.propTypes = {
   educations: PropTypes.array,
   experiences: PropTypes.array,
   skills: PropTypes.array,
-  refreshPosts: PropTypes.func,
+  refreshPost: PropTypes.func,
+  refreshSkill: PropTypes.func,
+  refreshExperience: PropTypes.func,
+  refreshEducation: PropTypes.func
 };
 
 const handleBack = () => {

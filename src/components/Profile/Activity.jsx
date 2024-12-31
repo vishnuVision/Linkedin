@@ -45,7 +45,7 @@ function Activity({ followers, posts, refreshPost }) {
                     )
                 }
             </div>
-            <CreatePostModal refereshData={refreshPost} isOpen={isVisible} setIsOpen={setIsVisible} accept={"image/*"} previews={previews} setPreviews={setPreviews} setVideos={setFiles} videos={files} />
+            <CreatePostModal isOpen={isVisible} setIsOpen={setIsVisible} accept={"image/*"} previews={previews} setPreviews={setPreviews} setVideos={setFiles} videos={files} refereshData={refreshPost} />
         </>
     )
 }

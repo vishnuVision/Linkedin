@@ -6,7 +6,7 @@ import { useState } from 'react';
 import SkillForm from '../../Forms/SkillForm';
 import PropTypes from 'prop-types';
 
-function Skills({ skills }) {
+function Skills({ skills, refreshSkill }) {
   const { id } = useParams();
   const [isAddSkill, setIsSkill] = useState(false);
 
@@ -62,7 +62,7 @@ function Skills({ skills }) {
         )
       }
       <Modal isOpen={isAddSkill} onClose={() => setIsSkill(false)} title='Add skill'>
-        <SkillForm />
+        <SkillForm refreshSkill={refreshSkill} setIsOpen={setIsSkill}/>
       </Modal>
     </div>
   );
@@ -70,6 +70,7 @@ function Skills({ skills }) {
 
 Skills.propTypes = {
   skills: PropTypes.array,
+  refreshSkill: PropTypes.func
 };
 
 export default Skills

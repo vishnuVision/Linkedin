@@ -3,26 +3,105 @@ import { useEffect, useRef, useState } from "react";
 import Input from "../components/Ui/Input";
 import Textarea from "../components/Ui/Textarea";
 import Select from "../components/Ui/Select";
+import PropTypes from "prop-types";
+import useApi from "../hook/useApi";
+import Dropdown from "../components/Ui/Dropdown";
 
-function EducationForm() {
+const list = ["--Select", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
+function EducationForm({ setIsOpen, refreshEducation }) {
     const [skill, setSkill] = useState("");
-    const [skills, setSkills] = useState([]);
     const [image, setImage] = useState("");
     const [imagePreview, setImagePreview] = useState("");
     const [imagetitle, setImageTitle] = useState("");
     const [description, setDesctiption] = useState("");
     const [media, setMedia] = useState([]);
-    const [mediaList, setMediaList] = useState([]);
     const imageRef = useRef(null);
+    const { apiAction } = useApi();
+    const [pageList, setPageList] = useState([]);
+    const [error, setError] = useState("");
+    const [startMonth, setStartMonth] = useState("");
+    const [startYear, setStartYear] = useState("");
+    const [endMonth, setEndMonth] = useState("");
+    const [endYear, setEndYear] = useState("");
 
-    const handleSubmit = async () => {
+    const [school, setSchool] = useState("");
+    const [degree, setDegree] = useState("");
+    const [fieldOfStudy, setFieldOfStudy] = useState("");
+    const [grade, setGrade] = useState("");
+    const [activities, setActivities] = useState("");
+    const [edudescription, setEduDescription] = useState("");
+    const [skills, setSkills] = useState([]);
+    const [mediaList, setMediaList] = useState([]);
 
+    useEffect(() => {
+        getAllSchools();
+    }, [])
+
+    const getAllSchools = async () => {
+        const { success, data } = await apiAction({
+            url: `/api/v1/getAllPages/school`,
+            method: "GET",
+        });
+
+        if (success && data) {
+            setPageList(data);
+        }
+    }
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        if (!school || !degree || !fieldOfStudy || !grade || !activities || !edudescription || !startMonth || !startYear || !endMonth || !endYear) {
+            setError("Please fill all the fields");
+        }
+        else {
+            console.log(school, degree, fieldOfStudy, grade, activities, edudescription, startMonth, startYear, endMonth, endYear,skills,mediaList);
+            const formData = new FormData();
+            formData.append("school", school);
+            formData.append("degree", degree);
+            formData.append("startMonth", list[startMonth]);
+            formData.append("startYear", startYear);
+            formData.append("endMonth", list[endMonth]);
+            formData.append("endYear", endYear);
+            formData.append("fieldOfStudy", fieldOfStudy);
+            formData.append("grade", grade);
+            formData.append("activities", activities);
+            formData.append("description", edudescription);
+            skills.map((skill) => formData.append("skills", skill));
+            mediaList.map((media) => {
+                formData.append("media", media.url)
+                formData.append("mediatitle", media.title)
+                formData.append("mediaDescription", media.description)
+            }
+            );
+
+            const { success, data } = await apiAction({
+                url: `api/v1/profile/education/createEducation`,
+                method: "POST",
+                isFormData: true,
+                data: formData
+            });
+
+            if (success && data) {
+                refreshEducation();
+            }
+        }
+        setIsOpen(false);
     }
 
     const addSkills = () => {
-        if (skills.length <= 5) {
-            setSkills(prev => [...prev, skill]);
-            setSkill("");
+        setError("");
+        if (skill) {
+            if (skills.length <= 5) {
+                setSkills(prev => [...prev, skill]);
+                setSkill("");
+            }
+            else {
+                setError("You can't add more than 5 skills");
+            }
+        }
+        else {
+            setError("Please enter a skill");
         }
     }
 
@@ -44,7 +123,6 @@ function EducationForm() {
             setImageTitle(image?.name);
             const previewURL = URL.createObjectURL(image);
             setImagePreview(previewURL);
-            setMediaList(prev => [...prev, image]);
         }
     }, [image])
 
@@ -57,6 +135,7 @@ function EducationForm() {
 
     const applyMedia = () => {
         setMedia(prev => [...prev, { title: imagetitle, description: description, preview: imagePreview }]);
+        setMediaList(prev => [...prev, { title: imagetitle, description: description, url: image }]);
         resetData();
     }
 
@@ -97,40 +176,59 @@ function EducationForm() {
                     <div className='max-h-[60vh] overflow-y-scroll'>
                         <div className='flex flex-col gap-4 px-2'>
 
-                            <Input
-                                label="School"
-                                placeholder={"Ex: Boston University"}
-                            />
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">School</label>
+                                <select
+                                    value={school}
+                                    onChange={(e) => setSchool(e.target.value)}
+                                    className={`w-full px-4 py-2 border border-gray-300 shadow-sm rounded-lg focus:border-blue-500 focus:ring-blue-500`}
+                                >
+                                    <option
+                                        value=""
+                                    >
+                                        Please select
+                                    </option>
+                                    {pageList && pageList.length > 0 && pageList.map((item, index) => (
+                                        <option key={index} value={item._id}>
+                                            {item.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
 
-                            <Select label={"Degree"} list={["Please select", "BSC", "BCA", "BTech"]} />
+                            <Select value={degree} setValue={setDegree} label={"Degree"} list={["Please select", "BSC", "BCA", "BTech"]} />
 
-                            <Select label={"Field of study"} list={["Please select", "Computer Science", "Mechanical Engineer", "Doctor"]} />
+                            <Select value={fieldOfStudy} setValue={setFieldOfStudy} label={"Field of study"} list={["Please select", "Computer Science", "Mechanical Engineer", "Doctor"]} />
 
                             <div className='flex gap-4'>
                                 <div className='flex-grow'>
-                                    <Input type='date' label={"Start date"} />
+                                    <Dropdown label={"Month"} value={startMonth} onChaneHandler={(e) => setStartMonth(e.target.value)} list={list} />
                                 </div>
                                 <div className='flex-grow'>
-                                    <Input type='time' label={"Start time"} />
+                                    <Dropdown isYear={true} label={"Year"} value={startYear} onChaneHandler={(e) => setStartYear(e.target.value)} list={["--Select", ...Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i)]} />
                                 </div>
                             </div>
 
                             <div className='flex gap-4'>
                                 <div className='flex-grow'>
-                                    <Input type='date' label={"End date"} />
+                                    <Dropdown label={"Month"} value={endMonth} onChaneHandler={(e) => setEndMonth(e.target.value)} list={list} />
                                 </div>
                                 <div className='flex-grow'>
-                                    <Input type='time' label={"End time"} />
+                                    <Dropdown isYear={true} label={"Year"} value={endYear} onChaneHandler={(e) => setEndYear(e.target.value)} list={["--Select", ...Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i)]} />
                                 </div>
                             </div>
 
                             <Input
                                 label="Grade"
-                                placeholder={"Ex: Boston University"}
+                                value={grade}
+                                setvalue={setGrade}
+                                placeholder={"Ex: 10.00"}
                             />
 
                             <Textarea
                                 label="Activities and societies"
+                                value={activities}
+                                setvalue={setActivities}
                                 required
                                 maxLength={2000}
                                 rows={4}
@@ -139,6 +237,8 @@ function EducationForm() {
 
                             <Textarea
                                 label="Description"
+                                value={edudescription}
+                                setvalue={setEduDescription}
                                 required
                                 maxLength={2000}
                                 rows={4}
@@ -157,6 +257,9 @@ function EducationForm() {
                                         <Plus size={20} /> Add Skill
                                     </button>
                                 </div>
+                                {
+                                    error && <div className='text-red-600 mt-2'>{error}</div>
+                                }
                                 <div className='flex flex-wrap gap-2 mt-3'>
                                     {
                                         skills && skills.length > 0 && skills.map((skill, index) => (
@@ -201,6 +304,11 @@ function EducationForm() {
             }
         </>
     )
+}
+
+EducationForm.propTypes = {
+    setIsOpen: PropTypes.func,
+    refreshEducation: PropTypes.func
 }
 
 export default EducationForm
