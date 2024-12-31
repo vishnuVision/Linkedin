@@ -20,9 +20,11 @@ function Login() {
     const { user: userData } = useSelector((state) => state.authReducer);
     const navigate = useNavigate();
     const { signOut } = useAuth();
-    const { search } = useLocation();
     const [isLoading, setIsLoading] = useState(false);
     const [captchaValue, setCaptchaValue] = useState(null);
+    const queryParams = new URLSearchParams(window.location.search);
+    const authenticateParam = queryParams.get("authenticate");
+    const messageParam = queryParams.get("message");
 
     useEffect(() => {
         if (userData) {
@@ -36,17 +38,27 @@ function Login() {
     }, [userData])
 
     useEffect(() => {
-        if (search.replace("?", "").split("=")[1] === "true") {
+        if (authenticateParam === "true") {
             if (user?.emailAddresses[0]?.emailAddress) {
                 login(user.emailAddresses[0].emailAddress)
             }
             else {
-                setError("please signup!");
+                if (messageParam) {
+                    setError(messageParam);
+                }
+                else {
+                    setError("Invalid email or password.");
+                }
             }
         }
 
-        if (search.replace("?", "").split("=")[1] === "false") {
-            setError("user not login!");
+        if (authenticateParam === "false") {
+            if (messageParam) {
+                setError(messageParam);
+            }
+            else {
+                setError("Invalid email or password.");
+            }
         }
     }, [])
 
@@ -67,15 +79,12 @@ function Login() {
                     }
                     else {
                         toast.error(message);
-                        await signOut({ redirectTo: undefined });
-                        window.location.href = "/signin?authenticate=false";
                     }
                 }
             }
         } catch (err) {
             await signOut({ redirectTo: undefined });
-            window.location.href = "/signin?authenticate=false";
-            setError(err.errors ? err.errors[0].message : "Failed to sign in");
+            setError(err.errors ? err.errors[0].message : "Invalid email or password.");
         }
         setIsLoading(false);
     }
@@ -118,8 +127,7 @@ function Login() {
             });
         } catch (err) {
             await signOut({ redirectTo: undefined });
-            window.location.href = "/signin?authenticate=false";
-            setError(err.errors ? err.errors[0].message : "Failed to sign in with Google");
+            window.location.href = `/signin?authenticate=false&&message=${err.errors ? err.errors[0].message : "Failed to login with google"}`;
         }
     };
 
@@ -134,8 +142,7 @@ function Login() {
             });
         } catch (err) {
             await signOut({ redirectTo: undefined });
-            window.location.href = "/signin?authenticate=false";
-            setError(err.errors ? err.errors[0].message : "Failed to sign in with Microsoft");
+            window.location.href = `/signin?authenticate=false&&message=${err.errors ? err.errors[0].message : "Failed to login with microsoft"}`;
         }
     };
 
@@ -165,27 +172,28 @@ function Login() {
                         <form onSubmit={handleEmailLogin} className="space-y-4">
                             <Input label="Email" value={email} setvalue={setEmail} type="email" placeholder="you@example.com" />
                             <Input label="Password" value={password} setvalue={setPassword} type="password" placeholder="Enter a Password" />
-                            <Link className="font-semibold text-[#0a66c2]">Forgot password?</Link>
+                            <Link to={"/forgot"} className="font-semibold text-[#0a66c2]">Forgot password?</Link>
                             {error && <p className="text-red-600 text-sm">{error}</p>}
+                            {
+                                captchaValue === null &&
+                                <div className="flex flex-col justify-start items-start mt-4">
+                                    <ReCAPTCHA
+                                        sitekey="6LekZKUqAAAAAMZ5FCTLw5oQ8SZdtXq5c7VlT_xV"
+                                        onChange={handleCaptchaChange}
+                                        onExpired={() => setError("CAPTCHA expired. Please try again.")}
+                                        onErrored={() => setError("CAPTCHA verification failed. Please try again.")}
+                                    />
+                                    <p className="text-sm text-gray-600 ml-2">Please verify that you are not a robot</p>
+                                </div>
+                            }
                             <button
                                 type="submit"
                                 disabled={isLoading || !captchaValue}
                                 className={`${isLoading || !captchaValue ? "opacity-50 cursor-not-allowed" : ""} w-full bg-[#0a66c2] text-white py-2 px-4 rounded-full hover:bg-blue-600 focus:ring-2 focus:ring-blue-500`}
                             >
-                                Agree & Join
+                                Login
                             </button>
                         </form>
-                        {
-                            captchaValue===null &&
-                            <div className="flex justify-center items-center mt-4">
-                                <ReCAPTCHA
-                                    sitekey="6LekZKUqAAAAAMZ5FCTLw5oQ8SZdtXq5c7VlT_xV"
-                                    onChange={handleCaptchaChange}
-                                    onExpired={() => setError("CAPTCHA expired. Please try again.")}
-                                    onErrored={() => setError("CAPTCHA verification failed. Please try again.")}
-                                />
-                            </div>
-                        }
                         <div className="relative my-6">
                             <div className="absolute inset-0 flex items-center">
                                 <div className="w-full border-t border-gray-300"></div>

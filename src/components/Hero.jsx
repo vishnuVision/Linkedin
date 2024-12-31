@@ -3,7 +3,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useDispatch } from "react-redux";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { assignUser } from "../redux/slices/authReducer";
 
 export default function Hero() {
@@ -11,25 +11,35 @@ export default function Hero() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const dispatch = useDispatch();
-  const {search} = useLocation();
   const { user } = useUser();
-  const {signOut} = useAuth();
+  const { signOut } = useAuth();
+  const queryParams = new URLSearchParams(window.location.search);
+  const authenticateParam = queryParams.get("authenticate");
+  const messageParam = queryParams.get("message");
 
   useEffect(() => {
-    if (search.replace("?", "").split("=")[1] === "true") {
-      if (user?.emailAddresses[0]?.emailAddress)
-      {
+
+    if (authenticateParam === "true") {
+      if (user?.emailAddresses[0]?.emailAddress) {
         login(user.emailAddresses[0].emailAddress)
       }
-      else
-      {
-        setError("please signup!");
+      else {
+        if (messageParam) {
+          setError(messageParam);
+        }
+        else {
+          setError("Invalid email or password.");
+        }
       }
     }
 
-    if(search.replace("?", "").split("=")[1] === "false")
-    {
-      setError("please signup!");
+    if (authenticateParam === "false") {
+      if (messageParam) {
+        setError(messageParam);
+      }
+      else {
+        setError("Invalid email or password.");
+      }
     }
   }, [])
 
@@ -56,8 +66,7 @@ export default function Hero() {
       }
     } catch (err) {
       await signOut({ redirectTo: undefined });
-      window.location.href = "/?authenticate=false";
-      setError(err.errors ? err.errors[0].message : "Failed to sign in");
+      setError(err.errors ? err.errors[0].message : "Invalid email or password.");
     }
     setIsLoading(false);
   }
@@ -74,8 +83,7 @@ export default function Hero() {
       });
     } catch (err) {
       await signOut({ redirectTo: undefined });
-      window.location.href = "/?authenticate=false";
-      setError(err.errors ? err.errors[0].message : "Failed to sign in with Google");
+      window.location.href = `/signin?authenticate=false&&message=${err.errors ? err.errors[0].message : "Failed to login with google"}`;
     }
   };
 
@@ -91,8 +99,7 @@ export default function Hero() {
       });
     } catch (err) {
       await signOut({ redirectTo: undefined });
-      window.location.href = "/?authenticate=false";
-      setError(err.errors ? err.errors[0].message : "Failed to sign in with Microsoft");
+      window.location.href = `/signin?authenticate=false&&message=${err.errors ? err.errors[0].message : "Failed to login with microsoft"}`;
     }
   };
 
@@ -117,8 +124,8 @@ export default function Hero() {
                 <Link to={isLoading ? "#" : "/signin"} className={`${isLoading ? "disabled-link opacity-50 cursor-not-allowed flex w-full justify-center items-center py-2 border rounded-full" : "flex w-full gap-1 justify-center items-center py-2 text-left border rounded-full hover:bg-gray-100 font-medium"}`}>
                   Sign in With email
                 </Link>
-                {error && <p className="text-red-600 text-sm">{error}</p>}
-                <p className="break-words text-sm text-center mt-2 px-4">By clicking Continue to join or sign in, you agree to LinkedIn’s <span className="text-[#0a66c2] font-semibold">User Agreement, Privacy Policy,</span> and <span className="text-[#0a66c2] font-semibold">Cookie Policy.</span></p>
+                {error && <p className="text-red-600 text-sm">{error} <Link to="/signup" className="text-[#0a66c2] font-semibold hover:underline hover:cursor-pointer">Sign up</Link></p>}
+                <p className="break-words text-sm text-center mt-2 px-4">By clicking Continue to join or sign in, you agree to LinkedIn&apos;s <span className="text-[#0a66c2] font-semibold">User Agreement, Privacy Policy,</span> and <span className="text-[#0a66c2] font-semibold">Cookie Policy.</span></p>
                 <div className="flex justify-center items-center mt-4">
                   <p>New to Linkedin? <Link to={"/signup"} className="no-underline text-[#0a66c2] font-semibold text-lg hover:underline hover:text-blue-900">Join now</Link></p>
                 </div>

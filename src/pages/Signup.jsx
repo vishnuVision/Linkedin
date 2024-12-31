@@ -22,9 +22,11 @@ function Signup() {
     const { signOut } = useAuth();
     const navigate = useNavigate();
     const { user: userData } = useSelector((state) => state.authReducer);
-    const { search } = useLocation();
     const [isLoading, setIsLoading] = useState(false);
     const [captchaValue, setCaptchaValue] = useState(null);
+    const queryParams = new URLSearchParams(window.location.search);
+    const authenticateParam = queryParams.get("authenticate");
+    const messageParam = queryParams.get("message");
 
     useEffect(() => {
         if (userData) {
@@ -38,17 +40,24 @@ function Signup() {
     }, [userData])
 
     useEffect(() => {
-        if (search.replace("?", "").split("=")[1] === "true") {
+        if (authenticateParam === "true") {
             if (user?.user?.emailAddresses[0]?.emailAddress) {
                 signUpUser();
             }
             else {
-                setError("user already signup");
+                setError("Someone's already using that email.");
             }
         }
 
-        if (search.replace("?", "").split("=")[1] === "false") {
-            setError("email is aleady exists");
+        if (authenticateParam === "false") {
+            if(messageParam)
+            {
+                setError(messageParam);
+            }
+            else
+            {
+                setError("Someone's already using that email.");
+            }
         }
     }, [])
 
@@ -73,14 +82,13 @@ function Signup() {
                     }
                     else {
                         toast.error(message);
-                        window.location.href = "/signin";
                     }
                 }
             }
         }
         catch (err) {
-            window.location.href = "/signin";
-            setError(err.errors ? err.errors[0].message : "User not signup Properly");
+            await signOut({ redirectTo: undefined });
+            setError(err.errors ? err.errors[0].message : "Someone's already using that email.");
         }
         setIsLoading(false);
     }
@@ -100,8 +108,7 @@ function Signup() {
             setPage(1);
         } catch (err) {
             await signOut({ redirectTo: undefined });
-            window.location.href = "/signup?authenticate=false";
-            setError(err.errors ? err.errors[0].message : "Something went wrong");
+            setError(err.errors ? err.errors[0].message : "Someone's already using that email.");
         }
         setIsLoading(false);
     };
@@ -117,11 +124,11 @@ function Signup() {
                 signUpUser(signUpAttempt.emailAddress);
                 await setActive({ session: signUpAttempt.createdSessionId });
             }
-            setPage(2);
+            setPage(0);
         } catch (err) {
             setOtp("");
             await signOut({ redirectTo: undefined });
-            window.location.href = "/signup?authenticate=false";
+            window.location.href = `/signup?authenticate=false&&message=Invalid OTP. Please try again`;
             setError(err.errors ? "Invalid OTP. Please try again." : "Something went wrong");
         }
     };
@@ -137,8 +144,7 @@ function Signup() {
             });
         } catch (err) {
             await signOut({ redirectTo: undefined });
-            window.location.href = "/signup?authenticate=false";
-            setError(err.errors ? err.errors[0].message : "Failed to sign up with Google");
+            window.location.href = `/signup?authenticate=false&&message=${err.errors ? err.errors[0].message : "Someone's already using that email."}`;
         }
     };
 
@@ -153,12 +159,12 @@ function Signup() {
             });
         } catch (err) {
             await signOut({ redirectTo: undefined });
-            window.location.href = "/signup?authenticate=false";
-            setError(err.errors ? err.errors[0].message : "Failed to sign up with Microsoft");
+            window.location.href = `/signup?authenticate=false&&message=${err.errors ? err.errors[0].message : "Someone's already using that email."}`;
         }
     };
 
     const handleCaptchaChange = (value) => {
+        setError("");
         setCaptchaValue(value);
     };
 
@@ -187,6 +193,18 @@ function Signup() {
                                 <Input label="Password" type="password" placeholder="Enter a Password" value={password} setvalue={setPassword} />
                                 {error && <p className="text-red-600 text-sm">{error}</p>}
                                 <p className="break-words text-sm text-center mt-2 px-4">By clicking Continue to join or sign in, you agree to LinkedIn&apos;s <span className="text-[#0a66c2] font-semibold">User Agreement, Privacy Policy,</span> and <span className="text-[#0a66c2] font-semibold">Cookie Policy.</span></p>
+                                {
+                                    captchaValue === null &&
+                                    <div className="flex justify-start flex-col items-start mt-4">
+                                        <ReCAPTCHA
+                                            sitekey="6LekZKUqAAAAAMZ5FCTLw5oQ8SZdtXq5c7VlT_xV"
+                                            onChange={handleCaptchaChange}
+                                            onExpired={() => setError("CAPTCHA expired. Please try again.")}
+                                            onErrored={() => setError("CAPTCHA verification failed. Please try again.")}
+                                        />
+                                        <p className="text-sm text-gray-600 ml-2">Please verify that you are not a robot</p>
+                                    </div>
+                                }
                                 <button
                                     type="submit"
                                     disabled={isLoading || !captchaValue}
@@ -195,17 +213,6 @@ function Signup() {
                                     Agree & Join
                                 </button>
                             </form>
-                            {
-                                captchaValue===null &&
-                                <div className="flex justify-center items-center mt-4">
-                                    <ReCAPTCHA
-                                        sitekey="6LekZKUqAAAAAMZ5FCTLw5oQ8SZdtXq5c7VlT_xV"
-                                        onChange={handleCaptchaChange}
-                                        onExpired={() => setError("CAPTCHA expired. Please try again.")}
-                                        onErrored={() => setError("CAPTCHA verification failed. Please try again.")}
-                                    />
-                                </div>
-                            }
                             <div className="relative my-6">
                                 <div className="absolute inset-0 flex items-center">
                                     <div className="w-full border-t border-gray-300"></div>
