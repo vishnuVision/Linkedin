@@ -138,13 +138,9 @@ function PostCard({ post }) {
             <div className="p-4">
                 <Link to={post.authorType === "page" ? `/company/${isAuthor ? post.author : post.authorDetails?._id}/` : post.authorType === "group" ? `/groups/${isAuthor ? post.author : post.authorDetails?._id}` : post.authorType === "event" ? `/events/${isAuthor ? post.author : post.authorDetails?._id}` : post.authorType === "company" ? `/company/${isAuthor ? post.author : post.authorDetails?._id}` : `/profile/${isAuthor ? post.author : post.authorDetails?._id}`} className="flex items-start gap-3">
                     {
-                        !post.authorDetails?.avatar && (
-                            <img src={user?.avatar} alt={isAuthor ? user?.firstName+" "+user?.lastName : post.authorDetails?.name} className="w-12 h-12 border rounded-full object-cover" />
-                        )
-                    }
-                    {
                         post.authorDetails?.avatar && (
-                            <img src={post.authorDetails?.avatar} alt={isAuthor ? user?.firstName+" "+user?.lastName : post.authorDetails?.name} className="w-12 h-12 border rounded-full object-cover" />       
+                            <img src={post.authorDetails?.avatar}
+                            onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${post.authorDetails?.name}` }} alt={post.authorDetails?.name} className="w-12 h-12 border rounded-full object-cover" />       
                         )
                     }
                     <div>

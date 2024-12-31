@@ -56,6 +56,7 @@ export default function ProfileCard() {
                 user?.avatar &&
                 <img
                   src={user?.avatar}
+                  onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${user?.firstName + " " + user?.lastName}` }}
                   alt={user?.firstName + " " + user?.lastName}
                   className="w-24 h-24 rounded-full border-4 border-white object-cover"
                 />
