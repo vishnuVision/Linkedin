@@ -5,7 +5,7 @@ import CreatePostModal from "../ImageUpload/CreatePostModal";
 import { Link, useParams } from "react-router-dom";
 import PropTypes from "prop-types";
 
-function Activity({ followers, posts }) {
+function Activity({ followers, posts, refreshPost }) {
     const [isVisible, setIsVisible] = useState(false);
     const [previews, setPreviews] = useState([]);
     const [files, setFiles] = useState([]);
@@ -45,7 +45,7 @@ function Activity({ followers, posts }) {
                     )
                 }
             </div>
-            <CreatePostModal isOpen={isVisible} setIsOpen={setIsVisible} accept={"image/*"} previews={previews} setPreviews={setPreviews} setVideos={setFiles} videos={files} />
+            <CreatePostModal refereshData={refreshPost} isOpen={isVisible} setIsOpen={setIsVisible} accept={"image/*"} previews={previews} setPreviews={setPreviews} setVideos={setFiles} videos={files} />
         </>
     )
 }
@@ -53,7 +53,8 @@ function Activity({ followers, posts }) {
 Activity.propTypes = {
     followers: PropTypes.number,
     user: PropTypes.any,
-    posts: PropTypes.array
+    posts: PropTypes.array,
+    refreshPost: PropTypes.func
 }
 
 export default Activity

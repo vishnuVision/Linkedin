@@ -10,8 +10,6 @@ function Skills({ skills }) {
   const { id } = useParams();
   const [isAddSkill, setIsSkill] = useState(false);
 
-  console.log(skills);
-
   return (
     <div className="bg-white rounded-lg shadow pt-6 mt-4 overflow-hidden">
       <div className="flex justify-between items-center px-6 mb-2">
