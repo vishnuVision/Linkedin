@@ -1,4 +1,4 @@
-import { Link, useLocation, useNavigate } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import Input from "../components/Ui/Input"
 import { useEffect, useState } from "react"
 import { useAuth, useSignUp, useUser } from "@clerk/clerk-react";
@@ -195,7 +195,7 @@ function Signup() {
                                 <p className="break-words text-sm text-center mt-2 px-4">By clicking Continue to join or sign in, you agree to LinkedIn&apos;s <span className="text-[#0a66c2] font-semibold">User Agreement, Privacy Policy,</span> and <span className="text-[#0a66c2] font-semibold">Cookie Policy.</span></p>
                                 {
                                     captchaValue === null &&
-                                    <div className="flex justify-start flex-col items-start mt-4">
+                                    <div className="flex justify-start flex-col items-start">
                                         <ReCAPTCHA
                                             sitekey="6LekZKUqAAAAAMZ5FCTLw5oQ8SZdtXq5c7VlT_xV"
                                             onChange={handleCaptchaChange}

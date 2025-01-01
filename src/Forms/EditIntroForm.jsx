@@ -1,77 +1,94 @@
 import PropTypes from "prop-types";
-import { useState } from "react";
-import Input from "../components/Ui/Input";
-import Select from "../components/Ui/Select";
-import Textarea from "../components/Ui/Textarea";
+import { useEffect, useState } from "react";
+import FormInput from "../components/Ui/FormInput";
+import { useForm } from "react-hook-form";
+import FormSelect from "../components/Ui/FormSelect";
+import FormTextArea from "../components/Ui/FormTextArea";
 
 const list = ["Please Select", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-function EditIntroForm({ onSave, onCancel }) {
+function EditIntroForm({ onSave, onCancel, user }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const updateContactInfo = async (e) => {
-        e.preventDefault();
+    const {
+        register,
+        handleSubmit,
+        watch,
+        formState: { errors },
+        setValue
+    } = useForm({
+        defaultValues: {
+            firstName: user?.firstName || "",
+            lastName: user?.lastName || "",
+            additionalName: user?.additionalName || "",
+            pronouns: user?.pronouns || "",
+            bio: user?.bio || "",
+            industry: user?.industry || "",
+            region: user?.region || "",
+            city: user?.city || "",
+            website: user?.website || "",
+            email: user?.email || "",
+            phNo: user?.phNo || "",
+            phoneType: user?.phoneType || "",
+            address: user?.address || "",
+            month: list[new Date(user?.birthday).getMonth()] || "",
+            day: new Date(user?.birthday).getDate().toString() || "",
+        }
+    });
+
+    const updateContactInfo = async (data) => {
+        onSave(data);
     }
-    
+
     return (
         <>
             {
                 !isModalOpen ? (
-                    <EditForm onSave={onSave} onCancel={onCancel} isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} />
+                    <EditForm user={user} register={register} errors={errors} handleSubmit={handleSubmit} handleUpdate={updateContactInfo} onCancel={onCancel} isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} />
                 ) :
-                    <EditContactInfo handleSubmit={updateContactInfo} onCancel={()=>setIsModalOpen(false)}/>
+                    <EditContactInfo user={user} setValue={setValue} register={register} errors={errors} watch={watch} handleSubmit={handleSubmit} handleUpdate={updateContactInfo} onCancel={() => setIsModalOpen(false)} />
             }
         </>
     );
 }
 
-const EditContactInfo = ({ handleSubmit, onCancel }) => {
-    const [phNo, setPhNo] = useState("");
-    const [phoneType, setPhoneType] = useState("");
-    const [address, setAddress] = useState("");
-    const [email, setEmail] = useState("");
-    const [month, setMonth] = useState(0);
-    const [days, setDays] = useState([]);
-    const [selectedDay, setSelectedDay] = useState("");
+const EditContactInfo = ({ onCancel, register, watch, handleSubmit, handleUpdate, user, errors, setValue }) => {
+    const [days, setDays] = useState(["Please Select"]);
+    const [isFirst,setIsFirst] = useState(true);
 
-    const getDaysInMonth = (month, year = new Date().getFullYear()) => {
-        if (!month) return [];
-        const days = new Date(year, month, 0).getDate();
-        return Array.from({ length: days }, (_, i) => (i + 1).toString());
-    };
+    const month = watch("month");
 
-    const handleMonthChange = (e) => {
-        setMonth(e.target.value);
-        const daysList = getDaysInMonth(e.target.value);
-        setDays(["Please Select", ...daysList]);
-        setSelectedDay("");
-    };
+    useEffect(() => {
+        if (isFirst && days.length > 1) {
+            setValue("day", new Date(user?.birthday).getDate().toString());
+            setIsFirst(false);
+        }
+    },[days]);
+
+    useEffect(() => {
+        if (month) {
+            const daysInMonth = new Date(2023, parseInt(list.indexOf(month)), 0).getDate();
+            setDays(["Please Select",...Array.from({ length: daysInMonth }, (_, i) => i + 1+"")]);
+        }
+    }, [month]);
 
     return (
-        <form onSubmit={handleSubmit} className="relative flex flex-col space-y-6">
+        <form onSubmit={handleSubmit(handleUpdate)} className="relative flex flex-col space-y-6">
             <div className="flex-1 overflow-auto min-h-[60vh]">
                 <div className="space-y-4 px-4 pb-2">
-                    <Input label="Email" placeholder="Enter Email" value={email} setvalue={setEmail} />
-                    <Input label="Phone number" placeholder="Enter Phone number" value={phNo} setvalue={setPhNo} />
-                    <Select label="Phone type" list={["Please Select", "Mobile", "Home", "Work"]} value={phoneType} setValue={setPhoneType} />
-                    <Textarea label="Address" placeholder="Enter your address" value={address} setvalue={setAddress} />
+                    <FormInput type="email" label="Email" placeholder="Enter Email" value={register("email", { required: "Email is required" })} error={errors.email && errors.email.message} />
+                    <FormInput label="Phone number" placeholder="Enter Phone number" value={register("phNo", { required: "Phone number is required" })} error={errors.phNo && errors.phNo.message} />
+                    <FormSelect label="Phone type" list={["Please Select", "Mobile", "Home", "Work"]} value={register("phoneType", { required: "Phone type is required" })} error={errors.phoneType && errors.phoneType.message} />
+                    <FormTextArea label="Address" placeholder="Enter your address" value={register("address", { required: "Address is required" })} error={errors.address && errors.address.message} />
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Birthday</label>
+                        <label className="">Birthday</label>
                         <div className="flex gap-2">
-                            <select value={month} onChange={handleMonthChange} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                {
-                                    list && list.length > 0 && list.map((item, index) => (
-                                        <option key={index} value={index}>{item}</option>
-                                    ))
-                                }
-                            </select>
-                            <select value={selectedDay} onChange={(e) => setSelectedDay(e.target.value)} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                {
-                                    days && days.length > 0 && days.map((item, index) => (
-                                        <option key={index} value={item}>{item}</option>
-                                    ))
-                                }
-                            </select>
+                            <div className="w-full">
+                                <FormSelect list={list} value={register("month", { required: "Month is required" })} error={errors.month && errors.month.message} />
+                            </div>
+                            <div className="w-full">
+                                <FormSelect list={days} value={register("day", { required: "Day is required" })} error={errors.day && errors.day.message} />
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -95,42 +112,35 @@ const EditContactInfo = ({ handleSubmit, onCancel }) => {
     )
 }
 
-const EditForm = ({ onSave, onCancel, setIsModalOpen }) => {
-    const [firstName, setFirstName] = useState("");
-    const [lastName, setLastName] = useState("");
-    const [additionalName, setAdditionalName] = useState("");
-    const [pronous, setPronous] = useState("");
-    const [headline, setHeadline] = useState("");
-    const [Industry, setIndustry] = useState("");
-    const [country, setCountry] = useState("");
-    const [city, setCity] = useState("");
-    const [website, setWebsite] = useState("");
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        onSave();
-    };
+const EditForm = ({ onCancel, setIsModalOpen, errors, register, handleSubmit, handleUpdate }) => {
 
     return (
-        <form onSubmit={handleSubmit} className="relative flex flex-col space-y-6">
+        <form onSubmit={handleSubmit(handleUpdate)} className="relative flex flex-col space-y-6">
             <div className="flex-1 overflow-auto max-h-[60vh]">
                 <div className="space-y-4">
-                    <Input label="First Name" placeholder="Enter your first name" value={firstName} setvalue={setFirstName} />
-                    <Input label="Last Name" placeholder="Enter your Last name" value={lastName} setvalue={setLastName} />
-                    <Input label="Additional Name" placeholder="Enter Additional name" value={additionalName} setvalue={setAdditionalName} />
-                    <Select label="Pronouns" list={["Please Select", "He/Him", "She/Her", "They/Them", "Custom"]} value={pronous} setValue={setPronous} />
-                    <Textarea label="Headline" placeholder="Enter your Headline" value={headline} setvalue={setHeadline} />
-                    <Select label="Industry" list={["Please Select", "Information Technology", "Finance", "Accounting", "Legal"]} value={Industry} setValue={setIndustry} />
-                    <Select label="Country/Region" list={["Please Select", "India", "Canada", "USA"]} value={country} setValue={setCountry} />
-                    <Select label="City" list={["Please Select", "Surat", "Vadodara"]} value={city} setValue={setCity} />
+                    <FormInput label="First Name" placeholder="Enter your first name" value={register("firstName", { required: "First name is required" })} error={errors.firstName && errors.firstName.message} />
+                    <FormInput label="Last Name" placeholder="Enter your last name" value={register("lastName", { required: "Last name is required" })} error={errors.lastName && errors.lastName.message} />
+                    <FormInput label="Additional Name" placeholder="Enter additional name" value={register("additionalName", { required: "Additional name is required" })} error={errors.additionalName && errors.additionalName.message} />
+                    <FormSelect label="Pronouns" list={["Please Select", "He/Him", "She/Her", "They/Them", "Custom"]} value={register("pronouns", { required: "Pronouns are required" })} error={errors.pronouns && errors.pronouns.message} />
+                    <FormTextArea label="Headline" placeholder="Enter your headline" value={register("bio", { required: "Headline is required" })} error={errors.bio && errors.bio.message} />
+                    <FormSelect label="Industry" list={["Please Select", "Information Technology", "Finance", "Accounting", "Legal"]} value={register("industry", { required: "Industry is required" })} error={errors.industry && errors.industry.message} />
+                    <FormSelect label="Country/Region" list={["Please Select", "India", "Canada", "USA"]} value={register("region", { required: "Country/Region is required" })} error={errors.region && errors.region.message} />
+                    <FormSelect label="City" list={["Please Select", "Gujarat", "Maharashtra", "Rajasthan"]} value={register("city", { required: "City is required" })} error={errors.city && errors.city.message} />
                     <div>
                         <h1 className="text-lg font-medium text-gray-700">Contact Info</h1>
                         <p className="text-sm mb-4">Add or edit your contact information</p>
-                        <button type="button" onClick={() => { setIsModalOpen(true) }} className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md">Edit contact info</button>
+                        <button
+                            type="button"
+                            onClick={() => setIsModalOpen(true)}
+                            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md"
+                        >
+                            Edit contact info
+                        </button>
                     </div>
-                    <Input label="Webite" placeholder="Enter Your Website" value={website} setvalue={setWebsite} />
+                    <FormInput label="Website" placeholder="Enter your website" value={register("website", { required: "Website is required" })} error={errors.website && errors.website.message} />
                 </div>
             </div>
+
             <div className="flex justify-end space-x-3 pt-4 border-t">
                 <button
                     type="button"
@@ -151,19 +161,29 @@ const EditForm = ({ onSave, onCancel, setIsModalOpen }) => {
 }
 
 EditForm.propTypes = {
-    onSave: PropTypes.func.isRequired,
     onCancel: PropTypes.func.isRequired,
     setIsModalOpen: PropTypes.func.isRequired,
+    errors: PropTypes.object,
+    register: PropTypes.any,
+    handleSubmit: PropTypes.any,
+    handleUpdate: PropTypes.func,
 };
 
 EditContactInfo.propTypes = {
-    handleSubmit: PropTypes.func.isRequired,
-    onCancel: PropTypes.func.isRequired
+    onCancel: PropTypes.func.isRequired,
+    user: PropTypes.object,
+    errors: PropTypes.object,
+    register: PropTypes.any,
+    watch: PropTypes.any,
+    handleSubmit: PropTypes.any,
+    handleUpdate: PropTypes.func,
+    setValue: PropTypes.func,
 }
 
 EditIntroForm.propTypes = {
     onSave: PropTypes.func.isRequired,
     onCancel: PropTypes.func.isRequired,
+    user: PropTypes.object,
 };
 
 export default EditIntroForm;

@@ -4,35 +4,46 @@ import { handleModalContext } from '../../contextApi/handleModalContext';
 import PropTypes from 'prop-types';
 import { useLocation } from 'react-router-dom';
 import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import useApi from '../../hook/useApi';
 
-function ProfileHeader({ setIsModalOpen, user }) {
+function ProfileHeader({ setIsModalOpen, user, educations, experiences }) {
   const { setIsChatDetailsOpen } = useContext(handleModalContext);
   const { search } = useLocation();
   const isEdit = search.split('=')[1];
   const imageRef = useRef();
-  const [image, setImage] = useState();
+  const avatarRef = useRef();
+  const [image, setImage] = useState("");
+  const [avatarImage, setAvatarImage] = useState("");
   const [lastSchool, setLastSchool] = useState("");
   const [lastCompany, setLastCompany] = useState("");
-
+  const {apiAction} = useApi();
+  const [backgroundImage, setBackgroundImage] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [avatar, setAvatar] = useState("");
+  
   useEffect(() => {
     if (user) {
-      const lastEducation = user?.educations.reduce((max, education) => {
-        return Number(education.endYear) > (Number(max.endYear) || 0) ? education : max;
+      setBackgroundImage(user?.backgroundImage);
+      setAvatar(user?.avatar);
+    }
+  }, [user])
+
+  useEffect(() => {
+    if (educations || experiences) {
+      const lastEducation = educations && educations.reduce((max, education) => {
+        return Number(education?.endYear) > (Number(max?.endYear) || 0) ? education : max;
       }, {});
 
-      const lastExperience = user?.experiences.reduce((max, experience) => {
-        if (!experience?.endYear) return max;
-
-        const endDate = new Date(experience.endYear).getTime();
-        const maxEndDate = max?.endYear ? new Date(max.endYear).getTime() : 0;
-
-        return endDate > maxEndDate ? experience : max;
+      const lastExperience = experiences && experiences.reduce((max, experience) => {
+        if(experience?.isPresent) return experience;
+        return Number(experience?.endYear) > (Number(max?.endYear) || 0) ? experience : max;
       }, null);
 
       setLastSchool(lastEducation?.school?.name);
       setLastCompany(lastExperience?.company?.name);
     }
-  }, [user])
+  }, [educations, experiences])
 
   useEffect(() => {
     if (isEdit) {
@@ -40,37 +51,88 @@ function ProfileHeader({ setIsModalOpen, user }) {
     }
   }, [isEdit])
 
-  const handleImage = () => {
-    imageRef?.current.click();
+  const updateUserBackground = async () => {
+    try {
+      const formData = new FormData();
+      formData.append("backgroundImage", image);
+
+      const { success, data } = await apiAction({
+        url: `/api/v1/profile/editBackgroundImage`,
+        method: "PUT",
+        isFormData: true,
+        data: formData
+      });
+
+      if (success) {
+        setBackgroundImage(data?.backgroundImage);
+      }
+
+    } catch (error) {
+      toast.error(error?.response?.data?.message || error?.message);
+    }
   }
+
+  const updateUserAvatar = async () => {
+    try {
+      const formData = new FormData();
+      formData.append("avatar", avatarImage);
+
+      const { success, data } = await apiAction({
+        url: `/api/v1/profile/editAvatar`,
+        method: "PUT",
+        isFormData: true,
+        data: formData
+      });
+
+      if (success) {
+        setAvatar(data?.avatar);
+      }
+
+    } catch (error) {
+      toast.error(error?.response?.data?.message || error?.message);
+    }
+  }
+
+  useEffect(() => {
+    setIsLoading(true);
+    if (image) {
+      updateUserBackground();      
+    }
+
+    if(avatarImage) {
+      updateUserAvatar();
+    }
+    setIsLoading(false);
+  }, [image, avatarImage])
 
   return (
     <div className="bg-white rounded-lg shadow">
       <div className="relative">
         <div className="h-48 w-full overflow-hidden bg-gradient-to-r from-blue-500 to-blue-600 rounded-t-lg">
           {
-            user?.backgroundImage &&
+            backgroundImage &&
             <img
-              src={user?.backgroundImage}
+              src={backgroundImage}
               alt={user?.firstName + " " + user?.lastName}
-              className="w-full h-full object-cover"
+              className={`w-full h-full object-cover ${isLoading ? 'blur-lg' : ''}`}
             />
           }
-          <button onClick={handleImage} className="absolute right-4 bottom-4 bg-white p-2 rounded-full hover:bg-gray-100">
+          <button disabled={isLoading} onClick={()=>imageRef.current.click()} className={`absolute right-4 bottom-4 bg-white p-2 rounded-full hover:bg-gray-100 ${isLoading ? "bg-opacity-50" :""}`}>
             <Camera className="w-5 h-5 text-gray-600" />
           </button>
-          <input ref={imageRef} className='hidden' value={image} onChange={(e) => setImage(e.target.files[0])} type='file' />
+          <input ref={imageRef} className='hidden' onChange={(e) => setImage(e.target.files[0])} type='file' />
         </div>
         <div className="absolute -bottom-16 left-4">
           <div className="relative">
             <img
-              src={user?.avatar}
+              src={avatar}
               alt="Profile"
               className="w-32 h-32 rounded-full border-4 border-white"
             />
-            <button className="absolute bottom-0 right-0 bg-white p-2 rounded-full hover:bg-gray-100 border border-gray-200">
+            <button onClick={()=>avatarRef.current.click()} className="absolute bottom-0 right-0 bg-white p-2 rounded-full hover:bg-gray-100 border border-gray-200">
               <Camera className="w-5 h-5 text-gray-600" />
             </button>
+            <input ref={avatarRef} className='hidden' onChange={(e) => setAvatarImage(e.target.files[0])} type='file' />
           </div>
         </div>
       </div>
@@ -120,7 +182,7 @@ function ProfileHeader({ setIsModalOpen, user }) {
           </div>
         </div>
         <div>
-          <Link to={"/"} className="font-semibold text-[#0a66c2] text-sm hover:underline">{user?.followers.length + user.following.length || 0} connections</Link>
+          <Link to={"/"} className="font-semibold text-[#0a66c2] text-sm hover:underline">{ user?.followers?.length + user?.following?.length || 0} connections</Link>
         </div>
       </div>
     </div>
@@ -129,7 +191,9 @@ function ProfileHeader({ setIsModalOpen, user }) {
 
 ProfileHeader.propTypes = {
   setIsModalOpen: PropTypes.func,
-  user: PropTypes.object
+  user: PropTypes.object,
+  educations: PropTypes.array,
+  experiences: PropTypes.array,
 };
 
 export default ProfileHeader;
