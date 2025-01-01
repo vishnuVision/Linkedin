@@ -8,6 +8,8 @@ import { Link } from "react-router-dom";
 
 function Experience({ experiences, refreshExperience }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isEditOpen,setIsEditOpen] = useState(false);
+  const [experienceData,setExperienceData] = useState({});
 
   return (
     <div className="bg-white rounded-lg shadow p-6 mt-4">
@@ -92,7 +94,7 @@ function Experience({ experiences, refreshExperience }) {
                 {
                   exp?.media && exp?.media.length > 0 && (
                     <div className="flex gap-2 mt-2">
-                      {exp?.media.map(({ url }, index) => (
+                      {exp?.media?.map(({ url }, index) => (
                         <Link to={url} key={index} className='relative rounded-xl overflow-hidden'>
                           <img src={url} alt={`media-${index}`} key={index} className="w-32 h-16 object-cover" />
                           <div className='absolute -bottom-1 -right-1 bg-white rounded-xl p-2'>
@@ -105,7 +107,7 @@ function Experience({ experiences, refreshExperience }) {
                 }
               </div>
               <div className='text-gray-500'>
-                <button onClick={() => setIsOpen(true)} className='p-2 hover:bg-[#866f55] hover:bg-opacity-10 rounded-full'><Pen /></button>
+                <button onClick={() => {setIsEditOpen(true); setExperienceData(exp);}} className='p-2 hover:bg-[#866f55] hover:bg-opacity-10 rounded-full'><Pen /></button>
               </div>
             </div>
           </div>
@@ -118,6 +120,9 @@ function Experience({ experiences, refreshExperience }) {
       </div>
       <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} title='Add Experience'>
         <ExperienceForm setIsOpen={setIsOpen} refreshExperience={refreshExperience} />
+      </Modal>
+      <Modal isOpen={isEditOpen} onClose={() => setIsEditOpen(false)} title='Edit Experience'>
+        <ExperienceForm setIsOpen={setIsEditOpen} experienceData={experienceData} refreshExperience={refreshExperience} />
       </Modal>
     </div>
   );

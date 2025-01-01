@@ -2,17 +2,30 @@ import { X } from "lucide-react"
 import ImageGrid from "./ImageGrid"
 import VideoGrid from "./VideoGrid"
 import PropTypes from "prop-types"
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ReactPlayer from 'react-player';
 import useApi from "../../hook/useApi";
 import { useSelector } from "react-redux";
+import toast from "react-hot-toast";
 
 function CreatePostModal({ accept = "image/*", videos, previews, isOpen, setIsOpen, setPreviews, setVideos, refereshData }) {
     const textareaRef = useRef(null);
     const [content, setContent] = useState("");
     const [isValid, setIsValid] = useState(false);
-    const user = useSelector((state) => state.authReducer.user);
+    const { user } = useSelector((state) => state.authReducer);
     const { apiAction } = useApi();
+    const [isDisabled, setIsDisabled] = useState(true);
+    const [isLoading,setIsLoading] = useState(false);
+
+    useEffect(()=>{
+        if(content || videos.length > 0){
+            setIsDisabled(false);
+        }
+        else
+        {
+            setIsDisabled(true);
+        }
+    },[content,videos])
 
     if (!isOpen) return null;
 
@@ -27,8 +40,10 @@ function CreatePostModal({ accept = "image/*", videos, previews, isOpen, setIsOp
     };
 
     const handleFormSubmit = async () => {
-        if (!content && !videos) return;
+        if (!content && videos.length <= 0) return;
         
+        let toastId = toast.loading("Uploading...");
+        setIsLoading(true);
         const media = videos.map((file) => file);
         const formData = new FormData();
         media.forEach((file) => {
@@ -49,7 +64,13 @@ function CreatePostModal({ accept = "image/*", videos, previews, isOpen, setIsOp
 
         if (success && data) {
             refereshData();
+            toast.success("Post created successfully", { id: toastId });
         }
+        else
+        {
+            toast.error("Something went wrong", { id: toastId });
+        }
+        setIsLoading(true);
         setIsOpen(false);
         setVideos([]);
         setPreviews([]);
@@ -86,8 +107,8 @@ function CreatePostModal({ accept = "image/*", videos, previews, isOpen, setIsOp
             <div className="bg-white rounded-lg w-full max-w-2xl">
                 <div className="border-b p-4 flex justify-between items-center">
                     <div className="flex gap-2 items-center">
-                        <img className="w-10 h-10 object-cover rounded-full" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="" />
-                        <p className="font-semibold">Vishnu Mandlesara</p>
+                        <img className="w-10 h-10 object-cover rounded-full border border-gray-200" src={user?.avatar} alt="" />
+                        <p className="font-semibold">{user?.firstName + " " + user?.lastName}</p>
                     </div>
                     <button onClick={handleClose} className="p-1 hover:bg-gray-100 rounded-full">
                         <X className="w-6 h-6" />
@@ -129,14 +150,16 @@ function CreatePostModal({ accept = "image/*", videos, previews, isOpen, setIsOp
 
                 <div className="border-t p-4 flex justify-end gap-3">
                     <button
+                        disabled={isLoading}
                         onClick={handleClose}
-                        className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-full"
+                        className={`px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-full ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
                     >
                         Cancel
                     </button>
                     <button
+                        disabled={isDisabled || isLoading}
                         onClick={handleFormSubmit}
-                        className="px-4 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700"
+                        className={`px-4 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 ${isDisabled || isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
                     >
                         Post
                     </button>

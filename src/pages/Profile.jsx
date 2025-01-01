@@ -16,11 +16,13 @@ import PropTypes from 'prop-types';
 import useApi from '../hook/useApi';
 import Loader from '../components/Loaders/Loader';
 import toast from 'react-hot-toast';
+import { useDispatch, useSelector } from 'react-redux';
+import { assignUser } from '../redux/slices/authReducer';
 
 const list = ["Please Select", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 function Profile() {
-  const [user, setUser] = useState({});
+  const { user } = useSelector(state=>state.authReducer);
   const { apiAction } = useApi();
   const [isLoading, setIsLoading] = useState(true);
   const [posts, setPosts] = useState([]);
@@ -28,10 +30,6 @@ function Profile() {
   const [experiences, setExperiences] = useState([]);
   const [skills, setSkills] = useState([]);
   const { id } = useParams();
-
-  useEffect(() => {
-    getUserData();
-  }, [])
 
   useEffect(() => {
     setIsLoading(true);
@@ -43,17 +41,6 @@ function Profile() {
       setIsLoading(false);
     }
   }, [user])
-
-  const getUserData = async () => {
-    const { success, data } = await apiAction({
-      url: `/api/v1/profile/${id}`,
-      method: "GET",
-    });
-
-    if (success) {
-      setUser(data);
-    }
-  };
 
   const fetchData = async () => {
     const { success, data } = await apiAction({
@@ -106,7 +93,7 @@ function Profile() {
     <div className="min-h-screen pt-20">
       <div className="max-w-4xl max-h-[90vh] overflow-y-scroll someElement mx-auto px-4 pb-2">
         <Routes>
-          <Route path="/" element={<ProfilePage refreshPost={fetchData} refreshEducation={getEducationsData} getUserData={getUserData} refreshExperience={getExperiencesData} refreshSkill={getSkills} user={user} posts={posts.length > 3 ? posts.slice(0, 3) : posts || []} educations={educations} experiences={experiences} skills={skills.length > 3 ? skills.slice(0, 3) : skills || []} />} />
+          <Route path="/" element={<ProfilePage refreshPost={fetchData} refreshEducation={getEducationsData} refreshExperience={getExperiencesData} refreshSkill={getSkills} user={user} posts={posts.length > 3 ? posts.slice(0, 3) : posts || []} educations={educations} experiences={experiences} skills={skills.length > 3 ? skills.slice(0, 3) : skills || []} />} />
           <Route path="/all-posts" element={<ActivityPage posts={posts} />} />
           <Route path="/all-skills" element={<SkillPage skills={skills} refreshSkill={getSkills} />} />
           <Route path="*" element={<Notfound />} />
@@ -116,13 +103,14 @@ function Profile() {
   );
 }
 
-const ProfilePage = ({ user, posts, educations, getUserData, experiences, skills, refreshPost, refreshEducation, refreshExperience, refreshSkill }) => {
+const ProfilePage = ({ user, posts, educations, experiences, skills, refreshPost, refreshEducation, refreshExperience, refreshSkill }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { apiAction } = useApi();
+  const dispatch = useDispatch();
 
   const handleSave = async (formData) => {
     try {
-      const { success } = await apiAction({
+      const { success,data } = await apiAction({
         url: `/api/v1/profile/editProfile`,
         method: "PUT",
         data: { ...formData, birthday: new Date(2023, list.indexOf(formData?.month), parseInt(formData?.day)).toISOString() },
@@ -130,7 +118,8 @@ const ProfilePage = ({ user, posts, educations, getUserData, experiences, skills
 
       if (success) {
         toast.success("Intro updated successfully");
-        getUserData();
+        dispatch(assignUser(data))
+        // getUserData();
       }
     } catch (error) {
       toast.error(error.message);

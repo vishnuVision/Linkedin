@@ -1,17 +1,17 @@
 import PropTypes from "prop-types"
 
-function FormSelect({ label, list, value, error, disable=false }) {
+function FormMultiSelect({ label, list, value, error }) {
+
     return (
         <div>
             <label>{label}</label>
             <select
-                disabled={disable}
                 {...value}
-                className={`border rounded p-2 w-full ${disable ? "cursor-not-allowed bg-gray-300" : ""}`}
+                className="border rounded p-2 w-full"
             >
                 {
                     list && list.length > 0 && list.map((item, index) => (
-                        <option key={index} value={item==="Please Select" ?"":item}>{item}</option>
+                        <option key={index} value={item.name==="Please Select"?"":item._id}>{item.name}</option>
                     ))
                 }
             </select>
@@ -20,12 +20,11 @@ function FormSelect({ label, list, value, error, disable=false }) {
     )
 }
 
-FormSelect.propTypes = {
+FormMultiSelect.propTypes = {
     label: PropTypes.string,
     list: PropTypes.array,
-    value: PropTypes.string,
+    value: PropTypes.any,
     error: PropTypes.object,
-    disable:PropTypes.bool
 }
 
-export default FormSelect
+export default FormMultiSelect

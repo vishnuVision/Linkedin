@@ -17,11 +17,12 @@ function ProfileHeader({ setIsModalOpen, user, educations, experiences }) {
   const [avatarImage, setAvatarImage] = useState("");
   const [lastSchool, setLastSchool] = useState("");
   const [lastCompany, setLastCompany] = useState("");
-  const {apiAction} = useApi();
+  const { apiAction } = useApi();
   const [backgroundImage, setBackgroundImage] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
+  const [isAvatarLoading, setIsAvatarLoading] = useState(false);
+  const [isBackgroundLoading, setIsBackgroundLoading] = useState(false);
   const [avatar, setAvatar] = useState("");
-  
+
   useEffect(() => {
     if (user) {
       setBackgroundImage(user?.backgroundImage);
@@ -36,7 +37,7 @@ function ProfileHeader({ setIsModalOpen, user, educations, experiences }) {
       }, {});
 
       const lastExperience = experiences && experiences.reduce((max, experience) => {
-        if(experience?.isPresent) return experience;
+        if (experience?.isPresent) return experience;
         return Number(experience?.endYear) > (Number(max?.endYear) || 0) ? experience : max;
       }, null);
 
@@ -52,6 +53,8 @@ function ProfileHeader({ setIsModalOpen, user, educations, experiences }) {
   }, [isEdit])
 
   const updateUserBackground = async () => {
+    setIsBackgroundLoading(true);
+    console.log("hii");
     try {
       const formData = new FormData();
       formData.append("backgroundImage", image);
@@ -70,9 +73,11 @@ function ProfileHeader({ setIsModalOpen, user, educations, experiences }) {
     } catch (error) {
       toast.error(error?.response?.data?.message || error?.message);
     }
+    setIsBackgroundLoading(false);
   }
 
   const updateUserAvatar = async () => {
+    setIsAvatarLoading(true);
     try {
       const formData = new FormData();
       formData.append("avatar", avatarImage);
@@ -91,19 +96,23 @@ function ProfileHeader({ setIsModalOpen, user, educations, experiences }) {
     } catch (error) {
       toast.error(error?.response?.data?.message || error?.message);
     }
+    setIsAvatarLoading(false);
   }
 
   useEffect(() => {
-    setIsLoading(true);
     if (image) {
-      updateUserBackground();      
+      updateUserBackground();
     }
+  }, [image])
 
-    if(avatarImage) {
+  useEffect(() => {
+    if (avatarImage) {
       updateUserAvatar();
-    }
-    setIsLoading(false);
-  }, [image, avatarImage])
+    }    
+  }, [avatarImage])
+
+  // console.log(isBackgroundLoading);
+  // console.log(isAvatarLoading);
 
   return (
     <div className="bg-white rounded-lg shadow">
@@ -114,22 +123,33 @@ function ProfileHeader({ setIsModalOpen, user, educations, experiences }) {
             <img
               src={backgroundImage}
               alt={user?.firstName + " " + user?.lastName}
-              className={`w-full h-full object-cover ${isLoading ? 'blur-lg' : ''}`}
+              className={`w-full h-full object-cover ${isBackgroundLoading ? 'blur-sm' : ''}`}
             />
           }
-          <button disabled={isLoading} onClick={()=>imageRef.current.click()} className={`absolute right-4 bottom-4 bg-white p-2 rounded-full hover:bg-gray-100 ${isLoading ? "bg-opacity-50" :""}`}>
+          <button disabled={isBackgroundLoading} onClick={() => imageRef.current.click()} className={`absolute right-4 bottom-4 bg-white p-2 rounded-full ${isBackgroundLoading ? "bg-opacity-50 cursor-not-allowed" : "hover:bg-gray-100"}`}>
             <Camera className="w-5 h-5 text-gray-600" />
           </button>
           <input ref={imageRef} className='hidden' onChange={(e) => setImage(e.target.files[0])} type='file' />
         </div>
         <div className="absolute -bottom-16 left-4">
           <div className="relative">
-            <img
-              src={avatar}
-              alt="Profile"
-              className="w-32 h-32 rounded-full border-4 border-white"
-            />
-            <button onClick={()=>avatarRef.current.click()} className="absolute bottom-0 right-0 bg-white p-2 rounded-full hover:bg-gray-100 border border-gray-200">
+            {
+              avatar &&
+              <img
+                src={avatar}
+                alt="Profile"
+                className={`w-32 h-32 rounded-full border-4 border-white ${isAvatarLoading ? 'blur-[20px]' : ''}`}
+              />
+            }
+            {
+              !avatar &&
+              <img
+                src={`https://ui-avatars.com/api/?name=${user?.firstName + " " + user?.lastName}`}
+                alt="Profile"
+                className={`w-32 h-32 rounded-full border-4 border-white ${isAvatarLoading ? 'blur-[20px]' : ''}`}
+              />
+            }
+            <button onClick={() => avatarRef.current.click()} className={`absolute bottom-0 right-0 bg-white p-2 rounded-full border border-gray-200 ${isBackgroundLoading ? "bg-opacity-50 cursor-not-allowed" : "hover:bg-gray-100"}`}>
               <Camera className="w-5 h-5 text-gray-600" />
             </button>
             <input ref={avatarRef} className='hidden' onChange={(e) => setAvatarImage(e.target.files[0])} type='file' />
@@ -182,7 +202,7 @@ function ProfileHeader({ setIsModalOpen, user, educations, experiences }) {
           </div>
         </div>
         <div>
-          <Link to={"/"} className="font-semibold text-[#0a66c2] text-sm hover:underline">{ user?.followers?.length + user?.following?.length || 0} connections</Link>
+          <Link to={"/"} className="font-semibold text-[#0a66c2] text-sm hover:underline">{user?.followers?.length + user?.following?.length || 0} connections</Link>
         </div>
       </div>
     </div>

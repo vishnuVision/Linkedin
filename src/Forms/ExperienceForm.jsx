@@ -1,15 +1,18 @@
 import { MoveLeft, Plus, X } from "lucide-react"
 import Input from "../components/Ui/Input"
-import Select from "../components/Ui/Select"
 import Textarea from "../components/Ui/Textarea"
 import { useEffect, useRef, useState } from "react"
 import PropTypes from "prop-types"
 import useApi from "../hook/useApi"
-import Dropdown from "../components/Ui/Dropdown"
+import { useForm } from "react-hook-form"
+import FormSelect from "../components/Ui/FormSelect"
+import FormTextArea from "../components/Ui/FormTextArea"
+import FormMultiSelect from "../components/Ui/FormMultiSelect"
+import FormInput from "../components/Ui/FormInput"
 
-const list = ["--Select", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const list = ["Please Select", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-function ExperienceForm({ setIsOpen, refreshExperience }) {
+function ExperienceForm({ setIsOpen, refreshExperience, experienceData }) {
     const [skill, setSkill] = useState("");
     const [skills, setSkills] = useState([]);
     const [image, setImage] = useState("");
@@ -21,62 +24,76 @@ function ExperienceForm({ setIsOpen, refreshExperience }) {
     const imageRef = useRef(null);
     const { apiAction } = useApi();
     const [pageList, setPageList] = useState([]);
-    const [title, setTitle] = useState("");
-    const [employmentType, setEmploymentType] = useState("");
-    const [company, setCompany] = useState("");
-    const [location, setLocation] = useState([]);
     const [isPresent, setIsPresent] = useState(false);
-    const [locationType, setLocationType] = useState("");
-    const [startMonth, setStartMonth] = useState("");
-    const [startYear, setStartYear] = useState("");
-    const [endMonth, setEndMonth] = useState("");
-    const [endYear, setEndYear] = useState("");
     const [error, setError] = useState("");
-    const [expDescription, setExpDescription] = useState("");
+
+    console.log(experienceData);
+
+    useEffect(()=>{
+        if(pageList.length > 0)
+        {
+            setValue("company", experienceData?.company._id);
+        }
+    },[pageList])
+
+    useEffect(()=>{
+        // setSkills(experienceData?.skills);
+        setMedia(experienceData?.media);
+        setMediaList(experienceData?.media);
+    },[experienceData])
+
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+        watch,
+        setValue
+    } = useForm({
+        defaultValues: {
+            title: experienceData?.title || "",
+            company: experienceData?.company._id || "",
+            startMonth: experienceData?.startMonth || "",
+            startYear: experienceData?.startYear || "",
+            endMonth: experienceData?.endMonth || "",
+            endYear: experienceData?.endYear || "",
+            locationType: experienceData?.locationType || "",
+            location: experienceData?.location || "",
+            description: experienceData?.description || "",
+            employmentType: experienceData?.employmentType || "",
+        },
+    });
 
     useEffect(() => {
         getAllCompanies();
     }, [])
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (!title || !employmentType || !company || !locationType || !startMonth || !startYear || !expDescription || (!isPresent && (!endMonth || !endYear))) {
-            setError("Please fill all the fields");
+    const handleFormSubmit = async (data) => {
+        const formData = new FormData();
+        Object.entries(data).forEach(([key, value]) => formData.append(key, value));
+        if (skills.length > 1) {
+            skills.forEach((skill) => skill && formData.append("skills", skill));
         }
         else {
-            const formData = new FormData();
-            formData.append("title", title);
-            formData.append("company", company);
-            formData.append("startMonth", list[startMonth]);
-            formData.append("startYear", startYear);
-            formData.append("endMonth", list[endMonth]);
-            formData.append("endYear", endYear);
-            formData.append("isPresent", isPresent);
-            formData.append("locationType", locationType);
-            formData.append("description", expDescription);
-            formData.append("employmentType", employmentType);
-            formData.append("location", location);
-            skills.map((skill) => formData.append("skills", skill));
-            mediaList.map((media) => {
-                formData.append("media", media.url)
-                formData.append("mediatitle",media.title)
-                formData.append("mediaDescription",media.description)
-            }
-            );
-
-            const { success, data } = await apiAction({
-                url: `api/v1/profile/experience/createExperience`,
-                method: "POST",
-                isFormData: true,
-                data: formData
-            });
-
-            if (success && data) {
-
-                refreshExperience();
-            }
+            formData.append("skills", [...skill]);
         }
-        setIsOpen(false);
+        mediaList.map((media) => {
+            formData.append("media", media.url)
+            formData.append("mediatitle", media.title)
+            formData.append("mediaDescription", media.description)
+        });
+        formData.append("isPresent", isPresent);
+
+        const { success } = await apiAction({
+            url: "api/v1/profile/experience/createExperience",
+            method: "POST",
+            isFormData: true,
+            data: formData,
+        });
+
+        if (success) {
+            refreshExperience();
+            setIsOpen(false);
+        }
     }
 
     const getAllCompanies = async () => {
@@ -136,7 +153,7 @@ function ExperienceForm({ setIsOpen, refreshExperience }) {
     }
 
     const applyMedia = () => {
-        setMedia(prev => [...prev, { title: imagetitle, description: description, preview: imagePreview }]);
+        setMedia(prev => [...prev, { title: imagetitle, description: description, url: imagePreview }]);
         setMediaList(prev => [...prev, { title: imagetitle, description: description, url: image }]);
         resetData();
     }
@@ -174,48 +191,14 @@ function ExperienceForm({ setIsOpen, refreshExperience }) {
                 </div>
             }
             {
-                !image && !imagePreview && <form onSubmit={handleSubmit}>
+                !image && !imagePreview && <form onSubmit={handleSubmit(handleFormSubmit)}>
                     <div className='max-h-[60vh] overflow-y-scroll'>
                         <div className='flex flex-col gap-4 px-2'>
-
-                            <Input
-                                label="Title"
-                                placeholder={"Ex: Retail Sales Manager"}
-                                value={title}
-                                setvalue={setTitle}
-                            />
-
-                            <Select value={employmentType} setValue={setEmploymentType} label={"Employment type"} list={["Please select", "Full-time", "Part-time", "Self-employed", "Freelance", "Internship", "Trainee"]} />
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">Company name</label>
-                                <select
-                                    value={company}
-                                    onChange={(e) => setCompany(e.target.value)}
-                                    className={`w-full px-4 py-2 border border-gray-300 shadow-sm rounded-lg focus:border-blue-500 focus:ring-blue-500`}
-                                >
-                                    <option
-                                        value=""
-                                    >
-                                        Please select
-                                    </option>
-                                    {pageList && pageList.length > 0 && pageList.map((item, index) => (
-                                        <option key={index} value={item._id}>
-                                            {item.name}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            <Input
-                                label="Location"
-                                placeholder={"Ex: London, United Kingdom"}
-                                value={location}
-                                setvalue={setLocation}
-                            />
-
-                            <Select label={"Location type"} value={locationType} setValue={setLocationType} list={["Please select", "On-site", "Hybrid", "Remote"]} />
-
+                            <FormInput label="Title" placeholder="Ex: Retail Sales Manager" value={register("title", { required: "Title is required" })} error={errors.title && errors.title.message} />
+                            <FormSelect label="Employment type" list={["Please Select", "Full-time", "Part-time", "Self-employed", "Freelance", "Internship", "Trainee"]} value={register("employmentType", { required: "Employment Type is required" })} error={errors.employmentType && errors.employmentType.message} />
+                            <FormMultiSelect data={watch("company")} setData={setValue} label="Company name" list={[{ id: "", name: "Please Select" }, ...pageList]} value={register("company", { required: "Company is required" })} error={errors.company && errors.company.message} />
+                            <FormInput label="Location" placeholder="Ex: London, United Kingdom" value={register("location", { required: "Location is required" })} error={errors.location && errors.location.message} />
+                            <FormSelect label="Location type" list={["Please Select", "On-site", "Hybrid", "Remote"]} value={register("locationType", { required: "location Type is required" })} error={errors.locationType && errors.locationType.message} />
                             <div className="flex gap-2">
                                 <input onChange={() => setIsPresent(prev => !prev)} className="w-6 h-6" name="im" type="checkbox" />
                                 <label htmlFor="im">I am currently working in this role</label>
@@ -223,32 +206,23 @@ function ExperienceForm({ setIsOpen, refreshExperience }) {
 
                             <div className='flex gap-4'>
                                 <div className='flex-grow'>
-                                    <Dropdown label={"Month"} value={startMonth} onChaneHandler={(e) => setStartMonth(e.target.value)} list={list} />
+                                    <FormSelect label="Start Month" list={list} value={register("startMonth", { required: "start Month is required" })} error={errors.startMonth && errors.startMonth.message} />
                                 </div>
                                 <div className='flex-grow'>
-                                    <Dropdown isYear={true} label={"Year"} value={startYear} onChaneHandler={(e) => setStartYear(e.target.value)} list={["--Select", ...Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i)]} />
+                                    <FormSelect label="Start Year" list={["Please Select", ...Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i)]} value={register("startYear", { required: "start Year is required" })} error={errors.startYear && errors.startYear.message} />
                                 </div>
                             </div>
 
                             <div className='flex gap-4'>
                                 <div className='flex-grow'>
-                                    <Dropdown disable={isPresent} label={"Month"} value={endMonth} onChaneHandler={(e) => setEndMonth(e.target.value)} list={list} />
+                                    <FormSelect disable={isPresent} label="End Month" list={list} value={register("endMonth", isPresent ? {required:false} : { required: "End Month is required" })} error={errors.endMonth && errors.endMonth.message} />
                                 </div>
                                 <div className='flex-grow'>
-                                    <Dropdown isYear={true} disable={isPresent} label={"Year"} value={endYear} onChaneHandler={(e) => setEndYear(e.target.value)} list={["--Select", ...Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i)]} />
+                                    <FormSelect disable={isPresent} label="End Year" list={["Please Select", ...Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i)]} value={register("endYear", isPresent ? {required:false} : { required: "End Year is required" })} error={errors.endYear && errors.endYear.message} />
                                 </div>
                             </div>
 
-                            <Textarea
-                                label="Description"
-                                name="description"
-                                required
-                                value={expDescription}
-                                setvalue={setExpDescription}
-                                maxLength={2000}
-                                rows={4}
-                                placeholder="Ex: topics, schedule, etc."
-                            />
+                            <FormTextArea label="Description" placeholder="Ex: topics, schedule, etc." value={register("description", { required: "Description is required" })} error={errors.description && errors.description.message} />
 
                             <div>
                                 <label className="block text-lg font-medium text-gray-700">
@@ -292,7 +266,7 @@ function ExperienceForm({ setIsOpen, refreshExperience }) {
                                     {
                                         media && media.length > 0 && media.map((image, index) => (
                                             <span onClick={() => deleteMedia(index)} key={index} className='bg-[#01754f] cursor-pointer hover:bg-[#10382a] flex items-center gap-2 text-gray-50 px-4 py-1 rounded-full'>
-                                                <img className="w-6 h-6 object-contain" src={image?.preview} alt={image?.title} /> {image?.title} <X size={20} />
+                                                <img className="w-6 h-6 object-contain" src={image?.url} alt={image?.title} /> {image?.title} <X size={20} />
                                             </span>
                                         ))
                                     }
@@ -314,7 +288,8 @@ function ExperienceForm({ setIsOpen, refreshExperience }) {
 
 ExperienceForm.propTypes = {
     setIsOpen: PropTypes.func,
-    refreshExperience: PropTypes.func
+    refreshExperience: PropTypes.func,
+    experienceData: PropTypes.object
 }
 
 export default ExperienceForm

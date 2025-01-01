@@ -28,7 +28,7 @@ function EditIntroForm({ onSave, onCancel, user }) {
             city: user?.city || "",
             website: user?.website || "",
             email: user?.email || "",
-            phNo: user?.phNo || "",
+            phoneNumber: user?.phoneNumber || "",
             phoneType: user?.phoneType || "",
             address: user?.address || "",
             month: list[new Date(user?.birthday).getMonth()] || "",
@@ -77,7 +77,7 @@ const EditContactInfo = ({ onCancel, register, watch, handleSubmit, handleUpdate
             <div className="flex-1 overflow-auto min-h-[60vh]">
                 <div className="space-y-4 px-4 pb-2">
                     <FormInput type="email" label="Email" placeholder="Enter Email" value={register("email", { required: "Email is required" })} error={errors.email && errors.email.message} />
-                    <FormInput label="Phone number" placeholder="Enter Phone number" value={register("phNo", { required: "Phone number is required" })} error={errors.phNo && errors.phNo.message} />
+                    <FormInput label="Phone number" placeholder="Enter Phone number" value={register("phoneNumber", { required: "Phone number is required" })} error={errors.phoneNumber && errors.phoneNumber.message} />
                     <FormSelect label="Phone type" list={["Please Select", "Mobile", "Home", "Work"]} value={register("phoneType", { required: "Phone type is required" })} error={errors.phoneType && errors.phoneType.message} />
                     <FormTextArea label="Address" placeholder="Enter your address" value={register("address", { required: "Address is required" })} error={errors.address && errors.address.message} />
                     <div>
