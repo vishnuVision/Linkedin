@@ -9,10 +9,11 @@ import FormSelect from "../components/Ui/FormSelect"
 import FormTextArea from "../components/Ui/FormTextArea"
 import FormMultiSelect from "../components/Ui/FormMultiSelect"
 import FormInput from "../components/Ui/FormInput"
+import toast from "react-hot-toast"
 
 const list = ["Please Select", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-function ExperienceForm({ setIsOpen, refreshExperience, experienceData }) {
+function ExperienceForm({ setIsOpen, refreshExperience, experienceData, isUpdate = false }) {
     const [skill, setSkill] = useState("");
     const [skills, setSkills] = useState([]);
     const [image, setImage] = useState("");
@@ -26,21 +27,7 @@ function ExperienceForm({ setIsOpen, refreshExperience, experienceData }) {
     const [pageList, setPageList] = useState([]);
     const [isPresent, setIsPresent] = useState(false);
     const [error, setError] = useState("");
-
-    console.log(experienceData);
-
-    useEffect(()=>{
-        if(pageList.length > 0)
-        {
-            setValue("company", experienceData?.company._id);
-        }
-    },[pageList])
-
-    useEffect(()=>{
-        // setSkills(experienceData?.skills);
-        setMedia(experienceData?.media);
-        setMediaList(experienceData?.media);
-    },[experienceData])
+    const [isLoading,setIsLoading] = useState(false);
 
     const {
         register,
@@ -64,10 +51,36 @@ function ExperienceForm({ setIsOpen, refreshExperience, experienceData }) {
     });
 
     useEffect(() => {
+        if (pageList.length > 0) {
+            setValue("company", experienceData?.company._id);
+        }
+    }, [pageList])
+
+    useEffect(() => {
+        if (isPresent) {
+            setValue("endMonth", "");
+            setValue("endYear", "");
+        }
+        else {
+            setValue("endMonth", experienceData?.endMonth);
+            setValue("endYear", experienceData?.endYear);
+        }
+    }, [isPresent])
+
+    useEffect(() => {
+        setSkills(experienceData?.skills ? experienceData?.skills : []);
+        setMedia(experienceData?.media ? experienceData?.media : []);
+        setMediaList(experienceData?.media ? experienceData?.media : []);
+        setIsPresent(experienceData?.isPresent ? experienceData?.isPresent : false);
+    }, [experienceData])
+
+    useEffect(() => {
         getAllCompanies();
     }, [])
 
     const handleFormSubmit = async (data) => {
+        setIsLoading(true);
+        let toastId = toast.loading("Please wait...");
         const formData = new FormData();
         Object.entries(data).forEach(([key, value]) => formData.append(key, value));
         if (skills.length > 1) {
@@ -91,6 +104,47 @@ function ExperienceForm({ setIsOpen, refreshExperience, experienceData }) {
         });
 
         if (success) {
+            setIsLoading(false);
+            toast.success("Experience added successfully", { id: toastId });
+            refreshExperience();
+            setIsOpen(false);
+        }
+    }
+
+    const updateHandler = async (data) => {
+        let toastId = toast.loading("Please wait...");
+        setIsLoading(true);
+        const formData = new FormData();
+        Object.entries(data).forEach(([key, value]) => formData.append(key, value));
+        if (skills.length > 1) {
+            skills.forEach((skill) => skill && formData.append("skills", skill));
+        }
+        else {
+            formData.append("skills", [...skill]);
+        }
+
+        const uploadedMedia = mediaList.filter((media) => !(media.url instanceof File));
+        uploadedMedia.map((media) => {
+            formData.append("uploadedMedia", JSON.stringify(media))
+        });
+        mediaList?.filter((media) => media.url instanceof File).map((media) => {
+            console.log(media)
+            formData.append("media", media.url)
+            formData.append("mediatitle", media.title)
+            formData.append("mediaDescription", media.description)
+        });
+        formData.append("isPresent", isPresent);
+
+        const { success } = await apiAction({
+            url: `api/v1/profile/experience/editExperience/${experienceData._id}`,
+            method: "PUT",
+            isFormData: true,
+            data: formData,
+        });
+
+        if (success) {
+            setIsLoading(false);
+            toast.success("Experience updated successfully", { id: toastId });
             refreshExperience();
             setIsOpen(false);
         }
@@ -110,7 +164,7 @@ function ExperienceForm({ setIsOpen, refreshExperience, experienceData }) {
     const addSkills = () => {
         setError("");
         if (skill) {
-            if (skills.length <= 5) {
+            if (skills?.length <= 5) {
                 setSkills(prev => [...prev, skill]);
                 setSkill("");
             }
@@ -158,6 +212,19 @@ function ExperienceForm({ setIsOpen, refreshExperience, experienceData }) {
         resetData();
     }
 
+    const deleteExperience = async () => {
+        const { success } = await apiAction({
+            url: `/api/v1/profile/experience/deleteExperience/${experienceData._id}`,
+            method: "DELETE",
+            data: {},
+        });
+
+        if (success) {
+            refreshExperience();
+            setIsOpen(false);
+        }
+    }
+
     return (
         <>
             {
@@ -191,16 +258,16 @@ function ExperienceForm({ setIsOpen, refreshExperience, experienceData }) {
                 </div>
             }
             {
-                !image && !imagePreview && <form onSubmit={handleSubmit(handleFormSubmit)}>
+                !image && !imagePreview && <form onSubmit={handleSubmit(isUpdate ? updateHandler : handleFormSubmit)} className='flex flex-col gap-4'>
                     <div className='max-h-[60vh] overflow-y-scroll'>
                         <div className='flex flex-col gap-4 px-2'>
                             <FormInput label="Title" placeholder="Ex: Retail Sales Manager" value={register("title", { required: "Title is required" })} error={errors.title && errors.title.message} />
                             <FormSelect label="Employment type" list={["Please Select", "Full-time", "Part-time", "Self-employed", "Freelance", "Internship", "Trainee"]} value={register("employmentType", { required: "Employment Type is required" })} error={errors.employmentType && errors.employmentType.message} />
-                            <FormMultiSelect data={watch("company")} setData={setValue} label="Company name" list={[{ id: "", name: "Please Select" }, ...pageList]} value={register("company", { required: "Company is required" })} error={errors.company && errors.company.message} />
+                            <FormMultiSelect data={watch("company")} setData={setValue} label="Company name" list={[{ _id: "", name: "Please Select" }, ...pageList]} value={register("company", { required: "Company is required" })} error={errors.company && errors.company.message} />
                             <FormInput label="Location" placeholder="Ex: London, United Kingdom" value={register("location", { required: "Location is required" })} error={errors.location && errors.location.message} />
                             <FormSelect label="Location type" list={["Please Select", "On-site", "Hybrid", "Remote"]} value={register("locationType", { required: "location Type is required" })} error={errors.locationType && errors.locationType.message} />
                             <div className="flex gap-2">
-                                <input onChange={() => setIsPresent(prev => !prev)} className="w-6 h-6" name="im" type="checkbox" />
+                                <input checked={isPresent} onChange={() => setIsPresent(prev => !prev)} className="w-6 h-6" name="im" type="checkbox" />
                                 <label htmlFor="im">I am currently working in this role</label>
                             </div>
 
@@ -215,10 +282,10 @@ function ExperienceForm({ setIsOpen, refreshExperience, experienceData }) {
 
                             <div className='flex gap-4'>
                                 <div className='flex-grow'>
-                                    <FormSelect disable={isPresent} label="End Month" list={list} value={register("endMonth", isPresent ? {required:false} : { required: "End Month is required" })} error={errors.endMonth && errors.endMonth.message} />
+                                    <FormSelect disable={isPresent} label="End Month" list={list} value={register("endMonth", isPresent ? { required: false } : { required: "End Month is required" })} error={errors.endMonth && errors.endMonth.message} />
                                 </div>
                                 <div className='flex-grow'>
-                                    <FormSelect disable={isPresent} label="End Year" list={["Please Select", ...Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i)]} value={register("endYear", isPresent ? {required:false} : { required: "End Year is required" })} error={errors.endYear && errors.endYear.message} />
+                                    <FormSelect disable={isPresent} label="End Year" list={["Please Select", ...Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i)]} value={register("endYear", isPresent ? { required: false } : { required: "End Year is required" })} error={errors.endYear && errors.endYear.message} />
                                 </div>
                             </div>
 
@@ -231,9 +298,9 @@ function ExperienceForm({ setIsOpen, refreshExperience, experienceData }) {
                                 <p className='text-sm mb-1 text-gray-600'>Add skill keywords (max 5) to make your job more visible to the right candidates.</p>
                                 <div className='flex gap-2 items-center mt-2'>
                                     <div className='w-52'>
-                                        <Input disable={skills.length >= 5 ? true : false} placeholder={"Enter Skill"} value={skill} setvalue={setSkill} />
+                                        <Input disable={skills?.length >= 5 ? true : false} placeholder={"Enter Skill"} value={skill} setvalue={setSkill} />
                                     </div>
-                                    <button type="button" onClick={addSkills} disabled={skills.length >= 5 ? true : false} className={`flex border items-center gap-1 border-gray-600 px-4 py-1 rounded-full ${skills.length >= 5 ? "cursor-not-allowed" : "hover:bg-gray-200 hover:ring-1 hover:ring-black"}`}>
+                                    <button type="button" onClick={addSkills} disabled={skills?.length >= 5 ? true : false} className={`flex border items-center gap-1 border-gray-600 px-4 py-1 rounded-full ${skills?.length >= 5 ? "cursor-not-allowed" : "hover:bg-gray-200 hover:ring-1 hover:ring-black"}`}>
                                         <Plus size={20} /> Add Skill
                                     </button>
                                 </div>
@@ -257,7 +324,7 @@ function ExperienceForm({ setIsOpen, refreshExperience, experienceData }) {
                                 </label>
                                 <p className='text-sm mb-1 text-gray-600'>Add media like images, documents, sites or presentations.</p>
                                 <div className='flex gap-2 items-center mt-2'>
-                                    <button onClick={imageUploadHandler} type="button" disabled={skills.length >= 10 ? true : false} className={`flex border items-center gap-1 border-gray-600 px-4 py-1 rounded-full ${skills.length >= 10 ? "cursor-not-allowed" : "hover:bg-gray-200 hover:ring-1 hover:ring-black"}`}>
+                                    <button onClick={imageUploadHandler} type="button" disabled={skills?.length >= 10 ? true : false} className={`flex border items-center gap-1 border-gray-600 px-4 py-1 rounded-full ${skills?.length >= 10 ? "cursor-not-allowed" : "hover:bg-gray-200 hover:ring-1 hover:ring-black"}`}>
                                         <Plus size={20} /> Add Media
                                     </button>
                                     <input accept="image/" className="hidden" type="file" ref={imageRef} value={image} onChange={(e) => setImage(e.target.files[0])} />
@@ -275,9 +342,14 @@ function ExperienceForm({ setIsOpen, refreshExperience, experienceData }) {
 
                         </div>
                     </div>
-                    <div className="mt-8 border-t pt-4 border-gray-300 flex justify-end">
-                        <button className='bg-[#0a66c2] px-4 py-1 rounded-full text-white font-semibold text-md' type="submit">
-                            Create
+                    <div className={`mt-8 border-t pt-4 border-gray-300 flex ${isUpdate ? "justify-between" : "justify-end"}`}>
+                        {
+                            isUpdate && <button disabled={isLoading} onClick={deleteExperience} className={`bg-gray-200 px-4 py-1 rounded-full text-gray-700 font-semibold text-md ${isLoading ? "cursor-not-allowed bg-opacity-50" : ""}`} type="button">
+                                Delete
+                            </button>
+                        }
+                        <button disabled={isLoading} className={`bg-[#0a66c2] px-4 py-1 rounded-full text-white font-semibold text-md' type="submit ${isLoading ? "cursor-not-allowed bg-opacity-50" : ""}`} type="submit">
+                            {isUpdate ? "Update" : "Save"}
                         </button>
                     </div>
                 </form>
@@ -289,7 +361,8 @@ function ExperienceForm({ setIsOpen, refreshExperience, experienceData }) {
 ExperienceForm.propTypes = {
     setIsOpen: PropTypes.func,
     refreshExperience: PropTypes.func,
-    experienceData: PropTypes.object
+    experienceData: PropTypes.object,
+    isUpdate: PropTypes.bool
 }
 
 export default ExperienceForm

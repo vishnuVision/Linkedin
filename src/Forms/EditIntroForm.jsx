@@ -7,7 +7,7 @@ import FormTextArea from "../components/Ui/FormTextArea";
 
 const list = ["Please Select", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-function EditIntroForm({ onSave, onCancel, user }) {
+function EditIntroForm({ onSave, onCancel, user, isLoading }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const {
@@ -44,15 +44,15 @@ function EditIntroForm({ onSave, onCancel, user }) {
         <>
             {
                 !isModalOpen ? (
-                    <EditForm user={user} register={register} errors={errors} handleSubmit={handleSubmit} handleUpdate={updateContactInfo} onCancel={onCancel} isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} />
+                    <EditForm user={user} isLoading={isLoading} register={register} errors={errors} handleSubmit={handleSubmit} handleUpdate={updateContactInfo} onCancel={onCancel} isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} />
                 ) :
-                    <EditContactInfo user={user} setValue={setValue} register={register} errors={errors} watch={watch} handleSubmit={handleSubmit} handleUpdate={updateContactInfo} onCancel={() => setIsModalOpen(false)} />
+                    <EditContactInfo user={user} isLoading={isLoading} setValue={setValue} register={register} errors={errors} watch={watch} handleSubmit={handleSubmit} handleUpdate={updateContactInfo} onCancel={() => setIsModalOpen(false)} />
             }
         </>
     );
 }
 
-const EditContactInfo = ({ onCancel, register, watch, handleSubmit, handleUpdate, user, errors, setValue }) => {
+const EditContactInfo = ({ onCancel, isLoading, register, watch, handleSubmit, handleUpdate, user, errors, setValue }) => {
     const [days, setDays] = useState(["Please Select"]);
     const [isFirst,setIsFirst] = useState(true);
 
@@ -97,13 +97,15 @@ const EditContactInfo = ({ onCancel, register, watch, handleSubmit, handleUpdate
                 <button
                     type="button"
                     onClick={onCancel}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-md border border-gray-300"
+                    disabled={isLoading}
+                    className={`px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-md border border-gray-300 ${isLoading ? "bg-opacity-50 cursor-not-allowed" : ""}`}
                 >
                     Cancel
                 </button>
                 <button
                     type="submit"
-                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md"
+                    disabled={isLoading}
+                    className={`px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md ${isLoading ? "bg-opacity-50 cursor-not-allowed" : ""}`}
                 >
                     Save
                 </button>
@@ -112,7 +114,7 @@ const EditContactInfo = ({ onCancel, register, watch, handleSubmit, handleUpdate
     )
 }
 
-const EditForm = ({ onCancel, setIsModalOpen, errors, register, handleSubmit, handleUpdate }) => {
+const EditForm = ({ onCancel, setIsModalOpen, isLoading, errors, register, handleSubmit, handleUpdate }) => {
 
     return (
         <form onSubmit={handleSubmit(handleUpdate)} className="relative flex flex-col space-y-6">
@@ -132,7 +134,8 @@ const EditForm = ({ onCancel, setIsModalOpen, errors, register, handleSubmit, ha
                         <button
                             type="button"
                             onClick={() => setIsModalOpen(true)}
-                            className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md"
+                            disabled={isLoading}
+                            className={`px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md ${isLoading ? "bg-opacity-50 cursor-not-allowed" : ""}`}
                         >
                             Edit contact info
                         </button>
@@ -145,13 +148,15 @@ const EditForm = ({ onCancel, setIsModalOpen, errors, register, handleSubmit, ha
                 <button
                     type="button"
                     onClick={onCancel}
-                    className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-md border border-gray-300"
+                    disabled={isLoading}
+                    className={`px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-md border border-gray-300 ${isLoading ? "bg-opacity-50 cursor-not-allowed" : ""}`}
                 >
                     Cancel
                 </button>
                 <button
                     type="submit"
-                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md"
+                    disabled={isLoading}
+                    className={`px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md ${isLoading ? "bg-opacity-50 cursor-not-allowed" : ""}`}
                 >
                     Save
                 </button>
@@ -167,6 +172,7 @@ EditForm.propTypes = {
     register: PropTypes.any,
     handleSubmit: PropTypes.any,
     handleUpdate: PropTypes.func,
+    isLoading: PropTypes.bool,
 };
 
 EditContactInfo.propTypes = {
@@ -178,12 +184,14 @@ EditContactInfo.propTypes = {
     handleSubmit: PropTypes.any,
     handleUpdate: PropTypes.func,
     setValue: PropTypes.func,
+    isLoading: PropTypes.bool,
 }
 
 EditIntroForm.propTypes = {
     onSave: PropTypes.func.isRequired,
     onCancel: PropTypes.func.isRequired,
     user: PropTypes.object,
+    isLoading: PropTypes.bool,
 };
 
 export default EditIntroForm;

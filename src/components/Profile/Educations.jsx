@@ -7,6 +7,9 @@ import { Link } from "react-router-dom";
 
 function Educations({ educations, refreshEducation }) {
     const [isOpen, setIsOpen] = useState(false);
+    const [isEditOpen, setIsEditOpen] = useState(false);
+    const [educationsData, setEducationsData] = useState({});
+
     return (
         <div className="bg-white rounded-lg shadow p-6 mt-4">
             <div className="flex justify-between items-center mb-4">
@@ -27,7 +30,16 @@ function Educations({ educations, refreshEducation }) {
                             <div className="flex-grow">
                                 <h3 className="font-semibold text-gray-900">{edu?.school.name}</h3>
                                 <p className="text-gray-600">{edu.degree}</p>
-                                <p className="text-sm text-gray-500">{edu.startYear} - {edu.endYear}</p>
+                                {
+                                    edu.startYear && edu.endYear && !edu.isPresent && (
+                                        <p className="text-sm text-gray-500">{edu.startYear} - {edu.endYear}</p>
+                                    )
+                                }
+                                {
+                                    edu.isPresent && edu.startYear && (
+                                        <p className="text-sm text-gray-500">{edu.startYear} - present</p>
+                                    )
+                                }
                                 <p className="text-sm text-gray-500"><span className="font-semibold">Grade:</span> {edu.grade}</p>
                                 <p className="text-sm text-gray-500"><span className="font-semibold">Activities:</span> {edu.activities}</p>
                                 <p className="line-clamp-2">{edu.description}</p>
@@ -47,7 +59,7 @@ function Educations({ educations, refreshEducation }) {
                                 }
                             </div>
                             <div className="text-gray-500">
-                                <button onClick={() => setIsOpen(true)} className='p-2 hover:bg-[#866f55] hover:bg-opacity-10 rounded-full'><Pen /></button>
+                                <button onClick={() => { setIsEditOpen(true); setEducationsData(edu) }} className='p-2 hover:bg-[#866f55] hover:bg-opacity-10 rounded-full'><Pen /></button>
                             </div>
                         </div>
                     </div>
@@ -60,6 +72,9 @@ function Educations({ educations, refreshEducation }) {
             </div>
             <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} title="Add Education">
                 <EducationForm refreshEducation={refreshEducation} setIsOpen={setIsOpen} />
+            </Modal>
+            <Modal isOpen={isEditOpen} onClose={() => setIsEditOpen(false)} title="Edit Education">
+                <EducationForm isUpdate={true} educationsData={educationsData} refreshEducation={refreshEducation} setIsOpen={setIsEditOpen} />
             </Modal>
         </div>
     )

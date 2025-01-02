@@ -2,14 +2,18 @@ import { MoveLeft, Plus, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import Input from "../components/Ui/Input";
 import Textarea from "../components/Ui/Textarea";
-import Select from "../components/Ui/Select";
 import PropTypes from "prop-types";
 import useApi from "../hook/useApi";
-import Dropdown from "../components/Ui/Dropdown";
+import { useForm } from "react-hook-form";
+import FormSelect from "../components/Ui/FormSelect";
+import FormMultiSelect from "../components/Ui/FormMultiSelect";
+import FormTextArea from "../components/Ui/FormTextArea";
+import FormInput from "../components/Ui/FormInput";
+import toast from "react-hot-toast";
 
-const list = ["--Select", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const list = ["Please Select", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-function EducationForm({ setIsOpen, refreshEducation }) {
+function EducationForm({ setIsOpen, refreshEducation, isUpdate, educationsData }) {
     const [skill, setSkill] = useState("");
     const [image, setImage] = useState("");
     const [imagePreview, setImagePreview] = useState("");
@@ -20,23 +24,60 @@ function EducationForm({ setIsOpen, refreshEducation }) {
     const { apiAction } = useApi();
     const [pageList, setPageList] = useState([]);
     const [error, setError] = useState("");
-    const [startMonth, setStartMonth] = useState("");
-    const [startYear, setStartYear] = useState("");
-    const [endMonth, setEndMonth] = useState("");
-    const [endYear, setEndYear] = useState("");
-
-    const [school, setSchool] = useState("");
-    const [degree, setDegree] = useState("");
-    const [fieldOfStudy, setFieldOfStudy] = useState("");
-    const [grade, setGrade] = useState("");
-    const [activities, setActivities] = useState("");
-    const [edudescription, setEduDescription] = useState("");
     const [skills, setSkills] = useState([]);
     const [mediaList, setMediaList] = useState([]);
+    const [isPresent, setIsPresent] = useState(false);
+    const [isLoading,setIsLoading] = useState(false);
+
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+        watch,
+        setValue
+    } = useForm({
+        defaultValues: {
+            school: educationsData?.school._id || ["Please Select"],
+            degree: educationsData?.degree || "",
+            fieldOfStudy: educationsData?.fieldOfStudy || "",
+            grade: educationsData?.grade || "",
+            activities: educationsData?.activities || "",
+            description: educationsData?.description || "",
+            startMonth: educationsData?.startMonth || "",
+            startYear: educationsData?.startYear || "",
+            endMonth: educationsData?.endMonth || "",
+            endYear: educationsData?.endYear || "",
+        },
+    });
 
     useEffect(() => {
         getAllSchools();
     }, [])
+
+    useEffect(() => {
+        if (pageList?.length > 0) {
+            setValue("school", educationsData?.school._id);
+        }
+    }, [pageList])
+
+    useEffect(() => {
+        if (isPresent) {
+            setValue("endMonth", "");
+            setValue("endYear", "");
+        }
+        else {
+            setValue("endMonth", educationsData?.endMonth || "");
+            setValue("endYear", educationsData?.endYear || "");
+        }
+    }, [isPresent])
+
+    useEffect(() => {
+        setSkills(educationsData?.skills ? educationsData?.skills : []);
+        setMedia(educationsData?.media ? educationsData?.media : []);
+        setMediaList(educationsData?.media ? educationsData?.media : []);
+        setIsPresent(educationsData?.isPresent ? educationsData?.isPresent : false);
+    }, [educationsData])
+
 
     const getAllSchools = async () => {
         const { success, data } = await apiAction({
@@ -45,54 +86,81 @@ function EducationForm({ setIsOpen, refreshEducation }) {
         });
 
         if (success && data) {
-            setPageList(data);
+            setPageList([...pageList, ...data]);
         }
     }
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (!school || !degree || !fieldOfStudy || !grade || !activities || !edudescription || !startMonth || !startYear || !endMonth || !endYear) {
-            setError("Please fill all the fields");
+    const handleFormSubmit = async (data) => {
+        let toastId = toast("Adding education...");
+        isLoading(true);
+        const formData = new FormData();
+        Object.entries(data).forEach(([key, value]) => formData.append(key, value));
+        skills.map((skill) => formData.append("skills", skill));
+        mediaList.map((media) => {
+            formData.append("media", media.url)
+            formData.append("mediatitle", media.title)
+            formData.append("mediaDescription", media.description)
+        });
+        formData.append("isPresent", isPresent);
+
+        const { success } = await apiAction({
+            url: "api/v1/profile/education/createEducation",
+            method: "POST",
+            isFormData: true,
+            data: formData,
+        });
+
+        if (success) {
+            toast.success("Education added successfully", { id: toastId });
+            isLoading(false);
+            refreshEducation();
+            setIsOpen(false);
+        }
+    }
+
+    const updateHandler = async (data) => {
+        let toastId = toast("Updating education...");
+        setIsLoading(true);
+        const formData = new FormData();
+        Object.entries(data).forEach(([key, value]) => formData.append(key, value));
+        if (skills.length > 1) {
+            skills.forEach((skill) => skill && formData.append("skills", skill));
         }
         else {
-            console.log(school, degree, fieldOfStudy, grade, activities, edudescription, startMonth, startYear, endMonth, endYear,skills,mediaList);
-            const formData = new FormData();
-            formData.append("school", school);
-            formData.append("degree", degree);
-            formData.append("startMonth", list[startMonth]);
-            formData.append("startYear", startYear);
-            formData.append("endMonth", list[endMonth]);
-            formData.append("endYear", endYear);
-            formData.append("fieldOfStudy", fieldOfStudy);
-            formData.append("grade", grade);
-            formData.append("activities", activities);
-            formData.append("description", edudescription);
-            skills.map((skill) => formData.append("skills", skill));
-            mediaList.map((media) => {
-                formData.append("media", media.url)
-                formData.append("mediatitle", media.title)
-                formData.append("mediaDescription", media.description)
-            }
-            );
-
-            const { success, data } = await apiAction({
-                url: `api/v1/profile/education/createEducation`,
-                method: "POST",
-                isFormData: true,
-                data: formData
-            });
-
-            if (success && data) {
-                refreshEducation();
-            }
+            formData.append("skills", [...skill]);
         }
-        setIsOpen(false);
+
+        const uploadedMedia = mediaList.filter((media) => !(media.url instanceof File));
+        uploadedMedia.map((media) => {
+            formData.append("uploadedMedia", JSON.stringify(media))
+        });
+        mediaList?.filter((media) => media.url instanceof File).map((media) => {
+            console.log(media)
+            formData.append("media", media.url)
+            formData.append("mediatitle", media.title)
+            formData.append("mediaDescription", media.description)
+        });
+        formData.append("isPresent", isPresent);
+
+        const { success } = await apiAction({
+            url: `/api/v1/profile/education/editEducation/${educationsData?._id}`,
+            method: "PUT",
+            isFormData: true,
+            data: formData,
+        });
+
+        if (success) {
+            setIsLoading(false);
+            toast.success("Education updated successfully", { id: toastId });
+            refreshEducation();
+            setIsOpen(false);
+        }
     }
 
     const addSkills = () => {
         setError("");
         if (skill) {
-            if (skills.length <= 5) {
+            if (skills?.length <= 5) {
                 setSkills(prev => [...prev, skill]);
                 setSkill("");
             }
@@ -139,6 +207,23 @@ function EducationForm({ setIsOpen, refreshEducation }) {
         resetData();
     }
 
+    const deleteEducation = async () => {
+        let toastId = toast("Deleting education...");
+        setIsLoading(true);
+        const { success } = await apiAction({
+            url: `/api/v1/profile/education/deleteEducation/${educationsData?._id}`,
+            method: "DELETE",
+            data: {},
+        });
+
+        if (success) {
+            toast.success("Education deleted successfully", { id: toastId });
+            setIsLoading(false);
+            refreshEducation();
+            setIsOpen(false);
+        }
+    }
+
     return (
         <>
             {
@@ -172,78 +257,35 @@ function EducationForm({ setIsOpen, refreshEducation }) {
                 </div>
             }
             {
-                !image && !imagePreview && <form onSubmit={handleSubmit}>
+                !image && !imagePreview && <form onSubmit={handleSubmit(isUpdate ? updateHandler : handleFormSubmit)} className='flex flex-col gap-4'>
                     <div className='max-h-[60vh] overflow-y-scroll'>
                         <div className='flex flex-col gap-4 px-2'>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">School</label>
-                                <select
-                                    value={school}
-                                    onChange={(e) => setSchool(e.target.value)}
-                                    className={`w-full px-4 py-2 border border-gray-300 shadow-sm rounded-lg focus:border-blue-500 focus:ring-blue-500`}
-                                >
-                                    <option
-                                        value=""
-                                    >
-                                        Please select
-                                    </option>
-                                    {pageList && pageList.length > 0 && pageList.map((item, index) => (
-                                        <option key={index} value={item._id}>
-                                            {item.name}
-                                        </option>
-                                    ))}
-                                </select>
+                            <FormMultiSelect data={watch("school")} setData={setValue} label="School" list={[{ _id: "", name: "Please Select" }, ...pageList]} value={register("school", { required: "School is required" })} error={errors.school && errors.school.message} />
+                            <FormSelect label="Degree" list={["Please Select", "High School", "Associate", "Bachelor's", "Master's", "Doctorate"]} value={register("degree", { required: "Degree is required" })} error={errors.degree && errors.degree.message} />
+                            <FormSelect label="Field of study" list={["Please Select", "Computer Science", "Mechanical Engineer", "Doctor"]} value={register("fieldOfStudy", { required: "Field of study is required" })} error={errors.fieldOfStudy && errors.fieldOfStudy.message} />
+                            <div className="flex gap-2">
+                                <input checked={isPresent} onChange={() => setIsPresent(prev => !prev)} className="w-6 h-6" name="im" type="checkbox" />
+                                <label htmlFor="im">I am currently working in this role</label>
                             </div>
-
-                            <Select value={degree} setValue={setDegree} label={"Degree"} list={["Please select", "BSC", "BCA", "BTech"]} />
-
-                            <Select value={fieldOfStudy} setValue={setFieldOfStudy} label={"Field of study"} list={["Please select", "Computer Science", "Mechanical Engineer", "Doctor"]} />
-
                             <div className='flex gap-4'>
                                 <div className='flex-grow'>
-                                    <Dropdown label={"Month"} value={startMonth} onChaneHandler={(e) => setStartMonth(e.target.value)} list={list} />
+                                    <FormSelect label="Start Month" list={list} value={register("startMonth", { required: "start Month is required" })} error={errors.startMonth && errors.startMonth.message} />
                                 </div>
                                 <div className='flex-grow'>
-                                    <Dropdown isYear={true} label={"Year"} value={startYear} onChaneHandler={(e) => setStartYear(e.target.value)} list={["--Select", ...Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i)]} />
+                                    <FormSelect label="Start Year" list={["Please Select", ...Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i)]} value={register("startYear", { required: "start Year is required" })} error={errors.startYear && errors.startYear.message} />
                                 </div>
                             </div>
-
                             <div className='flex gap-4'>
                                 <div className='flex-grow'>
-                                    <Dropdown label={"Month"} value={endMonth} onChaneHandler={(e) => setEndMonth(e.target.value)} list={list} />
+                                    <FormSelect disable={isPresent} label="End Month" list={list} value={register("endMonth", isPresent ? { required: false } : { required: "End Month is required" })} error={isPresent ? "" : errors.endMonth && errors.endMonth.message} />
                                 </div>
                                 <div className='flex-grow'>
-                                    <Dropdown isYear={true} label={"Year"} value={endYear} onChaneHandler={(e) => setEndYear(e.target.value)} list={["--Select", ...Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i)]} />
+                                    <FormSelect disable={isPresent} label="End Year" list={["Please Select", ...Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i)]} value={register("endYear", isPresent ? { required: false } : { required: "End Year is required" })} error={isPresent ? "" : errors.endYear && errors.endYear.message} />
                                 </div>
                             </div>
-
-                            <Input
-                                label="Grade"
-                                value={grade}
-                                setvalue={setGrade}
-                                placeholder={"Ex: 10.00"}
-                            />
-
-                            <Textarea
-                                label="Activities and societies"
-                                value={activities}
-                                setvalue={setActivities}
-                                required
-                                maxLength={2000}
-                                rows={4}
-                                placeholder="Ex: Alpha Phi Omega, Marching Band, Volleyball etc."
-                            />
-
-                            <Textarea
-                                label="Description"
-                                value={edudescription}
-                                setvalue={setEduDescription}
-                                required
-                                maxLength={2000}
-                                rows={4}
-                            />
-
+                            <FormInput label="Grade" value={register("grade", { required: "Grade is required" })} error={errors.grade && errors.grade.message} />
+                            <FormInput label="Activities and societies" value={register("activities", { required: "Activities and societies is required" })} error={errors.activities && errors.activities.message} />
+                            <FormTextArea label="Description" value={register("description", { required: "Description is required" })} error={errors.description && errors.description.message} />
                             <div>
                                 <label className="block text-lg font-medium text-gray-700">
                                     Skills
@@ -251,9 +293,9 @@ function EducationForm({ setIsOpen, refreshEducation }) {
                                 <p className='text-sm mb-1 text-gray-600'>Add skill keywords (max 5) to make your job more visible to the right candidates.</p>
                                 <div className='flex gap-2 items-center mt-2'>
                                     <div className='w-52'>
-                                        <Input disable={skills.length >= 5 ? true : false} placeholder={"Enter Skill"} value={skill} setvalue={setSkill} />
+                                        <Input disable={skills?.length >= 5 ? true : false} placeholder={"Enter Skill"} value={skill} setvalue={setSkill} />
                                     </div>
-                                    <button type="button" onClick={addSkills} disabled={skills.length >= 5 ? true : false} className={`flex border items-center gap-1 border-gray-600 px-4 py-1 rounded-full ${skills.length >= 5 ? "cursor-not-allowed" : "hover:bg-gray-200 hover:ring-1 hover:ring-black"}`}>
+                                    <button type="button" onClick={addSkills} disabled={skills?.length >= 5 ? true : false} className={`flex border items-center gap-1 border-gray-600 px-4 py-1 rounded-full ${skills?.length >= 5 ? "cursor-not-allowed" : "hover:bg-gray-200 hover:ring-1 hover:ring-black"}`}>
                                         <Plus size={20} /> Add Skill
                                     </button>
                                 </div>
@@ -262,7 +304,7 @@ function EducationForm({ setIsOpen, refreshEducation }) {
                                 }
                                 <div className='flex flex-wrap gap-2 mt-3'>
                                     {
-                                        skills && skills.length > 0 && skills.map((skill, index) => (
+                                        skills && skills?.length > 0 && skills?.map((skill, index) => (
                                             <span onClick={() => deleteSkill(index)} key={index} className='bg-[#01754f] cursor-pointer hover:bg-[#10382a] flex items-center gap-2 text-gray-50 px-4 py-1 rounded-full'>
                                                 {skill} <X size={20} />
                                             </span>
@@ -270,34 +312,37 @@ function EducationForm({ setIsOpen, refreshEducation }) {
                                     }
                                 </div>
                             </div>
-
                             <div className="mb-2">
                                 <label className="block text-lg font-medium text-gray-700">
                                     Media
                                 </label>
                                 <p className='text-sm mb-1 text-gray-600'>Add media like images, documents, sites or presentations.</p>
                                 <div className='flex gap-2 items-center mt-2'>
-                                    <button onClick={imageUploadHandler} type="button" disabled={skills.length >= 10 ? true : false} className={`flex border items-center gap-1 border-gray-600 px-4 py-1 rounded-full ${skills.length >= 10 ? "cursor-not-allowed" : "hover:bg-gray-200 hover:ring-1 hover:ring-black"}`}>
+                                    <button onClick={imageUploadHandler} type="button" disabled={skills?.length >= 10 ? true : false} className={`flex border items-center gap-1 border-gray-600 px-4 py-1 rounded-full ${skills?.length >= 10 ? "cursor-not-allowed" : "hover:bg-gray-200 hover:ring-1 hover:ring-black"}`}>
                                         <Plus size={20} /> Add Media
                                     </button>
                                     <input accept="image/" className="hidden" type="file" ref={imageRef} value={image} onChange={(e) => setImage(e.target.files[0])} />
                                 </div>
                                 <div className='flex flex-wrap gap-2 mt-3'>
                                     {
-                                        media && media.length > 0 && media.map((image, index) => (
+                                        media && media?.length > 0 && media.map((image, index) => (
                                             <span onClick={() => deleteMedia(index)} key={index} className='bg-[#01754f] cursor-pointer hover:bg-[#10382a] flex items-center gap-2 text-gray-50 px-4 py-1 rounded-full'>
-                                                <img className="w-6 h-6 object-contain" src={image?.preview} alt={image?.title} /> {image?.title} <X size={20} />
+                                                <img className="w-6 h-6 object-contain" src={image?.url} alt={image?.title} /> {image?.title} <X size={20} />
                                             </span>
                                         ))
                                     }
                                 </div>
                             </div>
-
                         </div>
                     </div>
-                    <div className="mt-8 border-t pt-4 border-gray-300 flex justify-end">
-                        <button className='bg-[#0a66c2] px-4 py-1 rounded-full text-white font-semibold text-md' type="submit">
-                            Create
+                    <div className={`mt-8 border-t pt-4 border-gray-300 flex ${isUpdate ? "justify-between" : "justify-end"}`}>
+                        {
+                            isUpdate && <button disabled={isLoading} onClick={deleteEducation} className={`bg-gray-200 px-4 py-1 rounded-full text-gray-700 font-semibold text-md ${isLoading ? "bg-opacity-50 cursor-not-allowed" : ""}`} type="button">
+                                Delete
+                            </button>
+                        }
+                        <button disabled={isLoading} className={`bg-[#0a66c2] px-4 py-1 rounded-full text-white font-semibold text-md ${isLoading ? "bg-opacity-50 cursor-not-allowed" :""}`} type="submit">
+                            {isUpdate ? "Update" : "Save"}
                         </button>
                     </div>
                 </form>
@@ -308,7 +353,9 @@ function EducationForm({ setIsOpen, refreshEducation }) {
 
 EducationForm.propTypes = {
     setIsOpen: PropTypes.func,
-    refreshEducation: PropTypes.func
+    refreshEducation: PropTypes.func,
+    isUpdate: PropTypes.bool,
+    educationsData: PropTypes.object
 }
 
 export default EducationForm

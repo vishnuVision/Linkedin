@@ -122,7 +122,7 @@ function Experience({ experiences, refreshExperience }) {
         <ExperienceForm setIsOpen={setIsOpen} refreshExperience={refreshExperience} />
       </Modal>
       <Modal isOpen={isEditOpen} onClose={() => setIsEditOpen(false)} title='Edit Experience'>
-        <ExperienceForm setIsOpen={setIsEditOpen} experienceData={experienceData} refreshExperience={refreshExperience} />
+        <ExperienceForm isUpdate={true} setIsOpen={setIsEditOpen} experienceData={experienceData} refreshExperience={refreshExperience} />
       </Modal>
     </div>
   );
