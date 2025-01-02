@@ -5,6 +5,8 @@ import React, { useEffect, useState } from "react";
 import AboutForm from "../../Forms/AboutForm";
 import toast from "react-hot-toast";
 import useApi from "../../hook/useApi";
+import { useParams } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 function About({ about, skills = [], refereshUserData }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -12,6 +14,8 @@ function About({ about, skills = [], refereshUserData }) {
   const [summary, setSummary] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { apiAction } = useApi();
+  const { id } = useParams();
+  const { _id } = useSelector(state => state?.authReducer?.user);
 
   useEffect(() => {
     setSkillList(skills);
@@ -46,9 +50,13 @@ function About({ about, skills = [], refereshUserData }) {
       <div className="bg-white rounded-lg shadow p-6 mt-4">
         <div className="flex justify-between items-start mb-4">
           <h2 className="text-xl font-semibold">About</h2>
-          <button onClick={() => setIsModalOpen(true)} className="p-2 hover:bg-gray-100 rounded-full">
-            <Pencil className="w-5 h-5 text-gray-600" />
-          </button>
+          {
+            id === _id && (
+              <button onClick={() => setIsModalOpen(true)} className="p-2 hover:bg-gray-100 rounded-full">
+                <Pencil className="w-5 h-5 text-gray-600" />
+              </button>
+            )
+          }
         </div>
 
         <div className="space-y-4">

@@ -4,12 +4,14 @@ import { useState } from "react";
 import CreatePostModal from "../ImageUpload/CreatePostModal";
 import { Link, useParams } from "react-router-dom";
 import PropTypes from "prop-types";
+import { useSelector } from "react-redux";
 
 function Activity({ followers, posts, refreshPost }) {
     const [isVisible, setIsVisible] = useState(false);
     const [previews, setPreviews] = useState([]);
     const [files, setFiles] = useState([]);
     const { id } = useParams();
+    const { _id } = useSelector(state => state?.authReducer?.user);
     return (
         <>
             <div className="bg-white rounded-lg shadow pt-6 mt-4 overflow-hidden">
@@ -18,9 +20,13 @@ function Activity({ followers, posts, refreshPost }) {
                         <h2 className="text-xl font-bold text-gray-900">Activity</h2>
                         <p className="font-semibold text-[#0a66c2]">{followers} followers</p>
                     </div>
-                    <div>
-                        <button onClick={() => setIsVisible(prev => !prev)} className="text-[#0a66c2] border border-[#0a66c2] font-semibold px-4 py-1 rounded-full hover:bg-blue-50 hover:border-blue-600">create a post</button>
-                    </div>
+                    {
+                        id === _id && (
+                            <div>
+                                <button onClick={() => setIsVisible(prev => !prev)} className="text-[#0a66c2] border border-[#0a66c2] font-semibold px-4 py-1 rounded-full hover:bg-blue-50 hover:border-blue-600">create a post</button>
+                            </div>
+                        )
+                    }
                 </div>
                 <div className="flex flex-col px-4">
                     {

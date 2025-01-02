@@ -43,7 +43,7 @@ export default function ProfileCard() {
       <div className="">
         <div className='px-4 pb-4'>
           <div className="-mt-12 mb-4">
-            <Link to={"/profile/1"}>
+            <Link to={`/profile/${user._id}`}>
               {
                 !user?.avatar &&
                 <img
@@ -63,7 +63,7 @@ export default function ProfileCard() {
               }
             </Link>
           </div>
-          <Link to={"/profile/1"} className='hover:underline hover:underline-offset-2'>
+          <Link to={`/profile/${user._id}`} className='hover:underline hover:underline-offset-2'>
             <h2 className="text-xl font-bold">{user?.firstName + " " + user?.lastName}</h2>
           </Link>
           <p className="text-gray-600 mb-4 break-words">{user?.bio}</p>

@@ -6,17 +6,19 @@ import { useState } from 'react';
 import SkillForm from '../../Forms/SkillForm';
 import PropTypes from 'prop-types';
 import useApi from '../../hook/useApi';
+import { useSelector } from 'react-redux';
 
 function Skills({ skills, refreshSkill }) {
   const { id } = useParams();
   const [isAddSkill, setIsSkill] = useState(false);
   const { apiAction } = useApi();
+  const { _id } = useSelector(state => state?.authReducer?.user)
 
   const handleDeleteSkill = async (id) => {
     const { success, data } = await apiAction({
       url: `api/v1/profile/skill/deleteSkill/${id}`,
       method: "DELETE",
-      data:{}
+      data: {}
     });
 
     if (success && data) {
@@ -28,7 +30,11 @@ function Skills({ skills, refreshSkill }) {
     <div className="bg-white rounded-lg shadow pt-6 mt-4 overflow-hidden">
       <div className="flex justify-between items-center px-6 mb-2">
         <h2 className="text-xl font-bold text-gray-900">Skills</h2>
-        <button onClick={() => setIsSkill(prev => !prev)} className="p-2 hover:bg-[#866f55] hover:bg-opacity-10 rounded-full  "><Plus width={25} height={25} /></button>
+        {
+          id === _id && (
+            <button onClick={() => setIsSkill(prev => !prev)} className="p-2 hover:bg-[#866f55] hover:bg-opacity-10 rounded-full  "><Plus width={25} height={25} /></button>
+          )
+        }
       </div>
       <div className="grid grid-cols-1 gap-4 px-4">
         {skills && skills.length > 0 && skills.map((skill, index) => (
@@ -52,11 +58,13 @@ function Skills({ skills, refreshSkill }) {
                 )
               }
             </div>
-            <div className="flex items-center gap-2 text-gray-500">
-              <div className="flex items-center gap-2 text-gray-500">
-                <button onClick={() => handleDeleteSkill(skill._id)} className='p-2 hover:bg-[#866f55] hover:bg-opacity-10 rounded-full'><Trash2 /></button>
-              </div>
-            </div>
+            {
+              id === _id && (
+                <div className="flex items-center gap-2 text-gray-500">
+                  <button onClick={() => handleDeleteSkill(skill._id)} className='p-2 hover:bg-[#866f55] hover:bg-opacity-10 rounded-full'><Trash2 /></button>
+                </div>
+              )
+            }
           </div>
         ))}
         {

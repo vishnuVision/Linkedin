@@ -1,4 +1,4 @@
-import { Link, useLocation, useNavigate } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import Input from "../components/Ui/Input"
 import { useEffect, useState } from "react";
 import { useSignIn, useUser } from "@clerk/clerk-react";
@@ -203,11 +203,11 @@ function Login() {
                             </div>
                         </div>
                         <p className="break-words text-sm text-center mt-2 px-4">By clicking Continue to join or sign in, you agree to LinkedIn’s <span className="text-[#0a66c2] font-semibold">User Agreement, Privacy Policy,</span> and <span className="text-[#0a66c2] font-semibold">Cookie Policy.</span></p>
-                        <button disabled={isLoading || !captchaValue} type="button" onClick={handleGoogleSignin} className={`${isLoading || !captchaValue ? "opacity-50 cursor-not-allowed" : ""} flex w-full mt-4 gap-1 justify-center items-center py-2 text-left border rounded-full hover:bg-gray-100 font-medium`}>
+                        <button disabled={isLoading} type="button" onClick={handleGoogleSignin} className={`${isLoading ? "opacity-50 cursor-not-allowed" : ""} flex w-full mt-4 gap-1 justify-center items-center py-2 text-left border rounded-full hover:bg-gray-100 font-medium`}>
                             <img src="/google.webp" className="w-6 h-6" alt="icon" />
                             Continue With Google
                         </button>
-                        <button disabled={isLoading || !captchaValue} type="button" onClick={handleMicrosoftSignin} className={`${isLoading || !captchaValue ? "opacity-50 cursor-not-allowed" : ""} flex w-full mt-4 gap-2 justify-center items-center py-2 text-left border rounded-full hover:bg-gray-100 font-medium`}>
+                        <button disabled={isLoading} type="button" onClick={handleMicrosoftSignin} className={`${isLoading ? "opacity-50 cursor-not-allowed" : ""} flex w-full mt-4 gap-2 justify-center items-center py-2 text-left border rounded-full hover:bg-gray-100 font-medium`}>
                             <img src="/microsoft.png" className="w-6 h-6" alt="icon" />
                             Continue With Microsoft
                         </button>

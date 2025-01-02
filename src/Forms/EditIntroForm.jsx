@@ -1,14 +1,14 @@
 import PropTypes from "prop-types";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import FormInput from "../components/Ui/FormInput";
 import { useForm } from "react-hook-form";
 import FormSelect from "../components/Ui/FormSelect";
 import FormTextArea from "../components/Ui/FormTextArea";
-
-const list = ["Please Select", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+import DatePicker from "react-datepicker";
 
 function EditIntroForm({ onSave, onCancel, user, isLoading }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [birthdayDate, setBirthdayDate] = useState(user?.birthday || null);
 
     const {
         register,
@@ -31,13 +31,11 @@ function EditIntroForm({ onSave, onCancel, user, isLoading }) {
             phoneNumber: user?.phoneNumber || "",
             phoneType: user?.phoneType || "",
             address: user?.address || "",
-            month: list[new Date(user?.birthday).getMonth()] || "",
-            day: new Date(user?.birthday).getDate().toString() || "",
         }
     });
 
     const updateContactInfo = async (data) => {
-        onSave(data);
+        onSave({ ...data, birthday: birthdayDate });
     }
 
     return (
@@ -46,32 +44,13 @@ function EditIntroForm({ onSave, onCancel, user, isLoading }) {
                 !isModalOpen ? (
                     <EditForm user={user} isLoading={isLoading} register={register} errors={errors} handleSubmit={handleSubmit} handleUpdate={updateContactInfo} onCancel={onCancel} isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} />
                 ) :
-                    <EditContactInfo user={user} isLoading={isLoading} setValue={setValue} register={register} errors={errors} watch={watch} handleSubmit={handleSubmit} handleUpdate={updateContactInfo} onCancel={() => setIsModalOpen(false)} />
+                    <EditContactInfo user={user} isLoading={isLoading} setBirthdayDate={setBirthdayDate} birthdayDate={birthdayDate} setValue={setValue} register={register} errors={errors} watch={watch} handleSubmit={handleSubmit} handleUpdate={updateContactInfo} onCancel={() => setIsModalOpen(false)} />
             }
         </>
     );
 }
 
-const EditContactInfo = ({ onCancel, isLoading, register, watch, handleSubmit, handleUpdate, user, errors, setValue }) => {
-    const [days, setDays] = useState(["Please Select"]);
-    const [isFirst,setIsFirst] = useState(true);
-
-    const month = watch("month");
-
-    useEffect(() => {
-        if (isFirst && days.length > 1) {
-            setValue("day", new Date(user?.birthday).getDate().toString());
-            setIsFirst(false);
-        }
-    },[days]);
-
-    useEffect(() => {
-        if (month) {
-            const daysInMonth = new Date(2023, parseInt(list.indexOf(month)), 0).getDate();
-            setDays(["Please Select",...Array.from({ length: daysInMonth }, (_, i) => i + 1+"")]);
-        }
-    }, [month]);
-
+const EditContactInfo = ({ onCancel, isLoading, register, handleSubmit, handleUpdate, errors, birthdayDate, setBirthdayDate }) => {
     return (
         <form onSubmit={handleSubmit(handleUpdate)} className="relative flex flex-col space-y-6">
             <div className="flex-1 overflow-auto min-h-[60vh]">
@@ -80,16 +59,9 @@ const EditContactInfo = ({ onCancel, isLoading, register, watch, handleSubmit, h
                     <FormInput label="Phone number" placeholder="Enter Phone number" value={register("phoneNumber", { required: "Phone number is required" })} error={errors.phoneNumber && errors.phoneNumber.message} />
                     <FormSelect label="Phone type" list={["Please Select", "Mobile", "Home", "Work"]} value={register("phoneType", { required: "Phone type is required" })} error={errors.phoneType && errors.phoneType.message} />
                     <FormTextArea label="Address" placeholder="Enter your address" value={register("address", { required: "Address is required" })} error={errors.address && errors.address.message} />
-                    <div>
-                        <label className="">Birthday</label>
-                        <div className="flex gap-2">
-                            <div className="w-full">
-                                <FormSelect list={list} value={register("month", { required: "Month is required" })} error={errors.month && errors.month.message} />
-                            </div>
-                            <div className="w-full">
-                                <FormSelect list={days} value={register("day", { required: "Day is required" })} error={errors.day && errors.day.message} />
-                            </div>
-                        </div>
+                    <div className="flex flex-col">
+                        <label htmlFor="birthday" className="">Birthday</label>
+                        <DatePicker selected={birthdayDate} onChange={(date) => setBirthdayDate(date)} className="block w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900"/>
                     </div>
                 </div>
             </div>
@@ -177,10 +149,10 @@ EditForm.propTypes = {
 
 EditContactInfo.propTypes = {
     onCancel: PropTypes.func.isRequired,
-    user: PropTypes.object,
+    birthdayDate: PropTypes.any,
+    setBirthdayDate: PropTypes.func,
     errors: PropTypes.object,
     register: PropTypes.any,
-    watch: PropTypes.any,
     handleSubmit: PropTypes.any,
     handleUpdate: PropTypes.func,
     setValue: PropTypes.func,

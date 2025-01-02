@@ -6,7 +6,8 @@ import Loader from './components/Loaders/Loader.jsx';
 import { Provider } from "react-redux";
 import { store, persistor } from './redux/store/store.js';
 import { PersistGate } from 'redux-persist/integration/react';
-import "./i18.js"
+import "./i18.js";
+import "react-datepicker/dist/react-datepicker.css";
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
 

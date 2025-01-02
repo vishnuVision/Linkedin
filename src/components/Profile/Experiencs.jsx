@@ -4,18 +4,25 @@ import Modal from '../../Modal/Modal';
 import ExperienceForm from '../../Forms/ExperienceForm';
 import PropTypes from 'prop-types';
 import moment from 'moment';
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
+import { useSelector } from 'react-redux';
 
 function Experience({ experiences, refreshExperience }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [isEditOpen,setIsEditOpen] = useState(false);
-  const [experienceData,setExperienceData] = useState({});
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [experienceData, setExperienceData] = useState({});
+  const { id } = useParams();
+  const { _id } = useSelector(state => state?.authReducer?.user)
 
   return (
     <div className="bg-white rounded-lg shadow p-6 mt-4">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold text-gray-900">Experience</h2>
-        <button onClick={() => setIsOpen(prev => !prev)} className="p-2 hover:bg-[#866f55] hover:bg-opacity-10 rounded-full"><Plus width={25} height={25} /></button>
+        {
+          id===_id && (
+            <button onClick={() => setIsOpen(prev => !prev)} className="p-2 hover:bg-[#866f55] hover:bg-opacity-10 rounded-full"><Plus width={25} height={25} /></button>
+          )
+        }
       </div>
       <div className="space-y-6">
         {experiences && experiences.length > 0 && experiences.map((exp, index) => (
@@ -106,9 +113,13 @@ function Experience({ experiences, refreshExperience }) {
                   )
                 }
               </div>
-              <div className='text-gray-500'>
-                <button onClick={() => {setIsEditOpen(true); setExperienceData(exp);}} className='p-2 hover:bg-[#866f55] hover:bg-opacity-10 rounded-full'><Pen /></button>
-              </div>
+              {
+                id === _id && (
+                  <div className='text-gray-500'>
+                    <button onClick={() => { setIsEditOpen(true); setExperienceData(exp); }} className='p-2 hover:bg-[#866f55] hover:bg-opacity-10 rounded-full'><Pen /></button>
+                  </div>
+                )
+              }
             </div>
           </div>
         ))}

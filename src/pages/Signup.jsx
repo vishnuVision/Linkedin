@@ -221,11 +221,11 @@ function Signup() {
                                     <span className="bg-white px-2 text-gray-500">or</span>
                                 </div>
                             </div>
-                            <button disabled={isLoading || !captchaValue} type="button" onClick={handleGoogleSignup} className={`${isLoading || !captchaValue ? "opacity-50 cursor-not-allowed" : ""} flex w-full mt-4 gap-1 justify-center items-center py-2 text-left border rounded-full hover:bg-gray-100 font-medium`}>
+                            <button disabled={isLoading} type="button" onClick={handleGoogleSignup} className={`${isLoading ? "opacity-50 cursor-not-allowed" : ""} flex w-full mt-4 gap-1 justify-center items-center py-2 text-left border rounded-full hover:bg-gray-100 font-medium`}>
                                 <img src="/google.webp" className="w-6 h-6" alt="icon" />
                                 Continue With Google
                             </button>
-                            <button disabled={isLoading || !captchaValue} type="button" onClick={handleMicrosoftSignup} className={`${isLoading || !captchaValue ? "opacity-50 cursor-not-allowed" : ""} flex w-full mt-4 gap-2 justify-center items-center py-2 text-left border rounded-full hover:bg-gray-100 font-medium`}>
+                            <button disabled={isLoading} type="button" onClick={handleMicrosoftSignup} className={`${isLoading ? "opacity-50 cursor-not-allowed" : ""} flex w-full mt-4 gap-2 justify-center items-center py-2 text-left border rounded-full hover:bg-gray-100 font-medium`}>
                                 <img src="/microsoft.png" className="w-6 h-6" alt="icon" />
                                 Continue With Microsoft
                             </button>

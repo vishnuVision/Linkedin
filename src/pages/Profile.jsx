@@ -16,11 +16,10 @@ import PropTypes from 'prop-types';
 import useApi from '../hook/useApi';
 import Loader from '../components/Loaders/Loader';
 import toast from 'react-hot-toast';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { assignUser } from '../redux/slices/authReducer';
 import SkillForm from '../Forms/SkillForm';
 
-const list = ["Please Select", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const PostContext = createContext();
 
 function Profile() {
@@ -123,7 +122,7 @@ function Profile() {
   );
 }
 
-const ProfilePage = ({ user, posts, getUserData, educations,allSkills, experiences, skills, refreshPost, refreshEducation, refreshExperience, refreshSkill }) => {
+const ProfilePage = ({ user, posts, getUserData, educations, allSkills, experiences, skills, refreshPost, refreshEducation, refreshExperience, refreshSkill }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { apiAction } = useApi();
   const dispatch = useDispatch();
@@ -137,7 +136,7 @@ const ProfilePage = ({ user, posts, getUserData, educations,allSkills, experienc
       const { success, data } = await apiAction({
         url: `/api/v1/profile/editProfile`,
         method: "PUT",
-        data: { ...formData, birthday: new Date(2023, list.indexOf(formData?.month), parseInt(formData?.day)).toISOString() },
+        data: { ...formData},
       });
 
       if (success) {
@@ -158,7 +157,7 @@ const ProfilePage = ({ user, posts, getUserData, educations,allSkills, experienc
     <>
       <ProfileHeader setIsModalOpen={setIsModalOpen} user={user} educations={educations} experiences={experiences} />
       <Analytics views={user?.views || 0} />
-      <About refereshUserData={getUserData} about={user?.about} skills={allSkills && allSkills.length > 0 && allSkills.filter((skill)=>skill.isTop).map((skill) => {return {name:skill.name,_id:skill._id}})}/>
+      <About refereshUserData={getUserData} about={user?.about} skills={allSkills && allSkills.length > 0 && allSkills.filter((skill) => skill.isTop).map((skill) => { return { name: skill.name, _id: skill._id } })} />
       <Activity followers={user?.followers?.length} posts={posts} refreshPost={refreshPost} />
       <Experience experiences={experiences} refreshExperience={refreshExperience} />
       <Educations educations={educations} refreshEducation={refreshEducation} />
@@ -198,6 +197,8 @@ const ActivityPage = ({ posts }) => {
 const SkillPage = ({ skills, refreshSkill }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { apiAction } = useApi();
+  const { id } = useParams();
+  const { _id } = useSelector(state => state?.authReducer?.user);
 
   const deleteSkill = async (id) => {
     try {
@@ -224,7 +225,11 @@ const SkillPage = ({ skills, refreshSkill }) => {
         </div>
         <div className="flex justify-between items-center flex-grow">
           <h2 className="text-xl font-bold text-gray-900">Skills</h2>
-          <button onClick={() => setIsOpen(prev => !prev)} className="p-2 hover:bg-[#866f55] hover:bg-opacity-10 rounded-full  "><Plus width={25} height={25} /></button>
+          {
+            id === _id && (
+              <button onClick={() => setIsOpen(prev => !prev)} className="p-2 hover:bg-[#866f55] hover:bg-opacity-10 rounded-full  "><Plus width={25} height={25} /></button>
+            )
+          }
         </div>
       </div>
       <div className="grid grid-cols-1 gap-4 px-4 pb-4">
@@ -249,11 +254,13 @@ const SkillPage = ({ skills, refreshSkill }) => {
                 )
               }
             </div>
-            <div className="flex items-center gap-2 text-gray-500">
-              <div className="flex items-center gap-2 text-gray-500">
-                <button onClick={() => deleteSkill(skill._id)} className='p-2 hover:bg-[#866f55] hover:bg-opacity-10 rounded-full'><Trash2 /></button>
-              </div>
-            </div>
+            {
+              id === _id && (
+                <div className="flex items-center gap-2 text-gray-500">
+                  <button onClick={() => deleteSkill(skill._id)} className='p-2 hover:bg-[#866f55] hover:bg-opacity-10 rounded-full'><Trash2 /></button>
+                </div>
+              )
+            }
           </div>
         ))}
       </div>

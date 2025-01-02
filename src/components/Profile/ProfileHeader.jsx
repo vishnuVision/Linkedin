@@ -2,10 +2,11 @@ import { Camera, MapPin, Briefcase, MessageCircle, UserPlus, Pen, GraduationCap 
 import { useContext, useEffect, useRef, useState } from 'react';
 import { handleModalContext } from '../../contextApi/handleModalContext';
 import PropTypes from 'prop-types';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import useApi from '../../hook/useApi';
+import { useSelector } from 'react-redux';
 
 function ProfileHeader({ setIsModalOpen, user, educations, experiences }) {
   const { setIsChatDetailsOpen } = useContext(handleModalContext);
@@ -22,6 +23,8 @@ function ProfileHeader({ setIsModalOpen, user, educations, experiences }) {
   const [isAvatarLoading, setIsAvatarLoading] = useState(false);
   const [isBackgroundLoading, setIsBackgroundLoading] = useState(false);
   const [avatar, setAvatar] = useState("");
+  const { id } = useParams();
+  const { _id } = useSelector(state => state?.authReducer?.user);
 
   useEffect(() => {
     if (user) {
@@ -54,7 +57,6 @@ function ProfileHeader({ setIsModalOpen, user, educations, experiences }) {
 
   const updateUserBackground = async () => {
     setIsBackgroundLoading(true);
-    console.log("hii");
     try {
       const formData = new FormData();
       formData.append("backgroundImage", image);
@@ -108,11 +110,8 @@ function ProfileHeader({ setIsModalOpen, user, educations, experiences }) {
   useEffect(() => {
     if (avatarImage) {
       updateUserAvatar();
-    }    
+    }
   }, [avatarImage])
-
-  // console.log(isBackgroundLoading);
-  // console.log(isAvatarLoading);
 
   return (
     <div className="bg-white rounded-lg shadow">
@@ -126,9 +125,11 @@ function ProfileHeader({ setIsModalOpen, user, educations, experiences }) {
               className={`w-full h-full object-cover ${isBackgroundLoading ? 'blur-sm' : ''}`}
             />
           }
-          <button disabled={isBackgroundLoading} onClick={() => imageRef.current.click()} className={`absolute right-4 bottom-4 bg-white p-2 rounded-full ${isBackgroundLoading ? "bg-opacity-50 cursor-not-allowed" : "hover:bg-gray-100"}`}>
-            <Camera className="w-5 h-5 text-gray-600" />
-          </button>
+          {
+            id === _id && <button disabled={isBackgroundLoading} onClick={() => imageRef.current.click()} className={`absolute right-4 bottom-4 bg-white p-2 rounded-full ${isBackgroundLoading ? "bg-opacity-50 cursor-not-allowed" : "hover:bg-gray-100"}`}>
+              <Camera className="w-5 h-5 text-gray-600" />
+            </button>
+          }
           <input accept='image/*' ref={imageRef} className='hidden' onChange={(e) => setImage(e.target.files[0])} type='file' />
         </div>
         <div className="absolute -bottom-16 left-4">
@@ -149,17 +150,25 @@ function ProfileHeader({ setIsModalOpen, user, educations, experiences }) {
                 className={`w-32 h-32 rounded-full border-4 border-white ${isAvatarLoading ? 'blur-[20px]' : ''}`}
               />
             }
-            <button onClick={() => avatarRef.current.click()} className={`absolute bottom-0 right-0 bg-white p-2 rounded-full border border-gray-200 ${isBackgroundLoading ? "bg-opacity-50 cursor-not-allowed" : "hover:bg-gray-100"}`}>
-              <Camera className="w-5 h-5 text-gray-600" />
-            </button>
+            {
+              id === _id && (
+                <button onClick={() => avatarRef.current.click()} className={`absolute bottom-0 right-0 bg-white p-2 rounded-full border border-gray-200 ${isBackgroundLoading ? "bg-opacity-50 cursor-not-allowed" : "hover:bg-gray-100"}`}>
+                  <Camera className="w-5 h-5 text-gray-600" />
+                </button>
+              )
+            }
             <input accept='image/*' ref={avatarRef} className='hidden' onChange={(e) => setAvatarImage(e.target.files[0])} type='file' />
           </div>
         </div>
       </div>
       <div className='flex justify-end p-3'>
-        <button onClick={() => setIsModalOpen(true)} className='px-3 py-3 rounded-full bg-[#866f55] bg-opacity-10'>
-          <Pen />
-        </button>
+        {
+          id === _id && (
+            <button onClick={() => setIsModalOpen(true)} className='px-3 py-3 rounded-full bg-[#866f55] bg-opacity-10'>
+              <Pen />
+            </button>
+          )
+        }
       </div>
       <div className="pt-8 px-4 pb-4">
         <div className="flex flex-wrap justify-between items-start">
