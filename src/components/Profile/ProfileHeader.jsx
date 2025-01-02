@@ -129,7 +129,7 @@ function ProfileHeader({ setIsModalOpen, user, educations, experiences }) {
           <button disabled={isBackgroundLoading} onClick={() => imageRef.current.click()} className={`absolute right-4 bottom-4 bg-white p-2 rounded-full ${isBackgroundLoading ? "bg-opacity-50 cursor-not-allowed" : "hover:bg-gray-100"}`}>
             <Camera className="w-5 h-5 text-gray-600" />
           </button>
-          <input ref={imageRef} className='hidden' onChange={(e) => setImage(e.target.files[0])} type='file' />
+          <input accept='image/*' ref={imageRef} className='hidden' onChange={(e) => setImage(e.target.files[0])} type='file' />
         </div>
         <div className="absolute -bottom-16 left-4">
           <div className="relative">
@@ -152,7 +152,7 @@ function ProfileHeader({ setIsModalOpen, user, educations, experiences }) {
             <button onClick={() => avatarRef.current.click()} className={`absolute bottom-0 right-0 bg-white p-2 rounded-full border border-gray-200 ${isBackgroundLoading ? "bg-opacity-50 cursor-not-allowed" : "hover:bg-gray-100"}`}>
               <Camera className="w-5 h-5 text-gray-600" />
             </button>
-            <input ref={avatarRef} className='hidden' onChange={(e) => setAvatarImage(e.target.files[0])} type='file' />
+            <input accept='image/*' ref={avatarRef} className='hidden' onChange={(e) => setAvatarImage(e.target.files[0])} type='file' />
           </div>
         </div>
       </div>

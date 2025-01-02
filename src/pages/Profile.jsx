@@ -9,7 +9,7 @@ import { Routes, Route, useParams } from 'react-router-dom';
 import Notfound from '../components/Notfound';
 import { MoveLeft, Plus, Trash2, Users } from 'lucide-react';
 import Feed from '../components/Dashboard/Feed';
-import { useEffect, useState } from 'react';
+import { createContext, useEffect, useState } from 'react';
 import Modal from '../Modal/Modal';
 import EditIntroForm from '../Forms/EditIntroForm';
 import PropTypes from 'prop-types';
@@ -21,6 +21,7 @@ import { assignUser } from '../redux/slices/authReducer';
 import SkillForm from '../Forms/SkillForm';
 
 const list = ["Please Select", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const PostContext = createContext();
 
 function Profile() {
   const [user, setUser] = useState("");
@@ -109,23 +110,25 @@ function Profile() {
   return (
     <div className="min-h-screen pt-20">
       <div className="max-w-4xl max-h-[90vh] overflow-y-scroll someElement mx-auto px-4 pb-2">
-        <Routes>
-          <Route path="/" element={<ProfilePage getUserData={getUserData} refreshPost={fetchData} refreshEducation={getEducationsData} refreshExperience={getExperiencesData} refreshSkill={getSkills} user={user} posts={posts.length > 3 ? posts.slice(0, 3) : posts || []} educations={educations} experiences={experiences} skills={skills.length > 3 ? skills.slice(0, 3) : skills || []} />} />
-          <Route path="/all-posts" element={<ActivityPage posts={posts} />} />
-          <Route path="/all-skills" element={<SkillPage skills={skills} refreshSkill={getSkills} />} />
-          <Route path="*" element={<Notfound />} />
-        </Routes>
+        <PostContext.Provider value={{ setPosts }}>
+          <Routes>
+            <Route path="/" element={<ProfilePage getUserData={getUserData} allSkills={skills} refreshPost={fetchData} refreshEducation={getEducationsData} refreshExperience={getExperiencesData} refreshSkill={getSkills} user={user} posts={posts.length > 3 ? posts.slice(0, 3) : posts || []} educations={educations} experiences={experiences} skills={skills.length > 3 ? skills.slice(0, 3) : skills || []} />} />
+            <Route path="/all-posts" element={<ActivityPage posts={posts} setPosts={setPosts} />} />
+            <Route path="/all-skills" element={<SkillPage skills={skills} refreshSkill={getSkills} />} />
+            <Route path="*" element={<Notfound />} />
+          </Routes>
+        </PostContext.Provider>
       </div>
     </div>
   );
 }
 
-const ProfilePage = ({ user, posts, getUserData, educations, experiences, skills, refreshPost, refreshEducation, refreshExperience, refreshSkill }) => {
+const ProfilePage = ({ user, posts, getUserData, educations,allSkills, experiences, skills, refreshPost, refreshEducation, refreshExperience, refreshSkill }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { apiAction } = useApi();
   const dispatch = useDispatch();
   const { id } = useParams();
-  const [isLoading,setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSave = async (formData) => {
     let toastId = toast.loading("Updating intro...");
@@ -138,7 +141,7 @@ const ProfilePage = ({ user, posts, getUserData, educations, experiences, skills
       });
 
       if (success) {
-        toast.success("Intro updated successfully",{id: toastId});
+        toast.success("Intro updated successfully", { id: toastId });
         if (id === data._id) {
           dispatch(assignUser(data))
         }
@@ -146,7 +149,7 @@ const ProfilePage = ({ user, posts, getUserData, educations, experiences, skills
       }
       setIsModalOpen(false);
     } catch (error) {
-      toast.error(error.message,{id: toastId});
+      toast.error(error.message, { id: toastId });
     }
     setIsLoading(false);
   };
@@ -155,7 +158,7 @@ const ProfilePage = ({ user, posts, getUserData, educations, experiences, skills
     <>
       <ProfileHeader setIsModalOpen={setIsModalOpen} user={user} educations={educations} experiences={experiences} />
       <Analytics views={user?.views || 0} />
-      <About about={user?.about} />
+      <About refereshUserData={getUserData} about={user?.about} skills={allSkills && allSkills.length > 0 && allSkills.filter((skill)=>skill.isTop).map((skill) => {return {name:skill.name,_id:skill._id}})}/>
       <Activity followers={user?.followers?.length} posts={posts} refreshPost={refreshPost} />
       <Experience experiences={experiences} refreshExperience={refreshExperience} />
       <Educations educations={educations} refreshEducation={refreshEducation} />
@@ -209,7 +212,6 @@ const SkillPage = ({ skills, refreshSkill }) => {
         refreshSkill();
       }
     } catch (error) {
-      console.log(error);
       toast.error(error.message);
     }
   }
@@ -277,6 +279,8 @@ ProfilePage.propTypes = {
   refreshExperience: PropTypes.func,
   refreshEducation: PropTypes.func,
   getUserData: PropTypes.func,
+  setPosts: PropTypes.func,
+  allSkills: PropTypes.array
 };
 
 const handleBack = () => {
@@ -287,5 +291,7 @@ SkillPage.propTypes = {
   skills: PropTypes.array,
   refreshSkill: PropTypes.func,
 };
+
+export { PostContext };
 
 export default Profile;

@@ -47,7 +47,7 @@ function Educations({ educations, refreshEducation }) {
                                     edu?.media && edu?.media.length > 0 && (
                                         <div className="flex gap-2 mt-2">
                                             {edu?.media.map(({ url }, index) => (
-                                                <Link to={url} key={index} className='relative rounded-xl overflow-hidden'>
+                                                <Link to={url} target="_blank" key={index} className='relative rounded-xl overflow-hidden'>
                                                     <img src={url} alt={`media-${index}`} key={index} className="w-32 h-16 object-cover" />
                                                     <div className='absolute -bottom-1 -right-1 bg-white rounded-xl p-2'>
                                                         <SquareArrowOutUpRight width={20} height={20} />

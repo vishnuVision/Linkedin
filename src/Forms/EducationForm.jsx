@@ -91,8 +91,8 @@ function EducationForm({ setIsOpen, refreshEducation, isUpdate, educationsData }
     }
 
     const handleFormSubmit = async (data) => {
-        let toastId = toast("Adding education...");
-        isLoading(true);
+        let toastId = toast.loading("Adding education...");
+        setIsLoading(true);
         const formData = new FormData();
         Object.entries(data).forEach(([key, value]) => formData.append(key, value));
         skills.map((skill) => formData.append("skills", skill));
@@ -112,7 +112,7 @@ function EducationForm({ setIsOpen, refreshEducation, isUpdate, educationsData }
 
         if (success) {
             toast.success("Education added successfully", { id: toastId });
-            isLoading(false);
+            setIsLoading(false);
             refreshEducation();
             setIsOpen(false);
         }
@@ -202,7 +202,7 @@ function EducationForm({ setIsOpen, refreshEducation, isUpdate, educationsData }
     }
 
     const applyMedia = () => {
-        setMedia(prev => [...prev, { title: imagetitle, description: description, preview: imagePreview }]);
+        setMedia(prev => [...prev, { title: imagetitle, description: description, url: imagePreview }]);
         setMediaList(prev => [...prev, { title: imagetitle, description: description, url: image }]);
         resetData();
     }
@@ -283,9 +283,9 @@ function EducationForm({ setIsOpen, refreshEducation, isUpdate, educationsData }
                                     <FormSelect disable={isPresent} label="End Year" list={["Please Select", ...Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i)]} value={register("endYear", isPresent ? { required: false } : { required: "End Year is required" })} error={isPresent ? "" : errors.endYear && errors.endYear.message} />
                                 </div>
                             </div>
-                            <FormInput label="Grade" value={register("grade", { required: "Grade is required" })} error={errors.grade && errors.grade.message} />
-                            <FormInput label="Activities and societies" value={register("activities", { required: "Activities and societies is required" })} error={errors.activities && errors.activities.message} />
-                            <FormTextArea label="Description" value={register("description", { required: "Description is required" })} error={errors.description && errors.description.message} />
+                            <FormInput placeholder="Ex: 10.00" label="Grade" value={register("grade", { required: "Grade is required" })} error={errors.grade && errors.grade.message} />
+                            <FormInput placeholder="Ex: Volleyball, Boxing" label="Activities and societies" value={register("activities", { required: "Activities and societies is required" })} error={errors.activities && errors.activities.message} />
+                            <FormTextArea placeholder="Ex: Description for Your Educations" label="Description" value={register("description", { required: "Description is required" })} error={errors.description && errors.description.message} />
                             <div>
                                 <label className="block text-lg font-medium text-gray-700">
                                     Skills
@@ -321,7 +321,7 @@ function EducationForm({ setIsOpen, refreshEducation, isUpdate, educationsData }
                                     <button onClick={imageUploadHandler} type="button" disabled={skills?.length >= 10 ? true : false} className={`flex border items-center gap-1 border-gray-600 px-4 py-1 rounded-full ${skills?.length >= 10 ? "cursor-not-allowed" : "hover:bg-gray-200 hover:ring-1 hover:ring-black"}`}>
                                         <Plus size={20} /> Add Media
                                     </button>
-                                    <input accept="image/" className="hidden" type="file" ref={imageRef} value={image} onChange={(e) => setImage(e.target.files[0])} />
+                                    <input accept="image/*" className="hidden" type="file" ref={imageRef} value={image} onChange={(e) => setImage(e.target.files[0])} />
                                 </div>
                                 <div className='flex flex-wrap gap-2 mt-3'>
                                     {

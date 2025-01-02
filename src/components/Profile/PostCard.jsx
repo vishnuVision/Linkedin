@@ -16,7 +16,7 @@ function PostCard({ post }) {
             </div>
             <div className="flex items-center overflow-hidden gap-2">
                 {
-                    post.image && <img src={post.image} alt="" className="w-16 h-16 rounded-md" />
+                    post.media && <img src={post.media[0]} alt="" className="w-16 h-16 rounded-md" />
                 }
                 <div className="line-clamp-2">
                     {post.text}

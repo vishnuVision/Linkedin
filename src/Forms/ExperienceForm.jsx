@@ -282,10 +282,10 @@ function ExperienceForm({ setIsOpen, refreshExperience, experienceData, isUpdate
 
                             <div className='flex gap-4'>
                                 <div className='flex-grow'>
-                                    <FormSelect disable={isPresent} label="End Month" list={list} value={register("endMonth", isPresent ? { required: false } : { required: "End Month is required" })} error={errors.endMonth && errors.endMonth.message} />
+                                    <FormSelect disable={isPresent} label="End Month" list={list} value={register("endMonth", isPresent ? { required: false } : { required: "End Month is required" })} error={isPresent ? ""  : errors.endMonth && errors.endMonth.message} />
                                 </div>
                                 <div className='flex-grow'>
-                                    <FormSelect disable={isPresent} label="End Year" list={["Please Select", ...Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i)]} value={register("endYear", isPresent ? { required: false } : { required: "End Year is required" })} error={errors.endYear && errors.endYear.message} />
+                                    <FormSelect disable={isPresent} label="End Year" list={["Please Select", ...Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i)]} value={register("endYear", isPresent ? { required: false } : { required: "End Year is required" })} error={isPresent ? "" :errors.endYear && errors.endYear.message} />
                                 </div>
                             </div>
 
@@ -327,7 +327,7 @@ function ExperienceForm({ setIsOpen, refreshExperience, experienceData, isUpdate
                                     <button onClick={imageUploadHandler} type="button" disabled={skills?.length >= 10 ? true : false} className={`flex border items-center gap-1 border-gray-600 px-4 py-1 rounded-full ${skills?.length >= 10 ? "cursor-not-allowed" : "hover:bg-gray-200 hover:ring-1 hover:ring-black"}`}>
                                         <Plus size={20} /> Add Media
                                     </button>
-                                    <input accept="image/" className="hidden" type="file" ref={imageRef} value={image} onChange={(e) => setImage(e.target.files[0])} />
+                                    <input accept="image/*" className="hidden" type="file" ref={imageRef} value={image} onChange={(e) => setImage(e.target.files[0])} />
                                 </div>
                                 <div className='flex flex-wrap gap-2 mt-3'>
                                     {

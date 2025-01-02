@@ -2,12 +2,13 @@ import { Image, MessageSquare, Send, Share2, Smile, ThumbsUp, X } from "lucide-r
 import PropTypes from "prop-types"
 import ImageGrid from "./ImageGrid"
 import { Link, useParams } from "react-router-dom"
-import { useEffect, useRef, useState } from "react"
+import { useContext, useEffect, useRef, useState } from "react"
 import moment from "moment";
 import useApi from "../../hook/useApi"
 import EmojiPicker from "emoji-picker-react"
 import CommentList from "../comments/CommentList";
-import PostContext from "../../contextApi/postContext";
+import { PostContext as refereshPost } from "../../pages/Profile";
+import PostContext from "../../contextApi/postContext.js";
 import { useSelector } from "react-redux"
 
 function PostCard({ post }) {
@@ -24,10 +25,11 @@ function PostCard({ post }) {
     const user = useSelector((state) => state.authReducer.user); 
     const {id} = useParams();
     const isAuthor = id === user._id;
+    const setPosts = useContext(refereshPost)?.setPosts;
 
     const handleLike = async () => {
         if (isLiked) {
-            const { success } = await apiAction({
+            const { success,data } = await apiAction({
                 url: `/api/v1/post/like/removeLike/${post?._id}`,
                 method: "DELETE",
                 header: {}
@@ -36,10 +38,11 @@ function PostCard({ post }) {
             if (success) {
                 setIsLiked(false);
                 setLikeCount(likeCount - 1);
+                editPosts(likeCount-1,data?.post);
             }
         }
         else {
-            const { success } = await apiAction({
+            const { success,data } = await apiAction({
                 url: `/api/v1/post/like/addLike/${post._id}`,
                 method: "POST",
                 data: { type: "post" }
@@ -48,8 +51,36 @@ function PostCard({ post }) {
             if (success) {
                 setIsLiked(true);
                 setLikeCount(likeCount + 1);
+                editPosts(likeCount+1,data?.post);
             }
         }
+    }  
+    
+    const editPosts = async (likeCount,id) => {
+        if(!setPosts) return;
+        setPosts((prev) => prev.map((post) => {
+            if (post._id === id) {
+                return {
+                    ...post,
+                    likeCount: likeCount,
+                    isLike: !isLiked
+                };
+            }
+            return post;
+        }));
+    }
+
+    const editPostsForComment = async (comments,id) => {
+        if(!setPosts) return;
+        setPosts((prev) => prev.map((post) => {
+            if (post._id === id) {
+                return {
+                    ...post,
+                    comment: comments
+                };
+            }
+            return post;
+        }));
     }
 
     const handleFileUpload = async () => {
@@ -76,6 +107,7 @@ function PostCard({ post }) {
         });
 
         if (success && data) {
+            editPostsForComment([...comment,data],data?.referenceId);
             setComment(prev => [...prev, data]);
             setContent("");
             setImagePreview("");
@@ -296,7 +328,7 @@ function PostCard({ post }) {
 }
 
 PostCard.propTypes = {
-    post: PropTypes.object
+    post: PropTypes.object,
 }
 
 export default PostCard
