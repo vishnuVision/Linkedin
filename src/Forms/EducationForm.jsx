@@ -1,4 +1,4 @@
-import { Edit2, Menu, MoveLeft, Plus, Trash2, X } from "lucide-react";
+import { Edit2, Menu, MoveLeft, Plus, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import Input from "../components/Ui/Input";
 import Textarea from "../components/Ui/Textarea";
@@ -11,8 +11,6 @@ import FormInput from "../components/Ui/FormInput";
 import toast from "react-hot-toast";
 import CreatableSelect from "react-select/creatable";
 import { customStyles } from "../utils/reactStyle";
-import { use } from "react";
-import ImageGrid from "../components/ImageUpload/ImageGrid";
 
 const list = ["Please Select", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
@@ -34,7 +32,6 @@ function EducationForm({ setIsOpen, refreshEducation, isUpdate, educationsData }
     const [school, setSchool] = useState({});
     const [schoolError, setSchoolError] = useState("");
     const [imageIndex, setImageIndex] = useState(null);
-    const [updatedImage,setUpdatedImage] = useState("");
 
     useEffect(() => {
         setSchool({ value: educationsData?.school._id, label: educationsData?.school.name });
@@ -190,10 +187,6 @@ function EducationForm({ setIsOpen, refreshEducation, isUpdate, educationsData }
         setImagePreview("");
     }
 
-    const imageUploadHandler = () => {
-        imageRef?.current?.click();
-    }
-
     useEffect(() => {
         if (image) {
             setImageTitle(image?.name);
@@ -207,11 +200,18 @@ function EducationForm({ setIsOpen, refreshEducation, isUpdate, educationsData }
         setImagePreview("");
         setImageTitle("");
         setDesctiption("");
+        setImageIndex(null);
     }
 
     const applyMedia = () => {
-        setMedia(prev => [...prev, { title: imagetitle, description: description, url: imagePreview }]);
-        setMediaList(prev => [...prev, { title: imagetitle, description: description, url: image }]);
+        if (imageIndex !== null) {
+            setMedia(media.map((media, idx) => idx === imageIndex ? { title: imagetitle, description: description, url: imagePreview } : media));
+            setMediaList(mediaList.map((media, idx) => idx === imageIndex ? { title: imagetitle, description: description, url: image } : media));
+        }
+        else {
+            setMedia(prev => [...prev, { title: imagetitle, description: description, url: imagePreview }]);
+            setMediaList(prev => [...prev, { title: imagetitle, description: description, url: image }]);
+        }
         resetData();
     }
 
@@ -262,6 +262,7 @@ function EducationForm({ setIsOpen, refreshEducation, isUpdate, educationsData }
         }
         const blob = await response.blob();
         const file = new File([blob], image?.title, { type: blob.type });
+        setDesctiption(image?.description);
         setImage(file);
         setImageIndex(index);
     }
@@ -296,11 +297,10 @@ function EducationForm({ setIsOpen, refreshEducation, isUpdate, educationsData }
                                 className="w-full h-full object-cover rounded-lg"
                             />
                             <div className="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-2">
-                                {/* onClick={() => onFileChange(index)} */}
-                                <button type="button" onClick={imageUploadHandler} className="p-2 bg-white rounded-full hover:bg-gray-100">
+                                <button type="button" onClick={() => imageRef.current.click()} className="p-2 bg-white rounded-full hover:bg-gray-100">
                                     <Edit2 className="w-5 h-5 text-gray-700" />
                                 </button>
-                                <input accept="image/*" className="hidden" type="file" ref={imageRef}  value={updatedImage} onChange={(e) => changeuploadMedia(e.target.files[0])} />
+                                <input accept="image/*" className="hidden" type="file" ref={imageRef} onChange={(e) => setImage(e.target.files[0])} />
                             </div>
                         </div>
                     </div>
@@ -389,31 +389,29 @@ function EducationForm({ setIsOpen, refreshEducation, isUpdate, educationsData }
                                 </label>
                                 <p className='text-sm mb-1 text-gray-600'>Add media like images, documents, sites or presentations.</p>
                                 <div className='flex gap-2 items-center mt-2'>
-                                    <button onClick={imageUploadHandler} type="button" disabled={skills?.length >= 10 ? true : false} className={`flex border items-center gap-1 border-gray-600 px-4 py-1 rounded-full ${skills?.length >= 10 ? "cursor-not-allowed" : "hover:bg-gray-200 hover:ring-1 hover:ring-black"}`}>
+                                    <button onClick={() => imageRef.current.click()} type="button" disabled={skills?.length >= 10 ? true : false} className={`flex border items-center gap-1 border-gray-600 px-4 py-1 rounded-full ${skills?.length >= 10 ? "cursor-not-allowed" : "hover:bg-gray-200 hover:ring-1 hover:ring-black"}`}>
                                         <Plus size={20} /> Add Media
                                     </button>
-                                    <input accept="image/*" className="hidden" type="file" ref={imageRef} value={image} onChange={(e) => setImage(e.target.files[0])} />
+                                    <input accept="image/*" className="hidden" type="file" ref={imageRef} onChange={(e) => setImage(e.target.files[0])} />
                                 </div>
                                 <div className="max-w-2xl mt-4 bg-gray-50">
                                     <div className="space-y-2">
                                         {media && media.length > 0 && media.map((image, index) => (
-                                            <>
-                                                <div onClick={() => changeuploadMedia(image, index)} className="hover:cursor-pointer flex items-center justify-between p-4 mb-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow">
-                                                    <div className="flex items-center space-x-4">
-                                                        <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-200">
-                                                            <img
-                                                                src={image?.url}
-                                                                alt={image?.title}
-                                                                className="w-full h-full object-cover"
-                                                            />
-                                                        </div>
-                                                        <h3 className="text-lg font-medium text-gray-900">{image?.title}</h3>
+                                            <div key={image._id} onClick={() => changeuploadMedia(image, index)} className="hover:cursor-pointer flex items-center justify-between p-4 mb-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow">
+                                                <div className="flex items-center space-x-4">
+                                                    <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-200">
+                                                        <img
+                                                            src={image?.url}
+                                                            alt={image?.title}
+                                                            className="w-full h-full object-cover"
+                                                        />
                                                     </div>
-                                                    <button type="button" onClick={() => changeuploadMedia(image, index)} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-                                                        <Menu className="w-5 h-5 text-gray-500" />
-                                                    </button>
+                                                    <h3 className="text-lg font-medium text-gray-900">{image?.title}</h3>
                                                 </div>
-                                            </>
+                                                <button type="button" onClick={() => changeuploadMedia(image, index)} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                                                    <Menu className="w-5 h-5 text-gray-500" />
+                                                </button>
+                                            </div>
                                         ))}
                                     </div>
                                 </div>

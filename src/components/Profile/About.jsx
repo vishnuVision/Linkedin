@@ -16,6 +16,7 @@ function About({ about, skills = [], refereshUserData }) {
   const { apiAction } = useApi();
   const { id } = useParams();
   const { _id } = useSelector(state => state?.authReducer?.user);
+  const [summaryError, setSummaryError] = useState("");
 
   useEffect(() => {
     setSkillList(skills);
@@ -24,6 +25,11 @@ function About({ about, skills = [], refereshUserData }) {
 
   const editAbout = async (e) => {
     e.preventDefault();
+    if(!summary)
+    {
+      setSummaryError("Summary is required");
+      return;
+    }
     let toastId = toast.loading("Updating About...");
     setIsLoading(true);
     try {
@@ -47,7 +53,7 @@ function About({ about, skills = [], refereshUserData }) {
 
   return (
     <>
-      <div className="bg-white rounded-lg shadow p-6 mt-4">
+      <div className="bg-white rounded-lg shadow p-8 mt-4">
         <div className="flex justify-between items-start mb-4">
           <h2 className="text-xl font-semibold">About</h2>
           {
@@ -100,7 +106,7 @@ function About({ about, skills = [], refereshUserData }) {
         onClose={() => setIsModalOpen(false)}
         title="Edit about"
       >
-        <AboutForm setSummary={setSummary} summary={summary} isLoading={isLoading} setSkills={setSkillList} skills={skillList} onCancel={() => setIsModalOpen(false)} onSave={editAbout} />
+        <AboutForm setSummary={setSummary} setSummaryError={setSummaryError} summaryError={summaryError} summary={summary} isLoading={isLoading} setSkills={setSkillList} skills={skillList || []} onCancel={() => setIsModalOpen(false)} onSave={editAbout} />
       </Modal>
     </>
   );

@@ -23,8 +23,8 @@ function FormSelect({ label, list, value, error, disable=false }) {
 FormSelect.propTypes = {
     label: PropTypes.string,
     list: PropTypes.array,
-    value: PropTypes.string,
-    error: PropTypes.object,
+    value: PropTypes.any,
+    error: PropTypes.string,
     disable:PropTypes.bool
 }
 

@@ -1,4 +1,4 @@
-import { Menu, MoveLeft, Plus, X } from "lucide-react"
+import { Edit2, Menu, MoveLeft, Plus, X } from "lucide-react"
 import Input from "../components/Ui/Input"
 import Textarea from "../components/Ui/Textarea"
 import { useEffect, useRef, useState } from "react"
@@ -31,12 +31,11 @@ function ExperienceForm({ setIsOpen, refreshExperience, experienceData, isUpdate
     const [isLoading, setIsLoading] = useState(false);
     const [companyError, setCompanyError] = useState("");
     const [company, setCompany] = useState({});
+    const [imageIndex, setImageIndex] = useState(null);
 
     useEffect(() => {
         setCompany({ value: experienceData?.company._id, label: experienceData?.company.name });
     }, [experienceData])
-
-    console.log(experienceData);
 
     const {
         register,
@@ -186,9 +185,12 @@ function ExperienceForm({ setIsOpen, refreshExperience, experienceData, isUpdate
         setSkills(skills.filter((skill, idx) => idx !== index));
     }
 
-    const deleteMedia = (index) => {
-        setMedia(media.filter((media, idx) => idx !== index));
-        setMediaList(mediaList.filter((skill, idx) => idx !== index))
+    const deleteMedia = () => {
+        setMedia(media.filter((media, idx) => idx !== imageIndex));
+        setMediaList(mediaList.filter((skill, idx) => idx !== imageIndex))
+        setImageIndex(null);
+        setImage("");
+        setImagePreview("");
     }
 
     const imageUploadHandler = () => {
@@ -208,11 +210,18 @@ function ExperienceForm({ setIsOpen, refreshExperience, experienceData, isUpdate
         setImagePreview("");
         setImageTitle("");
         setDesctiption("");
+        setImageIndex(null);
     }
 
     const applyMedia = () => {
-        setMedia(prev => [...prev, { title: imagetitle, description: description, url: imagePreview }]);
-        setMediaList(prev => [...prev, { title: imagetitle, description: description, url: image }]);
+        if (imageIndex !== null) {
+            setMedia(media.map((media, idx) => idx === imageIndex ? { title: imagetitle, description: description, url: imagePreview } : media));
+            setMediaList(mediaList.map((media, idx) => idx === imageIndex ? { title: imagetitle, description: description, url: image } : media));
+        }
+        else {
+            setMedia(prev => [...prev, { title: imagetitle, description: description, url: imagePreview }]);
+            setMediaList(prev => [...prev, { title: imagetitle, description: description, url: image }]);
+        }
         resetData();
     }
 
@@ -252,6 +261,18 @@ function ExperienceForm({ setIsOpen, refreshExperience, experienceData, isUpdate
         }
     }
 
+    const changeuploadMedia = async (image, index) => {
+        const response = await fetch(image?.url);
+        if (!response.ok) {
+            throw new Error('Failed to fetch image from Cloudinary');
+        }
+        const blob = await response.blob();
+        const file = new File([blob], image?.title, { type: blob.type });
+        setDesctiption(image?.description);
+        setImage(file);
+        setImageIndex(index);
+    }
+
     return (
         <>
             {
@@ -275,9 +296,24 @@ function ExperienceForm({ setIsOpen, refreshExperience, experienceData, isUpdate
                     />
                     <div className="flex flex-col gap-2">
                         <p className="text-sm text-gray-500">Thumbnail</p>
-                        <img className="w-64 object-contain border rounded-lg" src={imagePreview} alt={image?.name} />
+                        <div className="relative group aspect-square h-52 w-52 ">
+                            <img
+                                src={imagePreview}
+                                alt={image?.name}
+                                className="w-full h-full object-cover rounded-lg"
+                            />
+                            <div className="absolute inset-0 bg-black bg-opacity-40 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-2">
+                                <button type="button" onClick={() => imageRef.current.click()} className="p-2 bg-white rounded-full hover:bg-gray-100">
+                                    <Edit2 className="w-5 h-5 text-gray-700" />
+                                </button>
+                                <input accept="image/*" className="hidden" type="file" ref={imageRef} onChange={(e) => setImage(e.target.files[0])} />
+                            </div>
+                        </div>
                     </div>
-                    <div className="flex justify-end">
+                    <div className="flex justify-between">
+                        <button onClick={deleteMedia} className='bg-gray-200 px-4 py-1 rounded-full text-gray-700 font-semibold text-md' type="button">
+                            Delete
+                        </button>
                         <button onClick={applyMedia} className='bg-[#0a66c2] px-4 py-1 rounded-full text-white font-semibold text-md' type="button">
                             Apply
                         </button>
@@ -380,23 +416,21 @@ function ExperienceForm({ setIsOpen, refreshExperience, experienceData, isUpdate
                                 <div className="max-w-2xl mt-4 bg-gray-50">
                                     <div className="space-y-2">
                                         {media && media.length > 0 && media.map((image, index) => (
-                                            <>
-                                                <div className="flex items-center justify-between p-4 mb-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow">
-                                                    <div className="flex items-center space-x-4">
-                                                        <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-200">
-                                                            <img
-                                                                src={image?.url}
-                                                                alt={image?.title}
-                                                                className="w-full h-full object-cover"
-                                                            />
-                                                        </div>
-                                                        <h3 className="text-lg font-medium text-gray-900">{image?.title}</h3>
+                                            <div key={image._id} onClick={() => changeuploadMedia(image, index)} className="hover:cursor-pointer flex items-center justify-between p-4 mb-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow">
+                                                <div className="flex items-center space-x-4">
+                                                    <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-200">
+                                                        <img
+                                                            src={image?.url}
+                                                            alt={image?.title}
+                                                            className="w-full h-full object-cover"
+                                                        />
                                                     </div>
-                                                    <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-                                                        <Menu className="w-5 h-5 text-gray-500" />
-                                                    </button>
+                                                    <h3 className="text-lg font-medium text-gray-900">{image?.title}</h3>
                                                 </div>
-                                            </>
+                                                <button type="button" onClick={() => changeuploadMedia(image, index)} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                                                    <Menu className="w-5 h-5 text-gray-500" />
+                                                </button>
+                                            </div>
                                         ))}
                                     </div>
                                 </div>

@@ -158,7 +158,7 @@ const ProfilePage = ({ user, posts, getUserData, educations, allSkills, experien
     <>
       <ProfileHeader setIsModalOpen={setIsModalOpen} user={user} educations={educations} experiences={experiences} />
       <Analytics views={user?.views || 0} impressions={user?.impressions || 0} appearances={user?.appearances || 0} />
-      <About refereshUserData={getUserData} about={user?.about} skills={allSkills && allSkills.length > 0 && allSkills.filter((skill) => skill.isTop).map((skill) => { return { name: skill.name, _id: skill._id } })} />
+      <About refereshUserData={getUserData} about={user?.about} skills={allSkills && allSkills.length > 0 ? allSkills.filter((skill) => skill.isTop).map((skill) => { return { name: skill.name, _id: skill._id } }) : []} />
       <Activity followers={user?.followers?.length} posts={posts} refreshPost={refreshPost} />
       <Experience experiences={experiences} refreshExperience={refreshExperience} />
       <Educations educations={educations} refreshEducation={refreshEducation} />
@@ -296,7 +296,6 @@ ProfilePage.propTypes = {
   refreshExperience: PropTypes.func,
   refreshEducation: PropTypes.func,
   getUserData: PropTypes.func,
-  setPosts: PropTypes.func,
   allSkills: PropTypes.array
 };
 

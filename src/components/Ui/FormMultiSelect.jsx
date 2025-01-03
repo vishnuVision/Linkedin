@@ -24,7 +24,7 @@ FormMultiSelect.propTypes = {
     label: PropTypes.string,
     list: PropTypes.array,
     value: PropTypes.any,
-    error: PropTypes.object,
+    error: PropTypes.string,
     disable:PropTypes.bool
 }
 

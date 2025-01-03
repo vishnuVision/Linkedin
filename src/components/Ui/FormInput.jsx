@@ -19,7 +19,7 @@ FormInput.propTypes = {
     label: PropTypes.string,
     type: PropTypes.string,
     placeholder: PropTypes.string,
-    value: PropTypes.string,
+    value: PropTypes.any,
     setvalue: PropTypes.func,
     error: PropTypes.string,
     disable:PropTypes.bool

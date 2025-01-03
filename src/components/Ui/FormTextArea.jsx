@@ -17,8 +17,8 @@ function FormTextArea({ label, placeholder, value, error, disable = false }) {
 FormTextArea.propTypes = {
     label: PropTypes.string,
     placeholder: PropTypes.string,
-    value: PropTypes.string,
-    error: PropTypes.object,
+    value: PropTypes.any,
+    error: PropTypes.string,
     disable:PropTypes.bool
 }
 

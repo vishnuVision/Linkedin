@@ -1,15 +1,25 @@
 import { Plus, X } from "lucide-react";
 import PropTypes from "prop-types";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Input from "../components/Ui/Input";
 import useApi from "../hook/useApi";
 import toast from "react-hot-toast";
 
-function AboutForm({ onCancel, onSave, setSummary, summary, skills, setSkills, isLoading }) {
+function AboutForm({ onCancel, onSave, setSummary, summary, skills, setSkills, isLoading, summaryError,setSummaryError }) {
     const [skill, setSkill] = useState("");
     const [error, setError] = useState("");
     const [isEdit, setIsEdit] = useState(false);
     const { apiAction } = useApi();
+
+    useEffect(() => {
+        if (summary) {
+            setSummaryError("");
+        }
+        else
+        {
+            setSummaryError("Summary is required");
+        }
+    }, [summary]);
 
     const addSkills = () => {
         setError("");
@@ -53,7 +63,7 @@ function AboutForm({ onCancel, onSave, setSummary, summary, skills, setSkills, i
     return (
 
         <form onSubmit={(e) => onSave(e)} className="relative flex flex-col space-y-6">
-            <div className="flex-1 overflow-auto max-h-[60vh]">
+            <div className="flex-1 overflow-auto max-h-[60vh] p-2">
                 <div className="space-y-6">
                     <div className="space-y-2">
                         <p className="text-sm text-gray-600">
@@ -61,8 +71,8 @@ function AboutForm({ onCancel, onSave, setSummary, summary, skills, setSkills, i
                         </p>
 
                         <div className="space-y-4">
-                            <div className="rounded border border-gray-300">
-                                <div className="p-3 border-b border-gray-300">
+                            <div className={`rounded border ${summaryError ? "border-red-400" : "border-gray-300"}`}>
+                                <div className={`p-3 border-b ${summaryError ? "border-red-400" : "border-gray-300"}`}>
                                     <h3 className="font-medium">Professional Summary</h3>
                                 </div>
                                 <div className="">
@@ -76,6 +86,10 @@ function AboutForm({ onCancel, onSave, setSummary, summary, skills, setSkills, i
                                 </div>
                             </div>
                         </div>
+                        {
+                            summaryError &&
+                            <p className="text-sm text-red-400">{summaryError}</p>
+                        }
                     </div>
 
                     <div className="space-y-4">
@@ -154,6 +168,8 @@ AboutForm.propTypes = {
     setSummary: PropTypes.func,
     skills: PropTypes.array,
     setSkills: PropTypes.func,
+    summaryError: PropTypes.string,
+    setSummaryError: PropTypes.func
 }
 
 export default AboutForm

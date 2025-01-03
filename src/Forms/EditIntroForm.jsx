@@ -19,10 +19,7 @@ function EditIntroForm({ onSave, onCancel, user, isLoading }) {
     const {
         register,
         handleSubmit,
-        watch,
         formState: { errors },
-        setValue,
-        control
     } = useForm({
         defaultValues: {
             firstName: user?.firstName || "",
@@ -48,9 +45,9 @@ function EditIntroForm({ onSave, onCancel, user, isLoading }) {
         <>
             {
                 !isModalOpen ? (
-                    <EditForm control={control} setRegion={setRegion} setCity={setCity} region={region} city={city} user={user} isLoading={isLoading} watch={watch} register={register} errors={errors} handleSubmit={handleSubmit} handleUpdate={updateContactInfo} onCancel={onCancel} isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} />
+                    <EditForm setRegion={setRegion} setCity={setCity} region={region} city={city} isLoading={isLoading} register={register} errors={errors} handleSubmit={handleSubmit} handleUpdate={updateContactInfo} onCancel={onCancel} setIsModalOpen={setIsModalOpen} />
                 ) :
-                    <EditContactInfo user={user} isLoading={isLoading} setBirthdayDate={setBirthdayDate} birthdayDate={birthdayDate} setValue={setValue} register={register} errors={errors} watch={watch} handleSubmit={handleSubmit} handleUpdate={updateContactInfo} onCancel={() => setIsModalOpen(false)} />
+                    <EditContactInfo isLoading={isLoading} setBirthdayDate={setBirthdayDate} birthdayDate={birthdayDate} register={register} errors={errors} handleSubmit={handleSubmit} handleUpdate={updateContactInfo} onCancel={() => setIsModalOpen(false)} />
             }
         </>
     );
@@ -280,8 +277,6 @@ EditForm.propTypes = {
     handleSubmit: PropTypes.any,
     handleUpdate: PropTypes.func,
     isLoading: PropTypes.bool,
-    watch: PropTypes.func,
-    control: PropTypes.func,
     region: PropTypes.object,
     city: PropTypes.object,
     setRegion: PropTypes.func,
@@ -296,7 +291,6 @@ EditContactInfo.propTypes = {
     register: PropTypes.any,
     handleSubmit: PropTypes.any,
     handleUpdate: PropTypes.func,
-    setValue: PropTypes.func,
     isLoading: PropTypes.bool,
 }
 
