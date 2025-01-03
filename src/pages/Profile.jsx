@@ -19,6 +19,7 @@ import toast from 'react-hot-toast';
 import { useDispatch, useSelector } from 'react-redux';
 import { assignUser } from '../redux/slices/authReducer';
 import SkillForm from '../Forms/SkillForm';
+import ProfileCard from '../components/Dashboard/ProfileCard';
 
 const PostContext = createContext();
 
@@ -108,7 +109,7 @@ function Profile() {
 
   return (
     <div className="min-h-screen pt-20">
-      <div className="max-w-4xl max-h-[90vh] overflow-y-scroll someElement mx-auto px-4 pb-2">
+      <div className="max-w-5xl max-h-[90vh] overflow-y-scroll someElement mx-auto px-4 pb-2">
         <PostContext.Provider value={{ setPosts }}>
           <Routes>
             <Route path="/" element={<ProfilePage getUserData={getUserData} allSkills={skills} refreshPost={fetchData} refreshEducation={getEducationsData} refreshExperience={getExperiencesData} refreshSkill={getSkills} user={user} posts={posts.length > 3 ? posts.slice(0, 3) : posts || []} educations={educations} experiences={experiences} skills={skills.length > 3 ? skills.slice(0, 3) : skills || []} />} />
@@ -136,7 +137,7 @@ const ProfilePage = ({ user, posts, getUserData, educations, allSkills, experien
       const { success, data } = await apiAction({
         url: `/api/v1/profile/editProfile`,
         method: "PUT",
-        data: { ...formData},
+        data: { ...formData },
       });
 
       if (success) {
@@ -156,7 +157,7 @@ const ProfilePage = ({ user, posts, getUserData, educations, allSkills, experien
   return (
     <>
       <ProfileHeader setIsModalOpen={setIsModalOpen} user={user} educations={educations} experiences={experiences} />
-      <Analytics views={user?.views || 0} />
+      <Analytics views={user?.views || 0} impressions={user?.impressions || 0} appearances={user?.appearances || 0} />
       <About refereshUserData={getUserData} about={user?.about} skills={allSkills && allSkills.length > 0 && allSkills.filter((skill) => skill.isTop).map((skill) => { return { name: skill.name, _id: skill._id } })} />
       <Activity followers={user?.followers?.length} posts={posts} refreshPost={refreshPost} />
       <Experience experiences={experiences} refreshExperience={refreshExperience} />
@@ -180,17 +181,26 @@ const ProfilePage = ({ user, posts, getUserData, educations, allSkills, experien
 
 const ActivityPage = ({ posts }) => {
   return (
-    <div className="bg-white rounded-lg shadow pt-6 mt-4">
-      <div className='flex items-center gap-2 px-6 mb-4'>
-        <div onClick={handleBack} className='w-10 h-10 hover:bg-[#866f55] hover:bg-opacity-10 rounded-full flex justify-center items-center cursor-pointer'>
-          <MoveLeft />
+    <main className="px-2">
+      <div className="max-w-6xl mx-auto grid grid-cols-12 gap-4">
+        <div className="col-span-12 md:col-span-3">
+          <ProfileCard />
         </div>
-        <h2 className="text-xl font-bold text-gray-900">All Posts</h2>
+        <div className="col-span-12 md:col-span-9 md:max-h-[90vh] md:overflow-scroll someElement">
+          <div className="bg-white rounded-lg shadow pt-6">
+            <div className='flex items-center gap-2 px-6 mb-4'>
+              <div onClick={handleBack} className='w-10 h-10 hover:bg-[#866f55] hover:bg-opacity-10 rounded-full flex justify-center items-center cursor-pointer'>
+                <MoveLeft />
+              </div>
+              <h2 className="text-xl font-bold text-gray-900">All Posts</h2>
+            </div>
+            <div className="grid grid-cols-1 gap-4 px-4 pb-4">
+              <Feed posts={posts} />
+            </div>
+          </div>
+        </div>
       </div>
-      <div className="grid grid-cols-1 gap-4 px-4 pb-4">
-        <Feed posts={posts} />
-      </div>
-    </div>
+    </main >
   )
 }
 
