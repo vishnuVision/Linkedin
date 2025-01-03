@@ -1,4 +1,4 @@
-import { MoveLeft, Plus, X } from "lucide-react"
+import { Menu, MoveLeft, Plus, X } from "lucide-react"
 import Input from "../components/Ui/Input"
 import Textarea from "../components/Ui/Textarea"
 import { useEffect, useRef, useState } from "react"
@@ -7,7 +7,8 @@ import useApi from "../hook/useApi"
 import { useForm } from "react-hook-form"
 import FormSelect from "../components/Ui/FormSelect"
 import FormTextArea from "../components/Ui/FormTextArea"
-import FormMultiSelect from "../components/Ui/FormMultiSelect"
+import CreatableSelect from "react-select/creatable";
+import { customStyles } from "../utils/reactStyle";
 import FormInput from "../components/Ui/FormInput"
 import toast from "react-hot-toast"
 
@@ -27,7 +28,15 @@ function ExperienceForm({ setIsOpen, refreshExperience, experienceData, isUpdate
     const [pageList, setPageList] = useState([]);
     const [isPresent, setIsPresent] = useState(false);
     const [error, setError] = useState("");
-    const [isLoading,setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [companyError, setCompanyError] = useState("");
+    const [company, setCompany] = useState({});
+
+    useEffect(() => {
+        setCompany({ value: experienceData?.company._id, label: experienceData?.company.name });
+    }, [experienceData])
+
+    console.log(experienceData);
 
     const {
         register,
@@ -38,7 +47,6 @@ function ExperienceForm({ setIsOpen, refreshExperience, experienceData, isUpdate
     } = useForm({
         defaultValues: {
             title: experienceData?.title || "",
-            company: experienceData?.company._id || "",
             startMonth: experienceData?.startMonth || "",
             startYear: experienceData?.startYear || "",
             endMonth: experienceData?.endMonth || "",
@@ -49,12 +57,6 @@ function ExperienceForm({ setIsOpen, refreshExperience, experienceData, isUpdate
             employmentType: experienceData?.employmentType || "",
         },
     });
-
-    useEffect(() => {
-        if (pageList.length > 0) {
-            setValue("company", experienceData?.company._id);
-        }
-    }, [pageList])
 
     useEffect(() => {
         if (isPresent) {
@@ -95,6 +97,7 @@ function ExperienceForm({ setIsOpen, refreshExperience, experienceData, isUpdate
             formData.append("mediaDescription", media.description)
         });
         formData.append("isPresent", isPresent);
+        formData.append("company", company?.value);
 
         const { success } = await apiAction({
             url: "api/v1/profile/experience/createExperience",
@@ -134,6 +137,7 @@ function ExperienceForm({ setIsOpen, refreshExperience, experienceData, isUpdate
             formData.append("mediaDescription", media.description)
         });
         formData.append("isPresent", isPresent);
+        formData.append("company", company?.value);
 
         const { success } = await apiAction({
             url: `api/v1/profile/experience/editExperience/${experienceData._id}`,
@@ -225,6 +229,29 @@ function ExperienceForm({ setIsOpen, refreshExperience, experienceData, isUpdate
         }
     }
 
+    const handleCompanyChange = (selectedOption) => {
+        if (selectedOption) {
+            setCompanyError("");
+        }
+        else {
+            setCompanyError("Please select a company");
+        }
+        setCompany(selectedOption);
+    };
+
+    const onSave = (data) => {
+        if (!company.value) {
+            setCompanyError("Please select a school");
+            return;
+        }
+        if (isUpdate) {
+            updateHandler(data);
+        }
+        else {
+            handleFormSubmit(data);
+        }
+    }
+
     return (
         <>
             {
@@ -258,12 +285,24 @@ function ExperienceForm({ setIsOpen, refreshExperience, experienceData, isUpdate
                 </div>
             }
             {
-                !image && !imagePreview && <form onSubmit={handleSubmit(isUpdate ? updateHandler : handleFormSubmit)} className='flex flex-col gap-4'>
+                !image && !imagePreview && <form onSubmit={handleSubmit(onSave)} className='flex flex-col gap-4'>
                     <div className='max-h-[60vh] overflow-y-scroll'>
                         <div className='flex flex-col gap-4 px-2'>
                             <FormInput label="Title" placeholder="Ex: Retail Sales Manager" value={register("title", { required: "Title is required" })} error={errors.title && errors.title.message} />
                             <FormSelect label="Employment type" list={["Please Select", "Full-time", "Part-time", "Self-employed", "Freelance", "Internship", "Trainee"]} value={register("employmentType", { required: "Employment Type is required" })} error={errors.employmentType && errors.employmentType.message} />
-                            <FormMultiSelect data={watch("company")} setData={setValue} label="Company name" list={[{ _id: "", name: "Please Select" }, ...pageList]} value={register("company", { required: "Company is required" })} error={errors.company && errors.company.message} />
+                            <div className="mt-4">
+                                <label className="block text-sm font-medium text-gray-700">Company</label>
+                                <CreatableSelect
+                                    options={pageList?.map((item) => ({ value: item._id, label: item.name }))}
+                                    styles={customStyles(companyError)}
+                                    menuPortalTarget={document.body}
+                                    placeholder="Select company"
+                                    onChange={handleCompanyChange}
+                                    value={company}
+                                    isClearable
+                                />
+                                {companyError && <p className="text-red-500 text-sm">{companyError}</p>}
+                            </div>
                             <FormInput label="Location" placeholder="Ex: London, United Kingdom" value={register("location", { required: "Location is required" })} error={errors.location && errors.location.message} />
                             <FormSelect label="Location type" list={["Please Select", "On-site", "Hybrid", "Remote"]} value={register("locationType", { required: "location Type is required" })} error={errors.locationType && errors.locationType.message} />
                             <div className="flex gap-2">
@@ -273,19 +312,19 @@ function ExperienceForm({ setIsOpen, refreshExperience, experienceData, isUpdate
 
                             <div className='flex gap-4'>
                                 <div className='flex-grow'>
-                                    <FormSelect label="Start Month" list={list} value={register("startMonth", { required: "start Month is required" })} error={errors.startMonth && errors.startMonth.message} />
+                                    <FormSelect label="Start Year" list={["Please Select", ...Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i)]} value={register("startYear", { required: "start Year is required" })} error={errors.startYear && errors.startYear.message} />
                                 </div>
                                 <div className='flex-grow'>
-                                    <FormSelect label="Start Year" list={["Please Select", ...Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i)]} value={register("startYear", { required: "start Year is required" })} error={errors.startYear && errors.startYear.message} />
+                                    <FormSelect label="Start Month" list={watch("startYear") == new Date().getFullYear() ? list.slice(0, new Date().getMonth() + 2) : list} value={register("startMonth", { required: "start Month is required" })} error={errors.startMonth && errors.startMonth.message} />
                                 </div>
                             </div>
 
                             <div className='flex gap-4'>
                                 <div className='flex-grow'>
-                                    <FormSelect disable={isPresent} label="End Month" list={list} value={register("endMonth", isPresent ? { required: false } : { required: "End Month is required" })} error={isPresent ? ""  : errors.endMonth && errors.endMonth.message} />
+                                    <FormSelect disable={isPresent} label="End Year" list={["Please Select", ...Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i)]} value={register("endYear", isPresent ? { required: false } : { required: "End Year is required" })} error={isPresent ? "" : errors.endYear && errors.endYear.message} />
                                 </div>
                                 <div className='flex-grow'>
-                                    <FormSelect disable={isPresent} label="End Year" list={["Please Select", ...Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i)]} value={register("endYear", isPresent ? { required: false } : { required: "End Year is required" })} error={isPresent ? "" :errors.endYear && errors.endYear.message} />
+                                    <FormSelect disable={isPresent} label="End Month" list={watch("endYear") == new Date().getFullYear() ? list.slice(0, new Date().getMonth() + 2) : list} value={register("endMonth", isPresent ? { required: false } : { required: "End Month is required" })} error={isPresent ? "" : errors.endMonth && errors.endMonth.message} />
                                 </div>
                             </div>
 
@@ -329,7 +368,7 @@ function ExperienceForm({ setIsOpen, refreshExperience, experienceData, isUpdate
                                     </button>
                                     <input accept="image/*" className="hidden" type="file" ref={imageRef} value={image} onChange={(e) => setImage(e.target.files[0])} />
                                 </div>
-                                <div className='flex flex-wrap gap-2 mt-3'>
+                                {/* <div className='flex flex-wrap gap-2 mt-3'>
                                     {
                                         media && media.length > 0 && media.map((image, index) => (
                                             <span onClick={() => deleteMedia(index)} key={index} className='bg-[#01754f] cursor-pointer hover:bg-[#10382a] flex items-center gap-2 text-gray-50 px-4 py-1 rounded-full'>
@@ -337,6 +376,29 @@ function ExperienceForm({ setIsOpen, refreshExperience, experienceData, isUpdate
                                             </span>
                                         ))
                                     }
+                                </div> */}
+                                <div className="max-w-2xl mt-4 bg-gray-50">
+                                    <div className="space-y-2">
+                                        {media && media.length > 0 && media.map((image, index) => (
+                                            <>
+                                                <div className="flex items-center justify-between p-4 mb-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow">
+                                                    <div className="flex items-center space-x-4">
+                                                        <div className="w-12 h-12 rounded-lg overflow-hidden bg-gray-200">
+                                                            <img
+                                                                src={image?.url}
+                                                                alt={image?.title}
+                                                                className="w-full h-full object-cover"
+                                                            />
+                                                        </div>
+                                                        <h3 className="text-lg font-medium text-gray-900">{image?.title}</h3>
+                                                    </div>
+                                                    <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                                                        <Menu className="w-5 h-5 text-gray-500" />
+                                                    </button>
+                                                </div>
+                                            </>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
 

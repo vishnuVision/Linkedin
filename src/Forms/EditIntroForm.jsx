@@ -1,21 +1,28 @@
 import PropTypes from "prop-types";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import FormInput from "../components/Ui/FormInput";
 import { useForm } from "react-hook-form";
 import FormSelect from "../components/Ui/FormSelect";
 import FormTextArea from "../components/Ui/FormTextArea";
 import DatePicker from "react-datepicker";
+import axios from "axios";
+import Select from "react-select";
+import { customStyles } from "../utils/reactStyle";
+import moment from "moment";
 
 function EditIntroForm({ onSave, onCancel, user, isLoading }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [birthdayDate, setBirthdayDate] = useState(user?.birthday || null);
+    const [region, setRegion] = useState({ value: user?.region, label: user?.region });
+    const [city, setCity] = useState({ value: user?.city, label: user?.city });
 
     const {
         register,
         handleSubmit,
         watch,
         formState: { errors },
-        setValue
+        setValue,
+        control
     } = useForm({
         defaultValues: {
             firstName: user?.firstName || "",
@@ -24,8 +31,6 @@ function EditIntroForm({ onSave, onCancel, user, isLoading }) {
             pronouns: user?.pronouns || "",
             bio: user?.bio || "",
             industry: user?.industry || "",
-            region: user?.region || "",
-            city: user?.city || "",
             website: user?.website || "",
             email: user?.email || "",
             phoneNumber: user?.phoneNumber || "",
@@ -35,14 +40,15 @@ function EditIntroForm({ onSave, onCancel, user, isLoading }) {
     });
 
     const updateContactInfo = async (data) => {
-        onSave({ ...data, birthday: birthdayDate });
+        onSave({ ...data, birthday: birthdayDate, region: region?.value, city: city?.value });
+
     }
 
     return (
         <>
             {
                 !isModalOpen ? (
-                    <EditForm user={user} isLoading={isLoading} register={register} errors={errors} handleSubmit={handleSubmit} handleUpdate={updateContactInfo} onCancel={onCancel} isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} />
+                    <EditForm control={control} setRegion={setRegion} setCity={setCity} region={region} city={city} user={user} isLoading={isLoading} watch={watch} register={register} errors={errors} handleSubmit={handleSubmit} handleUpdate={updateContactInfo} onCancel={onCancel} isModalOpen={isModalOpen} setIsModalOpen={setIsModalOpen} />
                 ) :
                     <EditContactInfo user={user} isLoading={isLoading} setBirthdayDate={setBirthdayDate} birthdayDate={birthdayDate} setValue={setValue} register={register} errors={errors} watch={watch} handleSubmit={handleSubmit} handleUpdate={updateContactInfo} onCancel={() => setIsModalOpen(false)} />
             }
@@ -51,17 +57,62 @@ function EditIntroForm({ onSave, onCancel, user, isLoading }) {
 }
 
 const EditContactInfo = ({ onCancel, isLoading, register, handleSubmit, handleUpdate, errors, birthdayDate, setBirthdayDate }) => {
+
+    const [dateError, setDateError] = useState("");
+
+    const onSave = (data) => {
+        if (!birthdayDate) {
+            setDateError("Please select your birthday");
+            return;
+        }
+        const selectedDateMoment = moment(birthdayDate);
+        const currentDate = moment();
+        const age = currentDate.diff(selectedDateMoment, "years");
+
+        if (age < 18) {
+            setDateError("You must be at least 18 years old.");
+        } else {
+            handleUpdate(data);
+        }
+    }
+
     return (
-        <form onSubmit={handleSubmit(handleUpdate)} className="relative flex flex-col space-y-6">
-            <div className="flex-1 overflow-auto min-h-[60vh]">
+        <form onSubmit={handleSubmit(onSave)} className="relative flex flex-col space-y-6">
+            <div className="flex-1 overflow-y-auto scrollbar-thin min-h-[60vh]">
                 <div className="space-y-4 px-4 pb-2">
                     <FormInput type="email" label="Email" placeholder="Enter Email" value={register("email", { required: "Email is required" })} error={errors.email && errors.email.message} />
-                    <FormInput label="Phone number" placeholder="Enter Phone number" value={register("phoneNumber", { required: "Phone number is required" })} error={errors.phoneNumber && errors.phoneNumber.message} />
+                    <FormInput
+                        type="number"
+                        label="Phone number"
+                        placeholder="Enter Phone number"
+                        value={register("phoneNumber", {
+                            required: "Phone number is required",
+                            pattern: {
+                                value: /^[0-9]{10}$/, // Adjust regex for your desired phone format
+                                message: "Phone number must be 10 digits"
+                            }
+                        })}
+                        error={errors.phoneNumber && errors.phoneNumber.message}
+                    />
                     <FormSelect label="Phone type" list={["Please Select", "Mobile", "Home", "Work"]} value={register("phoneType", { required: "Phone type is required" })} error={errors.phoneType && errors.phoneType.message} />
                     <FormTextArea label="Address" placeholder="Enter your address" value={register("address", { required: "Address is required" })} error={errors.address && errors.address.message} />
                     <div className="flex flex-col">
                         <label htmlFor="birthday" className="">Birthday</label>
-                        <DatePicker selected={birthdayDate} onChange={(date) => setBirthdayDate(date)} className="block w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-gray-900"/>
+                        <DatePicker
+                            selected={birthdayDate}
+                            onChange={date => setBirthdayDate(date)}
+                            maxDate={new Date()}
+                            placeholderText="Select your date of birth"
+                            dateFormat="MM/dd/yyyy"
+                            className={`block w-full p-2 border rounded-md focus:outline-none focus:ring-2 ${dateError ? "border-red-600 focus:ring-red-600" : "border-gray-300 focus:ring-gray-900"
+                                }`}
+                            calendarContainer={({ className, children }) => (
+                                <div className={`custom-datepicker ${className}`}>{children}</div>
+                            )}
+                        />
+                        {
+                            dateError && <p className="text-red-600 text-sm">{dateError}</p>
+                        }
                     </div>
                 </div>
             </div>
@@ -86,20 +137,104 @@ const EditContactInfo = ({ onCancel, isLoading, register, handleSubmit, handleUp
     )
 }
 
-const EditForm = ({ onCancel, setIsModalOpen, isLoading, errors, register, handleSubmit, handleUpdate }) => {
+const EditForm = ({ onCancel, setIsModalOpen, isLoading, errors, register, handleSubmit, handleUpdate, region, setRegion, city, setCity }) => {
+    const [countries, setCountries] = useState([]);
+    const [cities, setCities] = useState([]);
+    const [countryError, setCountryError] = useState("");
+    const [cityError, setCityError] = useState("");
+
+    useEffect(() => {
+        getAllCountries();
+    }, [])
+
+    const getAllCountries = async () => {
+        const data = await (await axios.get("https://countriesnow.space/api/v0.1/countries")).data;
+        if (data?.data) {
+            setCountries(data?.data.map((item) => ({ value: item?.country, label: item?.country })));
+        }
+    }
+
+    const getAllCities = async (country) => {
+        const response = await axios.post('https://countriesnow.space/api/v0.1/countries/cities', {
+            country: country,
+        });
+        const data = response.data;
+        if (data?.data) {
+            setCities(data?.data.map((item) => ({ value: item, label: item })));
+        }
+    }
+
+    const handleCountryChange = (selectedOption) => {
+        if (selectedOption) {
+            setCountryError("");
+            getAllCities(selectedOption.value);
+            setCity(null);
+        }
+        else {
+            setCountryError("Please select or add a country");
+        }
+        setRegion(selectedOption);
+    };
+
+    const handleCityChange = (selectedOption) => {
+        if (selectedOption) {
+            setCityError("");
+        }
+        else {
+            setCityError("Please select or add a city");
+        }
+        setCity(selectedOption);
+    };
+
+    const onSave = (data) => {
+        if (!region.value || !city.value) {
+            setCountryError("Please select or add a country");
+            setCityError("Please select or add a city");
+            return;
+        }
+        handleUpdate(data);
+        setIsModalOpen(false);
+    }
 
     return (
-        <form onSubmit={handleSubmit(handleUpdate)} className="relative flex flex-col space-y-6">
-            <div className="flex-1 overflow-auto max-h-[60vh]">
-                <div className="space-y-4">
+        <form onSubmit={handleSubmit(onSave)} className="relative flex flex-col space-y-6">
+            <div className="flex-1 overflow-y-auto scrollbar scrollbar-thin max-h-[60vh]">
+                <div className="space-y-4 px-2">
                     <FormInput label="First Name" placeholder="Enter your first name" value={register("firstName", { required: "First name is required" })} error={errors.firstName && errors.firstName.message} />
                     <FormInput label="Last Name" placeholder="Enter your last name" value={register("lastName", { required: "Last name is required" })} error={errors.lastName && errors.lastName.message} />
                     <FormInput label="Additional Name" placeholder="Enter additional name" value={register("additionalName", { required: "Additional name is required" })} error={errors.additionalName && errors.additionalName.message} />
                     <FormSelect label="Pronouns" list={["Please Select", "He/Him", "She/Her", "They/Them", "Custom"]} value={register("pronouns", { required: "Pronouns are required" })} error={errors.pronouns && errors.pronouns.message} />
                     <FormTextArea label="Headline" placeholder="Enter your headline" value={register("bio", { required: "Headline is required" })} error={errors.bio && errors.bio.message} />
                     <FormSelect label="Industry" list={["Please Select", "Information Technology", "Finance", "Accounting", "Legal"]} value={register("industry", { required: "Industry is required" })} error={errors.industry && errors.industry.message} />
-                    <FormSelect label="Country/Region" list={["Please Select", "India", "Canada", "USA"]} value={register("region", { required: "Country/Region is required" })} error={errors.region && errors.region.message} />
-                    <FormSelect label="City" list={["Please Select", "Gujarat", "Maharashtra", "Rajasthan"]} value={register("city", { required: "City is required" })} error={errors.city && errors.city.message} />
+
+                    <div className="mt-4">
+                        <label className="block text-sm font-medium text-gray-700">Country/Region</label>
+                        <Select
+                            options={countries}
+                            styles={customStyles(countryError)}
+                            menuPortalTarget={document.body}
+                            placeholder="Select a country"
+                            onChange={handleCountryChange}
+                            value={region}
+                            isClearable
+                        />
+                        {countryError && <p className="text-red-500 text-sm">{countryError}</p>}
+                    </div>
+
+                    <div className="mt-4">
+                        <label className="block text-sm font-medium text-gray-700">City</label>
+                        <Select
+                            options={cities}
+                            styles={customStyles(cityError)}
+                            menuPortalTarget={document.body}
+                            placeholder="Select a city"
+                            onChange={handleCityChange}
+                            value={city}
+                            isClearable
+                        />
+                        {cityError && <p className="text-red-500 text-sm">{cityError}</p>}
+                    </div>
+
                     <div>
                         <h1 className="text-lg font-medium text-gray-700">Contact Info</h1>
                         <p className="text-sm mb-4">Add or edit your contact information</p>
@@ -145,6 +280,12 @@ EditForm.propTypes = {
     handleSubmit: PropTypes.any,
     handleUpdate: PropTypes.func,
     isLoading: PropTypes.bool,
+    watch: PropTypes.func,
+    control: PropTypes.func,
+    region: PropTypes.object,
+    city: PropTypes.object,
+    setRegion: PropTypes.func,
+    setCity: PropTypes.func
 };
 
 EditContactInfo.propTypes = {

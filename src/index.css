@@ -15,6 +15,25 @@ body {
   display: none;
 }
 
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #cac5c5;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #555;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+
 .ql-toolbar{
   border: none !important;
   border-bottom: 1px solid #ccc !important;
@@ -58,4 +77,33 @@ body {
 
 .cl-component.secured-by-clerk {
   display: none !important;
+}
+
+.custom-datepicker {
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px;
+  font-family: Arial, sans-serif;
+}
+
+.custom-datepicker .react-datepicker__header {
+  background-color: white;
+  padding: 10px;
+  color: white;
+  border-bottom: 0px solid #ddd;
+}
+
+.custom-datepicker .react-datepicker__day {
+  color: #333;
+  font-weight: bold;
+}
+
+.custom-datepicker .react-datepicker__day--selected {
+  background-color: #007bff;
+  color: white;
+}
+
+.custom-datepicker .react-datepicker__day:hover {
+  background-color: #f0f0f0;
 }

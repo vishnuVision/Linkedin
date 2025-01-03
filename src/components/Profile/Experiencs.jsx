@@ -1,4 +1,4 @@
-import { Building2, Pen, Plus, SquareArrowOutUpRight } from 'lucide-react';
+import { Pen, Plus, SquareArrowOutUpRight } from 'lucide-react';
 import { useState } from 'react';
 import Modal from '../../Modal/Modal';
 import ExperienceForm from '../../Forms/ExperienceForm';
@@ -19,7 +19,7 @@ function Experience({ experiences, refreshExperience }) {
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold text-gray-900">Experience</h2>
         {
-          id===_id && (
+          id === _id && (
             <button onClick={() => setIsOpen(prev => !prev)} className="p-2 hover:bg-[#866f55] hover:bg-opacity-10 rounded-full"><Plus width={25} height={25} /></button>
           )
         }
@@ -31,7 +31,7 @@ function Experience({ experiences, refreshExperience }) {
               {exp?.company?.logo ? (
                 <img src={exp?.company?.logo} alt={exp?.company?.name} className="w-12 h-12 rounded" />
               ) : (
-                <Building2 className="w-12 h-12 text-gray-400" />
+                <img src="/building.jpg" alt={exp?.company?.name || ""} className="w-12 h-12 rounded object-cover" />
               )}
             </div>
             <div className='flex items-start flex-grow'>
@@ -57,36 +57,34 @@ function Experience({ experiences, refreshExperience }) {
                   }
                   <div className="flex items-center gap-2">
                     <div className="h-1 p-[3px] w-1 rounded-full bg-slate-500"></div>
-                    <p className="text-sm text-gray-500">
-                      {(() => {
-                        try {
-                          const start = moment(`${exp.startYear}-${exp.startMonth}`, "YYYY-MMMM");
-                          const end = moment();
+                    {
+                      exp?.startYear && exp?.startMonth && (
+                        <p className="text-sm text-gray-500">
+                          {(() => {
+                            const start = moment(`${exp.startYear}-${exp.startMonth}`, "YYYY-MMMM");
+                            const end = moment();
 
-                          if (!start.isValid()) {
-                            return "Invalid start date";
-                          }
+                            if (!start.isValid()) {
+                              return "";
+                            }
 
-                          const years = end.diff(start, "years");
-                          if (years >= 1) {
-                            return `${years} year${years > 1 ? "s" : ""}`;
-                          }
+                            const years = end.diff(start, "years");
+                            if (years >= 1) {
+                              return `${years} year${years > 1 ? "s" : ""}`;
+                            }
 
-                          const months = end.diff(start, "months");
-                          if (months >= 1) {
-                            return `${months} month${months > 1 ? "s" : ""}`;
-                          }
+                            const months = end.diff(start, "months");
+                            if (months >= 1) {
+                              return `${months} month${months > 1 ? "s" : ""}`;
+                            }
 
-                          const days = end.diff(start, "days");
-                          return `${days} day${days > 1 ? "s" : ""}`;
-                        } catch (error) {
-                          console.error("Error calculating date difference:", error);
-                          return "Error calculating date";
-                        }
-                      })()}
-                    </p>
+                            const days = end.diff(start, "days");
+                            return `${days} day${days > 1 ? "s" : ""}`;
+                          })()}
+                        </p>
+                      )
+                    }
                   </div>
-
                 </div>
                 <div className="flex gap-2 items-center">
                   <p className="text-sm text-gray-500">{exp?.location}</p>

@@ -9,8 +9,14 @@ function SkillForm({ refreshSkill, setIsOpen }) {
     const [skill, setSkill] = useState({});
     const [skills, setSkills] = useState([]);
     const { apiAction } = useApi();
+    const [error,setError] = useState("");
 
     const handleSubmit = async (e) => {
+        if(!skill.value)
+        {
+            setError("Please select or add a skill");
+            return;
+        }
         let toastId = toast.loading("Adding skill...");
         e.preventDefault();
         const { success, data } = await apiAction({
@@ -21,10 +27,10 @@ function SkillForm({ refreshSkill, setIsOpen }) {
         });
 
         if (success && data) {
+            setIsOpen(false);
             toast.success("Skill added successfully", { id: toastId });
             refreshSkill();
         }
-        setIsOpen(false);
     }
 
     useEffect(()=>{
@@ -43,6 +49,14 @@ function SkillForm({ refreshSkill, setIsOpen }) {
     }
 
     const handleSkillsChange = (selectedOption) => {
+        if(selectedOption)
+        {
+           setError(""); 
+        }
+        else
+        {
+            setError("Please select or add a skill");
+        }
         setSkill(selectedOption);
     };
 
@@ -50,19 +64,18 @@ function SkillForm({ refreshSkill, setIsOpen }) {
         <div className="grid grid-cols-1">
             <CreatableSelect
                 options={skills}
-                styles={{
-                    ...customStyles,
-                    menuPortal: (base) => ({
-                        ...base,
-                        zIndex: 9999,
-                    }),
-                }}
+                styles={customStyles(error)}
                 menuPortalTarget={document.body}
                 placeholder="Select or add a skill"
                 onChange={handleSkillsChange}
                 value={skill}
                 isClearable
             />
+            {
+                error && (
+                    <p className="text-red-500 text-sm mt-2">{error}</p>
+                )
+            }
             <div className="mt-8 border-t pt-4 border-gray-300 flex justify-end">
                 <button type="button" onClick={handleSubmit} className='bg-[#0a66c2] px-4 py-1 rounded-full text-white font-semibold text-md'>
                     Save

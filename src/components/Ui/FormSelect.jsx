@@ -7,7 +7,7 @@ function FormSelect({ label, list, value, error, disable=false }) {
             <select
                 disabled={disable}
                 {...value}
-                className={`border rounded p-2 w-full ${disable ? "cursor-not-allowed bg-gray-300" : ""}`}
+                className={`rounded p-2 w-full focus:outline-none focus:ring-1 ${error ? "border border-red-600 focus:ring-red-600" : "border border-gray-300 focus:ring-gray-800"} ${disable ? "cursor-not-allowed bg-gray-300" : ""}`}
             >
                 {
                     list && list.length > 0 && list.map((item, index) => (

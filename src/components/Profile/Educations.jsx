@@ -1,4 +1,4 @@
-import { Building2, Pen, Plus, SquareArrowOutUpRight } from "lucide-react";
+import { Pen, Plus, SquareArrowOutUpRight } from "lucide-react";
 import { useState } from "react";
 import Modal from "../../Modal/Modal";
 import EducationForm from "../../Forms/EducationForm";
@@ -30,7 +30,7 @@ function Educations({ educations, refreshEducation }) {
                             {edu?.school.logo ? (
                                 <img src={edu?.school.logo} alt={edu?.school?.name} className="w-12 h-12 rounded" />
                             ) : (
-                                <Building2 className="w-12 h-12 text-gray-400" />
+                                <img src="/building.jpg" alt={edu?.company?.name || ""} className="w-12 h-12 rounded object-cover" />
                             )}
                         </div>
                         <div className="flex justify-between flex-grow">
