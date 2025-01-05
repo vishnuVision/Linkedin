@@ -8,7 +8,7 @@ function FormInput({ label, type = "text", placeholder, value, error, disable = 
                 type={type}
                 placeholder={placeholder}
                 {...value}
-                className={`rounded p-2 w-full focus:outline-none focus:ring-1 ${error ? "border border-red-600 focus:ring-red-600" : "border border-gray-300 focus:ring-gray-800"} ${disable ? "cursor-not-allowed bg-gray-300" : ""}`}
+                className={`rounded p-2 w-full focus:outline-none focus:ring-1 ${error ? "border border-1 border-red-600 focus:border-0 focus:ring-red-600" : "focus:ring-gray-800"} ${disable ? "cursor-not-allowed bg-gray-300" : ""}`}
             />
             {error && <p className="text-red-600 text-sm">{error}</p>}
         </div>

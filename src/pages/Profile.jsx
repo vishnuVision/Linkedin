@@ -35,7 +35,7 @@ function Profile() {
 
   useEffect(() => {
     getUserData();
-  }, [])
+  }, [id])
 
   useEffect(() => {
     setIsLoading(true);
@@ -55,6 +55,7 @@ function Profile() {
     });
 
     if (success) {
+      console.log(data);
       setUser(data);
     }
   };

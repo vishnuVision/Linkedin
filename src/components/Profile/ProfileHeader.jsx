@@ -1,4 +1,4 @@
-import { Camera, MapPin, Briefcase, MessageCircle, UserPlus, Pen, GraduationCap } from 'lucide-react';
+import { Camera, MapPin, Briefcase, MessageCircle, UserPlus, GraduationCap, Pencil } from 'lucide-react';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { handleModalContext } from '../../contextApi/handleModalContext';
 import PropTypes from 'prop-types';
@@ -164,8 +164,8 @@ function ProfileHeader({ setIsModalOpen, user, educations, experiences }) {
       <div className='flex justify-end p-3'>
         {
           id === _id && (
-            <button onClick={() => setIsModalOpen(true)} className='px-3 py-3 rounded-full bg-[#866f55] bg-opacity-10'>
-              <Pen />
+            <button onClick={() => setIsModalOpen(true)} className="p-2 hover:bg-gray-100 rounded-full">
+              <Pencil className="w-5 h-5 text-gray-600" />
             </button>
           )
         }

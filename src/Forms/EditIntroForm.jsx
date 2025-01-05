@@ -9,12 +9,14 @@ import axios from "axios";
 import Select from "react-select";
 import { customStyles } from "../utils/reactStyle";
 import moment from "moment";
+import industries from "industries";
 
 function EditIntroForm({ onSave, onCancel, user, isLoading }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [birthdayDate, setBirthdayDate] = useState(user?.birthday || null);
-    const [region, setRegion] = useState({ value: user?.region, label: user?.region });
-    const [city, setCity] = useState({ value: user?.city, label: user?.city });
+    const [region, setRegion] = useState({ value: user?.region || "", label: user?.region || "Please Select" });
+    const [industry, setIndustry] = useState({ value: user?.industry || "", label: user?.industry || "Please Select" });
+    const [city, setCity] = useState({ value: user?.city || "", label: user?.city || "Please Select" });
 
     const {
         register,
@@ -27,7 +29,6 @@ function EditIntroForm({ onSave, onCancel, user, isLoading }) {
             additionalName: user?.additionalName || "",
             pronouns: user?.pronouns || "",
             bio: user?.bio || "",
-            industry: user?.industry || "",
             website: user?.website || "",
             email: user?.email || "",
             phoneNumber: user?.phoneNumber || "",
@@ -37,15 +38,14 @@ function EditIntroForm({ onSave, onCancel, user, isLoading }) {
     });
 
     const updateContactInfo = async (data) => {
-        onSave({ ...data, birthday: birthdayDate, region: region?.value, city: city?.value });
-
+        onSave({ ...data, birthday: birthdayDate, region: region?.value, city: city?.value, industry: industry?.value });
     }
 
     return (
         <>
             {
                 !isModalOpen ? (
-                    <EditForm setRegion={setRegion} setCity={setCity} region={region} city={city} isLoading={isLoading} register={register} errors={errors} handleSubmit={handleSubmit} handleUpdate={updateContactInfo} onCancel={onCancel} setIsModalOpen={setIsModalOpen} />
+                    <EditForm setRegion={setRegion} setCity={setCity} region={region} city={city} industry={industry} setIndustry={setIndustry} isLoading={isLoading} register={register} errors={errors} handleSubmit={handleSubmit} handleUpdate={updateContactInfo} onCancel={onCancel} setIsModalOpen={setIsModalOpen} />
                 ) :
                     <EditContactInfo isLoading={isLoading} setBirthdayDate={setBirthdayDate} birthdayDate={birthdayDate} register={register} errors={errors} handleSubmit={handleSubmit} handleUpdate={updateContactInfo} onCancel={() => setIsModalOpen(false)} />
             }
@@ -134,15 +134,25 @@ const EditContactInfo = ({ onCancel, isLoading, register, handleSubmit, handleUp
     )
 }
 
-const EditForm = ({ onCancel, setIsModalOpen, isLoading, errors, register, handleSubmit, handleUpdate, region, setRegion, city, setCity }) => {
+const EditForm = ({ onCancel, setIsModalOpen, isLoading, errors, register, handleSubmit, handleUpdate, region, setRegion, city, setCity, industry, setIndustry }) => {
     const [countries, setCountries] = useState([]);
     const [cities, setCities] = useState([]);
+    const [industryList, setIndustryList] = useState([]);
     const [countryError, setCountryError] = useState("");
     const [cityError, setCityError] = useState("");
+    const [industryError, setIndustryError] = useState("");
 
     useEffect(() => {
         getAllCountries();
+        console.log(Object.keys(industries));
+        setIndustryList(Object.keys(industries).map((item) => ({ value: item, label: item })));
     }, [])
+
+    useEffect(() => {
+        if (region) {
+            getAllCities(region.value);
+        }
+    }, [region])
 
     const getAllCountries = async () => {
         const data = await (await axios.get("https://countriesnow.space/api/v0.1/countries")).data;
@@ -168,7 +178,7 @@ const EditForm = ({ onCancel, setIsModalOpen, isLoading, errors, register, handl
             setCity(null);
         }
         else {
-            setCountryError("Please select or add a country");
+            setCountryError("Please select country");
         }
         setRegion(selectedOption);
     };
@@ -178,17 +188,34 @@ const EditForm = ({ onCancel, setIsModalOpen, isLoading, errors, register, handl
             setCityError("");
         }
         else {
-            setCityError("Please select or add a city");
+            setCityError("Please select city");
         }
         setCity(selectedOption);
     };
 
-    const onSave = (data) => {
-        if (!region.value || !city.value) {
-            setCountryError("Please select or add a country");
-            setCityError("Please select or add a city");
-            return;
+    const handleIndustryChange = (selectedOption) => {
+        if (selectedOption) {
+            setIndustryError("");
         }
+        else {
+            setIndustryError("Please select industry");
+        }
+        setIndustry(selectedOption);
+    };
+
+    const onSave = (data) => {
+        if (!region.value)
+            setCountryError("Please select country");
+
+        if (!city.value)
+            setCityError("Please select city");
+
+        if (!industry.value)
+            setIndustryError("Please select industry");
+
+        if (!region.value || !city.value || !industry.value)
+            return;
+
         handleUpdate(data);
         setIsModalOpen(false);
     }
@@ -196,13 +223,26 @@ const EditForm = ({ onCancel, setIsModalOpen, isLoading, errors, register, handl
     return (
         <form onSubmit={handleSubmit(onSave)} className="relative flex flex-col space-y-6">
             <div className="flex-1 overflow-y-auto scrollbar scrollbar-thin max-h-[60vh]">
-                <div className="space-y-4 px-2">
+                <div className="space-y-4 p-2">
                     <FormInput label="First Name" placeholder="Enter your first name" value={register("firstName", { required: "First name is required" })} error={errors.firstName && errors.firstName.message} />
                     <FormInput label="Last Name" placeholder="Enter your last name" value={register("lastName", { required: "Last name is required" })} error={errors.lastName && errors.lastName.message} />
                     <FormInput label="Additional Name" placeholder="Enter additional name" value={register("additionalName", { required: "Additional name is required" })} error={errors.additionalName && errors.additionalName.message} />
                     <FormSelect label="Pronouns" list={["Please Select", "He/Him", "She/Her", "They/Them", "Custom"]} value={register("pronouns", { required: "Pronouns are required" })} error={errors.pronouns && errors.pronouns.message} />
                     <FormTextArea label="Headline" placeholder="Enter your headline" value={register("bio", { required: "Headline is required" })} error={errors.bio && errors.bio.message} />
-                    <FormSelect label="Industry" list={["Please Select", "Information Technology", "Finance", "Accounting", "Legal"]} value={register("industry", { required: "Industry is required" })} error={errors.industry && errors.industry.message} />
+                    {/* <FormSelect label="Industry" list={["Please Select", "Information Technology", "Finance", "Accounting", "Legal"]} value={register("industry", { required: "Industry is required" })} error={errors.industry && errors.industry.message} /> */}
+                    <div className="mt-4">
+                        <label className="block text-sm font-medium text-gray-700">Industry</label>
+                        <Select
+                            options={industryList}
+                            styles={customStyles(industryError)}
+                            menuPortalTarget={document.body}
+                            placeholder="Select a industry"
+                            onChange={handleIndustryChange}
+                            value={industry?.value && industry}
+                            isClearable
+                        />
+                        {industryError && <p className="text-red-500 text-sm">{industryError}</p>}
+                    </div>
 
                     <div className="mt-4">
                         <label className="block text-sm font-medium text-gray-700">Country/Region</label>
@@ -212,7 +252,7 @@ const EditForm = ({ onCancel, setIsModalOpen, isLoading, errors, register, handl
                             menuPortalTarget={document.body}
                             placeholder="Select a country"
                             onChange={handleCountryChange}
-                            value={region}
+                            value={region?.value && region}
                             isClearable
                         />
                         {countryError && <p className="text-red-500 text-sm">{countryError}</p>}
@@ -226,7 +266,7 @@ const EditForm = ({ onCancel, setIsModalOpen, isLoading, errors, register, handl
                             menuPortalTarget={document.body}
                             placeholder="Select a city"
                             onChange={handleCityChange}
-                            value={city}
+                            value={city?.value && city}
                             isClearable
                         />
                         {cityError && <p className="text-red-500 text-sm">{cityError}</p>}
@@ -244,7 +284,12 @@ const EditForm = ({ onCancel, setIsModalOpen, isLoading, errors, register, handl
                             Edit contact info
                         </button>
                     </div>
-                    <FormInput label="Website" placeholder="Enter your website" value={register("website", { required: "Website is required" })} error={errors.website && errors.website.message} />
+                    <FormInput label="Website" placeholder="Enter your website" value={register("website", {
+                        required: "Website is required", pattern: {
+                            value: /^(https?:\/\/)?([a-z0-9]+[.-_])*[a-z0-9]+\.[a-z]{2,6}(\/[a-z0-9#]+\/?)*$/i,
+                            message: "Please enter a valid website URL",
+                        },
+                    })} error={errors.website && errors.website.message} />
                 </div>
             </div>
 
@@ -280,7 +325,9 @@ EditForm.propTypes = {
     region: PropTypes.object,
     city: PropTypes.object,
     setRegion: PropTypes.func,
-    setCity: PropTypes.func
+    setCity: PropTypes.func,
+    industry: PropTypes.object,
+    setIndustry: PropTypes.func
 };
 
 EditContactInfo.propTypes = {

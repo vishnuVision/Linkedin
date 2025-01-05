@@ -1,4 +1,4 @@
-import { Pen, Plus, SquareArrowOutUpRight } from "lucide-react";
+import { Pencil, Plus, SquareArrowOutUpRight } from "lucide-react";
 import { useState } from "react";
 import Modal from "../../Modal/Modal";
 import EducationForm from "../../Forms/EducationForm";
@@ -19,7 +19,7 @@ function Educations({ educations, refreshEducation }) {
                 <h2 className="text-xl font-bold text-gray-900">Educations</h2>
                 {
                     id === _id && (
-                        <button onClick={() => setIsOpen(prev => !prev)} className="p-2 hover:bg-[#866f55] hover:bg-opacity-10 rounded-full  "><Plus width={25} height={25} /></button>
+                        <button onClick={() => setIsOpen(prev => !prev)} className="p-2 hover:bg-[#866f55] hover:bg-opacity-10 rounded-full  "><Plus className="text-gray-600 h-6 w-6"/></button>
                     )
                 }
             </div>
@@ -67,9 +67,9 @@ function Educations({ educations, refreshEducation }) {
                             </div>
                             {
                                 id === _id && (
-                                    <div className="text-gray-500">
-                                        <button onClick={() => { setIsEditOpen(true); setEducationsData(edu) }} className='p-2 hover:bg-[#866f55] hover:bg-opacity-10 rounded-full'><Pen /></button>
-                                    </div>
+                                    <button onClick={() => { setIsEditOpen(true); setEducationsData(edu) }} className="p-2 hover:bg-gray-100 rounded-full">
+                                        <Pencil className="w-5 h-5 text-gray-600" />
+                                    </button>
                                 )
                             }
                         </div>

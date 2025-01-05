@@ -4,16 +4,17 @@ import useApi from "../hook/useApi";
 import CreatableSelect from "react-select/creatable";
 import { customStyles } from "../utils/reactStyle";
 import toast from "react-hot-toast";
+import { default as skillsList } from 'skills';
 
 function SkillForm({ refreshSkill, setIsOpen }) {
     const [skill, setSkill] = useState({});
     const [skills, setSkills] = useState([]);
     const { apiAction } = useApi();
-    const [error,setError] = useState("");
+    const [error, setError] = useState("");
+    const [searchInput, setSearchInput] = useState("");
 
     const handleSubmit = async (e) => {
-        if(!skill.value)
-        {
+        if (!skill.value) {
             setError("Please select or add a skill");
             return;
         }
@@ -33,28 +34,18 @@ function SkillForm({ refreshSkill, setIsOpen }) {
         }
     }
 
-    useEffect(()=>{
-        selectAllSkillsForDropDown();
-    },[])
-
-    const selectAllSkillsForDropDown = async () => {
-        const { success, data } = await apiAction({
-            url: `api/v1/profile/skill/getAllSkill`,
-            method: "GET",
-        });
-        if (success && data) {
-            const newData = data.map((item) => ({ value: item.name, label: item.name }));
-            setSkills(newData);
-        }
-    }
+    useEffect(() => {
+        const data = skillsList.filter(({ tagName }) =>
+            tagName.toLowerCase().includes(searchInput.toLowerCase())
+        ).slice(0, 100);
+        setSkills(data.map(({ tagName }) => ({ value: tagName, label: tagName })));
+    }, [skillsList, searchInput]);
 
     const handleSkillsChange = (selectedOption) => {
-        if(selectedOption)
-        {
-           setError(""); 
+        if (selectedOption) {
+            setError("");
         }
-        else
-        {
+        else {
             setError("Please select or add a skill");
         }
         setSkill(selectedOption);
@@ -68,6 +59,7 @@ function SkillForm({ refreshSkill, setIsOpen }) {
                 menuPortalTarget={document.body}
                 placeholder="Select or add a skill"
                 onChange={handleSkillsChange}
+                onInputChange={(data)=>setSearchInput(data)}
                 value={skill}
                 isClearable
             />

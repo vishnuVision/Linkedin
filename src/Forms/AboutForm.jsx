@@ -1,31 +1,42 @@
 import { Plus, X } from "lucide-react";
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
-import Input from "../components/Ui/Input";
 import useApi from "../hook/useApi";
 import toast from "react-hot-toast";
+import { customStyles } from "../utils/reactStyle";
+import CreatableSelect from "react-select/creatable";
+import { default as skillsData } from 'skills';
 
-function AboutForm({ onCancel, onSave, setSummary, summary, skills, setSkills, isLoading, summaryError,setSummaryError }) {
-    const [skill, setSkill] = useState("");
+function AboutForm({ onCancel, onSave, setSummary, summary, skills, setSkills, isLoading, summaryError, setSummaryError }) {
+    const [skillsList, setSkillsList] = useState([]);
+    const [searchInput, setSearchInput] = useState("");
+    const [skill, setSkill] = useState({});
+
     const [error, setError] = useState("");
     const [isEdit, setIsEdit] = useState(false);
     const { apiAction } = useApi();
 
     useEffect(() => {
+        const data = skillsData.filter(({ tagName }) =>
+            tagName.toLowerCase().includes(searchInput.toLowerCase())
+        ).slice(0, 100);
+        setSkillsList(data.map(({ tagName }) => ({ value: tagName, label: tagName })));
+    }, [skillsData, searchInput]);
+
+    useEffect(() => {
         if (summary) {
             setSummaryError("");
         }
-        else
-        {
+        else {
             setSummaryError("Summary is required");
         }
     }, [summary]);
 
     const addSkills = () => {
         setError("");
-        if (skill) {
+        if (skill?.value) {
             if (skills?.length <= 5) {
-                setSkills(prev => [...prev, {_id: Date.now(),name:skill}]);
+                setSkills(prev => [...prev, { _id: Date.now(), name: skill?.value }]);
                 setSkill("");
                 setIsEdit(false);
             }
@@ -39,8 +50,7 @@ function AboutForm({ onCancel, onSave, setSummary, summary, skills, setSkills, i
     }
 
     const deleteSkill = async (index, skillId) => {
-        if(skillId.length===24)
-        {
+        if (skillId.length === 24) {
             try {
                 const { success } = await apiAction({
                     url: `/api/v1/profile/skill/updateSkill/${skillId}`,
@@ -54,11 +64,21 @@ function AboutForm({ onCancel, onSave, setSummary, summary, skills, setSkills, i
                 toast.error(error.message);
             }
         }
-        else
-        {
+        else {
             setSkills(skills.filter((skill, idx) => idx !== index));
         }
     }
+
+    const handleSkillsChange = (selectedOption) => {
+        if (selectedOption) {
+            setError("");
+        }
+        else {
+            setError("Please select or add a skill");
+        }
+        setSkill(selectedOption);
+        addSkills();
+    };
 
     return (
 
@@ -122,9 +142,21 @@ function AboutForm({ onCancel, onSave, setSummary, summary, skills, setSkills, i
                                     <p className='text-sm mb-1 text-gray-600'>Add skill keywords (max 5) to make your job more visible to the right candidates.</p>
                                     <div className='flex gap-2 items-center mt-2'>
                                         {
-                                            isEdit && <div className='flex-grow'>
-                                                <Input disable={skills?.length >= 5 ? true : false} placeholder={"Enter Skill"} value={skill} setvalue={setSkill} />
-                                            </div>
+                                            isEdit && (
+                                                <div className={`flex-grow ${skills?.length >= 5 ? "bg-gray-200 cursor-not-allowed" : ""}`}>
+                                                    <CreatableSelect
+                                                        options={skillsList}
+                                                        styles={customStyles(error, skills?.length >= 5 ? true : false)}
+                                                        menuPortalTarget={document.body}
+                                                        placeholder="Select or add a skill"
+                                                        onChange={handleSkillsChange}
+                                                        onInputChange={(data) => setSearchInput(data)}
+                                                        value={skill?.value && skill}
+                                                        isDisabled={skills?.length >= 5 ? true : false}
+                                                        isClearable
+                                                    />
+                                                </div>
+                                            )
                                         }
                                         <button type="button" onClick={!isEdit ? () => { setIsEdit(true) } : addSkills} disabled={skills?.length >= 5 ? true : false} className={`flex border items-center gap-1 border-gray-600 px-4 py-1 rounded-full ${skills?.length >= 5 ? "cursor-not-allowed opacity-50" : "hover:bg-gray-200 hover:ring-1 hover:ring-black"}`}>
                                             <Plus size={20} /> Add Skill

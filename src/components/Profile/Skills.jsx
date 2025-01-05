@@ -32,7 +32,7 @@ function Skills({ skills, refreshSkill }) {
         <h2 className="text-xl font-bold text-gray-900">Skills</h2>
         {
           id === _id && (
-            <button onClick={() => setIsSkill(prev => !prev)} className="p-2 hover:bg-[#866f55] hover:bg-opacity-10 rounded-full  "><Plus width={25} height={25} /></button>
+            <button onClick={() => setIsSkill(prev => !prev)} className="p-2 hover:bg-[#866f55] hover:bg-opacity-10 rounded-full  "><Plus className='text-gray-600 h-6 w-6'/></button>
           )
         }
       </div>
@@ -61,7 +61,7 @@ function Skills({ skills, refreshSkill }) {
             {
               id === _id && (
                 <div className="flex items-center gap-2 text-gray-500">
-                  <button onClick={() => handleDeleteSkill(skill._id)} className='p-2 hover:bg-[#866f55] hover:bg-opacity-10 rounded-full'><Trash2 /></button>
+                  <button onClick={() => handleDeleteSkill(skill._id)} className='p-2 hover:bg-[#866f55] hover:bg-opacity-10 rounded-full'><Trash2 className='w-5 h-5 text-gray-600'/></button>
                 </div>
               )
             }

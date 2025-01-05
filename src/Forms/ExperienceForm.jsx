@@ -11,12 +11,18 @@ import CreatableSelect from "react-select/creatable";
 import { customStyles } from "../utils/reactStyle";
 import FormInput from "../components/Ui/FormInput"
 import toast from "react-hot-toast"
+import { default as skillsData } from 'skills';
 
 const list = ["Please Select", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 function ExperienceForm({ setIsOpen, refreshExperience, experienceData, isUpdate = false }) {
-    const [skill, setSkill] = useState("");
+    const [skillsList, setSkillsList] = useState([]);
     const [skills, setSkills] = useState([]);
+    const [searchInput, setSearchInput] = useState("");
+    const [skill, setSkill] = useState({});
+    const [error, setError] = useState("");
+    const [isEdit, setIsEdit] = useState(false);
+
     const [image, setImage] = useState("");
     const [imagePreview, setImagePreview] = useState("");
     const [imagetitle, setImageTitle] = useState("");
@@ -27,14 +33,20 @@ function ExperienceForm({ setIsOpen, refreshExperience, experienceData, isUpdate
     const { apiAction } = useApi();
     const [pageList, setPageList] = useState([]);
     const [isPresent, setIsPresent] = useState(false);
-    const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [companyError, setCompanyError] = useState("");
-    const [company, setCompany] = useState({});
+    const [company, setCompany] = useState();
     const [imageIndex, setImageIndex] = useState(null);
 
     useEffect(() => {
-        setCompany({ value: experienceData?.company._id, label: experienceData?.company.name });
+        const data = skillsData.filter(({ tagName }) =>
+            tagName.toLowerCase().includes(searchInput.toLowerCase())
+        ).slice(0, 100);
+        setSkillsList(data.map(({ tagName }) => ({ value: tagName, label: tagName })));
+    }, [skillsData, searchInput]);
+
+    useEffect(() => {
+        setCompany({ value: experienceData?.company._id, label: experienceData?.company.name});
     }, [experienceData])
 
     const {
@@ -166,9 +178,9 @@ function ExperienceForm({ setIsOpen, refreshExperience, experienceData, isUpdate
 
     const addSkills = () => {
         setError("");
-        if (skill) {
+        if (skill.value) {
             if (skills?.length <= 5) {
-                setSkills(prev => [...prev, skill]);
+                setSkills(prev => [...prev, skill?.value]);
                 setSkill("");
             }
             else {
@@ -181,7 +193,6 @@ function ExperienceForm({ setIsOpen, refreshExperience, experienceData, isUpdate
     }
 
     const deleteSkill = (index) => {
-        setError("");
         setSkills(skills.filter((skill, idx) => idx !== index));
     }
 
@@ -273,6 +284,16 @@ function ExperienceForm({ setIsOpen, refreshExperience, experienceData, isUpdate
         setImageIndex(index);
     }
 
+    const handleSkillsChange = (selectedOption) => {
+        if (selectedOption) {
+            setError("");
+        }
+        else {
+            setError("Please select or add a skill");
+        }
+        setSkill(selectedOption);
+    };
+
     return (
         <>
             {
@@ -334,7 +355,7 @@ function ExperienceForm({ setIsOpen, refreshExperience, experienceData, isUpdate
                                     menuPortalTarget={document.body}
                                     placeholder="Select company"
                                     onChange={handleCompanyChange}
-                                    value={company}
+                                    value={company?.value && company}
                                     isClearable
                                 />
                                 {companyError && <p className="text-red-500 text-sm">{companyError}</p>}
@@ -372,10 +393,24 @@ function ExperienceForm({ setIsOpen, refreshExperience, experienceData, isUpdate
                                 </label>
                                 <p className='text-sm mb-1 text-gray-600'>Add skill keywords (max 5) to make your job more visible to the right candidates.</p>
                                 <div className='flex gap-2 items-center mt-2'>
-                                    <div className='w-52'>
-                                        <Input disable={skills?.length >= 5 ? true : false} placeholder={"Enter Skill"} value={skill} setvalue={setSkill} />
-                                    </div>
-                                    <button type="button" onClick={addSkills} disabled={skills?.length >= 5 ? true : false} className={`flex border items-center gap-1 border-gray-600 px-4 py-1 rounded-full ${skills?.length >= 5 ? "cursor-not-allowed" : "hover:bg-gray-200 hover:ring-1 hover:ring-black"}`}>
+                                    {
+                                        isEdit && (
+                                            <div className={`flex-grow ${skills?.length >= 5 ? "bg-gray-200 cursor-not-allowed" : ""}`}>
+                                                <CreatableSelect
+                                                    options={skillsList}
+                                                    styles={customStyles(error, skills?.length >= 5 ? true : false)}
+                                                    menuPortalTarget={document.body}
+                                                    placeholder="Select or add a skill"
+                                                    onChange={handleSkillsChange}
+                                                    onInputChange={(data) => setSearchInput(data)}
+                                                    value={skill?.value && skill}
+                                                    isDisabled={skills?.length >= 5 ? true : false}
+                                                    isClearable
+                                                />
+                                            </div>
+                                        )
+                                    }
+                                    <button type="button" onClick={!isEdit ? () => { setIsEdit(true) } : addSkills} disabled={skills?.length >= 5 ? true : false} className={`flex border items-center gap-1 border-gray-600 px-4 py-1 rounded-full ${skills?.length >= 5 ? "cursor-not-allowed" : "hover:bg-gray-200 hover:ring-1 hover:ring-black"}`}>
                                         <Plus size={20} /> Add Skill
                                     </button>
                                 </div>
@@ -384,7 +419,7 @@ function ExperienceForm({ setIsOpen, refreshExperience, experienceData, isUpdate
                                 }
                                 <div className='flex flex-wrap gap-2 mt-3'>
                                     {
-                                        skills && skills.length > 0 && skills.map((skill, index) => (
+                                        skills && skills?.length > 0 && skills?.map((skill, index) => (
                                             <span onClick={() => deleteSkill(index)} key={index} className='bg-[#01754f] cursor-pointer hover:bg-[#10382a] flex items-center gap-2 text-gray-50 px-4 py-1 rounded-full'>
                                                 {skill} <X size={20} />
                                             </span>

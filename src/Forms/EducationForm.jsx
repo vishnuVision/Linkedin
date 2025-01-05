@@ -10,12 +10,26 @@ import FormTextArea from "../components/Ui/FormTextArea";
 import FormInput from "../components/Ui/FormInput";
 import toast from "react-hot-toast";
 import CreatableSelect from "react-select/creatable";
+import Select from "react-select";
 import { customStyles } from "../utils/reactStyle";
+import { default as skillsData } from 'skills';
+import { degreesList, fieldsOfStudy as fieldList } from "../constants/constant";
 
 const list = ["Please Select", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 function EducationForm({ setIsOpen, refreshEducation, isUpdate, educationsData }) {
-    const [skill, setSkill] = useState("");
+    const [skillsList, setSkillsList] = useState([]);
+    const [skills, setSkills] = useState([]);
+    const [searchInput, setSearchInput] = useState("");
+    const [skill, setSkill] = useState({});
+    const [error, setError] = useState("");
+    const [isEdit, setIsEdit] = useState(false);
+
+    const [fieldOfStudy,setFieldsOfStudy] = useState({});
+    const [degree,setDegree] = useState({});
+    const [studyError,setStudyError] = useState("");
+    const [degreeError,setDegreeError] = useState("");
+
     const [image, setImage] = useState("");
     const [imagePreview, setImagePreview] = useState("");
     const [imagetitle, setImageTitle] = useState("");
@@ -24,8 +38,6 @@ function EducationForm({ setIsOpen, refreshEducation, isUpdate, educationsData }
     const imageRef = useRef(null);
     const { apiAction } = useApi();
     const [pageList, setPageList] = useState([]);
-    const [error, setError] = useState("");
-    const [skills, setSkills] = useState([]);
     const [mediaList, setMediaList] = useState([]);
     const [isPresent, setIsPresent] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -34,7 +46,19 @@ function EducationForm({ setIsOpen, refreshEducation, isUpdate, educationsData }
     const [imageIndex, setImageIndex] = useState(null);
 
     useEffect(() => {
-        setSchool({ value: educationsData?.school._id, label: educationsData?.school.name });
+        const data = skillsData.filter(({ tagName }) =>
+            tagName.toLowerCase().includes(searchInput.toLowerCase())
+        ).slice(0, 100);
+        setSkillsList(data.map(({ tagName }) => ({ value: tagName, label: tagName })));
+    }, [skillsData, searchInput]);
+
+    useEffect(() => {
+        if (educationsData) {
+            console.log(educationsData);
+            setSchool({ value: educationsData?.school._id, label: educationsData?.school.name });
+            setFieldsOfStudy({ value: educationsData?.fieldOfStudy, label: educationsData?.fieldOfStudy });
+            setDegree({ value: educationsData?.degree, label: educationsData?.degree });
+        }
     }, [educationsData])
 
     const {
@@ -45,8 +69,8 @@ function EducationForm({ setIsOpen, refreshEducation, isUpdate, educationsData }
         setValue
     } = useForm({
         defaultValues: {
-            degree: educationsData?.degree || "",
-            fieldOfStudy: educationsData?.fieldOfStudy || "",
+            // degree: educationsData?.degree || "",
+            // fieldOfStudy: educationsData?.fieldOfStudy || "",
             grade: educationsData?.grade || "",
             activities: educationsData?.activities || "",
             description: educationsData?.description || "",
@@ -95,7 +119,12 @@ function EducationForm({ setIsOpen, refreshEducation, isUpdate, educationsData }
         setIsLoading(true);
         const formData = new FormData();
         Object.entries(data).forEach(([key, value]) => formData.append(key, value));
-        skills.map((skill) => formData.append("skills", skill));
+        if (skills.length > 1) {
+            skills.forEach((skill) => skill && formData.append("skills", skill));
+        }
+        else {
+            formData.append("skills", [...skills]);
+        }
         mediaList.map((media) => {
             formData.append("media", media.url)
             formData.append("mediatitle", media.title)
@@ -103,6 +132,8 @@ function EducationForm({ setIsOpen, refreshEducation, isUpdate, educationsData }
         });
         formData.append("isPresent", isPresent);
         formData.append("school", school?.value);
+        formData.append("fieldOfStudy", fieldOfStudy?.value);
+        formData.append("degree", degree?.value);
 
         const { success } = await apiAction({
             url: "api/v1/profile/education/createEducation",
@@ -128,7 +159,7 @@ function EducationForm({ setIsOpen, refreshEducation, isUpdate, educationsData }
             skills.forEach((skill) => skill && formData.append("skills", skill));
         }
         else {
-            formData.append("skills", [...skill]);
+            formData.append("skills", [...skills]);
         }
 
         const uploadedMedia = mediaList.filter((media) => !(media.url instanceof File));
@@ -143,6 +174,8 @@ function EducationForm({ setIsOpen, refreshEducation, isUpdate, educationsData }
         });
         formData.append("isPresent", isPresent);
         formData.append("school", school?.value);
+        formData.append("fieldOfStudy", fieldOfStudy?.value);
+        formData.append("degree", degree?.value);
 
         const { success } = await apiAction({
             url: `/api/v1/profile/education/editEducation/${educationsData?._id}`,
@@ -161,9 +194,9 @@ function EducationForm({ setIsOpen, refreshEducation, isUpdate, educationsData }
 
     const addSkills = () => {
         setError("");
-        if (skill) {
+        if (skill.value) {
             if (skills?.length <= 5) {
-                setSkills(prev => [...prev, skill]);
+                setSkills(prev => [...prev, skill?.value]);
                 setSkill("");
             }
             else {
@@ -242,6 +275,26 @@ function EducationForm({ setIsOpen, refreshEducation, isUpdate, educationsData }
         setSchool(selectedOption);
     };
 
+    const handlefieldOfStudyChange = (selectedOption) => {
+        if (selectedOption) {
+            setStudyError("");
+        }
+        else {
+            setStudyError("Please select a field of study");
+        }
+        setFieldsOfStudy(selectedOption);
+    };
+
+    const handledegreeChange = (selectedOption) => {
+        if (selectedOption) {
+            setDegreeError("");
+        }
+        else {
+            setDegreeError("Please select a degree");
+        }
+        setDegree(selectedOption);
+    };
+
     const onSave = (data) => {
         if (!school.value) {
             setSchoolError("Please select a school");
@@ -266,6 +319,16 @@ function EducationForm({ setIsOpen, refreshEducation, isUpdate, educationsData }
         setImage(file);
         setImageIndex(index);
     }
+
+    const handleSkillsChange = (selectedOption) => {
+        if (selectedOption) {
+            setError("");
+        }
+        else {
+            setError("Please select or add a skill");
+        }
+        setSkill(selectedOption);
+    };
 
     return (
         <>
@@ -327,13 +390,43 @@ function EducationForm({ setIsOpen, refreshEducation, isUpdate, educationsData }
                                     menuPortalTarget={document.body}
                                     placeholder="Select company"
                                     onChange={handleSchoolChange}
-                                    value={school}
+                                    value={school?.value && school}
                                     isClearable
                                 />
                                 {schoolError && <p className="text-red-500 text-sm">{schoolError}</p>}
                             </div>
-                            <FormSelect label="Degree" list={["Please Select", "High School", "Associate", "Bachelor's", "Master's", "Doctorate"]} value={register("degree", { required: "Degree is required" })} error={errors.degree && errors.degree.message} />
-                            <FormSelect label="Field of study" list={["Please Select", "Computer Science", "Mechanical Engineer", "Doctor"]} value={register("fieldOfStudy", { required: "Field of study is required" })} error={errors.fieldOfStudy && errors.fieldOfStudy.message} />
+
+                            <div className="mt-4">
+                                <label className="block text-sm font-medium text-gray-700">Degree</label>
+                                <Select
+                                    options={degreesList}
+                                    styles={customStyles(degreeError)}
+                                    menuPortalTarget={document.body}
+                                    placeholder="Select Degree"
+                                    onChange={handledegreeChange}
+                                    value={degree?.value && degree}
+                                    isClearable
+                                />
+                                {degreeError && <p className="text-red-500 text-sm">{degreeError}</p>}
+                            </div>
+
+                            {/* <FormSelect label="Degree" list={["Please Select", "High School", "Associate", "Bachelor's", "Master's", "Doctorate"]} value={register("degree", { required: "Degree is required" })} error={errors.degree && errors.degree.message} /> */}
+
+                            <div className="mt-4">
+                                <label className="block text-sm font-medium text-gray-700">Field of study</label>
+                                <Select
+                                    options={fieldList}
+                                    styles={customStyles(studyError)}
+                                    menuPortalTarget={document.body}
+                                    placeholder="Select Field Of Study"
+                                    onChange={handlefieldOfStudyChange}
+                                    value={fieldOfStudy?.value && fieldOfStudy}
+                                    isClearable
+                                />
+                                {studyError && <p className="text-red-500 text-sm">{studyError}</p>}
+                            </div>
+
+                            {/* <FormSelect label="Field of study" list={["Please Select", "Computer Science", "Mechanical Engineer", "Doctor"]} value={register("fieldOfStudy", { required: "Field of study is required" })} error={errors.fieldOfStudy && errors.fieldOfStudy.message} /> */}
                             <div className="flex gap-2">
                                 <input checked={isPresent} onChange={() => setIsPresent(prev => !prev)} className="w-6 h-6" name="im" type="checkbox" />
                                 <label htmlFor="im">I am currently working in this role</label>
@@ -354,7 +447,7 @@ function EducationForm({ setIsOpen, refreshEducation, isUpdate, educationsData }
                                     <FormSelect disable={isPresent} label="End Month" list={watch("endYear") == new Date().getFullYear() ? list.slice(0, new Date().getMonth() + 2) : list} value={register("endMonth", isPresent ? { required: false } : { required: "End Month is required" })} error={isPresent ? "" : errors.endMonth && errors.endMonth.message} />
                                 </div>
                             </div>
-                            <FormInput placeholder="Ex: 10.00" label="Grade" value={register("grade", { required: "Grade is required" })} error={errors.grade && errors.grade.message} />
+                            <FormInput type="number" placeholder="Ex: 10.00" label="Grade" value={register("grade", { required: "Grade is required", valueAsNumber: true, min: { value: 0, message: "Grade must be greater than 0" }, max: { value: 10, message: "Grade must be less than 10" } })} error={errors.grade && errors.grade.message} />
                             <FormInput placeholder="Ex: Volleyball, Boxing" label="Activities and societies" value={register("activities", { required: "Activities and societies is required" })} error={errors.activities && errors.activities.message} />
                             <FormTextArea placeholder="Ex: Description for Your Educations" label="Description" value={register("description", { required: "Description is required" })} error={errors.description && errors.description.message} />
                             <div>
@@ -363,10 +456,24 @@ function EducationForm({ setIsOpen, refreshEducation, isUpdate, educationsData }
                                 </label>
                                 <p className='text-sm mb-1 text-gray-600'>Add skill keywords (max 5) to make your job more visible to the right candidates.</p>
                                 <div className='flex gap-2 items-center mt-2'>
-                                    <div className='w-52'>
-                                        <Input disable={skills?.length >= 5 ? true : false} placeholder={"Enter Skill"} value={skill} setvalue={setSkill} />
-                                    </div>
-                                    <button type="button" onClick={addSkills} disabled={skills?.length >= 5 ? true : false} className={`flex border items-center gap-1 border-gray-600 px-4 py-1 rounded-full ${skills?.length >= 5 ? "cursor-not-allowed" : "hover:bg-gray-200 hover:ring-1 hover:ring-black"}`}>
+                                    {
+                                        isEdit && (
+                                            <div className={`flex-grow ${skills?.length >= 5 ? "bg-gray-200 cursor-not-allowed" : ""}`}>
+                                                <CreatableSelect
+                                                    options={skillsList}
+                                                    styles={customStyles(error, skills?.length >= 5 ? true : false)}
+                                                    menuPortalTarget={document.body}
+                                                    placeholder="Select or add a skill"
+                                                    onChange={handleSkillsChange}
+                                                    onInputChange={(data) => setSearchInput(data)}
+                                                    value={skill}
+                                                    isDisabled={skills?.length >= 5 ? true : false}
+                                                    isClearable
+                                                />
+                                            </div>
+                                        )
+                                    }
+                                    <button type="button" onClick={!isEdit ? () => { setIsEdit(true) } : addSkills} disabled={skills?.length >= 5 ? true : false} className={`flex border items-center gap-1 border-gray-600 px-4 py-1 rounded-full ${skills?.length >= 5 ? "cursor-not-allowed" : "hover:bg-gray-200 hover:ring-1 hover:ring-black"}`}>
                                         <Plus size={20} /> Add Skill
                                     </button>
                                 </div>
