@@ -1,11 +1,21 @@
 import { Heart } from "lucide-react"
 import moment from "moment";
 import PropTypes from "prop-types"
+// import { useContext } from "react";
 import { useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+// import { filterContext } from "../../contextApi/filterContext";
 
 function PostCard({ post }) {
     const { user } = useSelector(state => state.authReducer);
+    // const data = useContext(filterContext);
+
+    // console.log(data);
+
+    // const redirectToPost = () => {
+
+        // window.location.href = `/post/${post._id}`;
+    // }
+
     return (
         <div className="flex flex-col gap-2 border-t border-gray-200 pt-4 hover:cursor-pointer">
             <div className="flex gap-2 items-center">

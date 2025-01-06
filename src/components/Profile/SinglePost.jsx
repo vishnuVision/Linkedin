@@ -1,10 +1,10 @@
 import ProfileCard from '../Dashboard/ProfileCard'
 import { MoveLeft } from 'lucide-react'
 import Feed from '../Dashboard/Feed'
-import { useParams } from 'react-router-dom'
+// import { useParams } from 'react-router-dom'
 
 function SinglePost() {
-    const {id} = useParams();
+    // const {id} = useParams();
 
     // console.log(id);
     return (

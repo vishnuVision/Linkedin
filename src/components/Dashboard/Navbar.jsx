@@ -26,6 +26,8 @@ export default function Navbar({setSearchQuery,searchResults=[],isDropdownVisibl
   const { t } = useTranslation();
   const { user } = useSelector(state => state.authReducer);
 
+  console.log(user);
+
   const handleSearch = (value) => {
     setIsDropdownVisible(true);
     setSearchQuery(value);
@@ -112,7 +114,7 @@ export default function Navbar({setSearchQuery,searchResults=[],isDropdownVisibl
             </div>
             <div className='relative'>
               <NavButton onClick={() => setShowProfile((prev) => !prev)} icon={<img
-                src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
+                src={user?.avatar}
                 alt="Profile"
                 className="w-8 h-8 rounded-full object-cover"
               />} label={<span className="flex items-center justify-center">{t("nav6")} <TiArrowSortedDown className='text-lg' /></span>} />
@@ -121,13 +123,13 @@ export default function Navbar({setSearchQuery,searchResults=[],isDropdownVisibl
                   <div onClick={() => setShowProfile(false)} ref={menuRef} className="fixed z-10 lg:absolute right-0 sm:right-10 mt-4 lg:right-0 lg:mt-2 w-72 bg-white border border-gray-200 rounded-md shadow-xl">
                     <div className='w-full'>
                       <div className='w-full flex flex-col gap-2 justify-center items-center p-4'>
-                        <Link className='w-full flex flex-col gap-2 justify-center items-center' to={"/profile/1"}>
+                        <Link className='w-full flex flex-col gap-2 justify-center items-center' to={`/profile/${user._id}`}>
                           <img
-                            src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"
+                            src={user?.avatar}
                             alt="Profile"
                             className="w-10 h-10 rounded-full object-cover"
                           />
-                          <p>Vishnu Mandlesara</p>
+                          <p>{user?.firstName + " " + user?.lastName}</p>
                         </Link>
                         <Link to={`/profile/${user._id}`} className='flex justify-center items-center w-full py-1 text-[#0a66c2] border border-[#0a66c2] hover:bg-blue-100 rounded-full'>{t("view")}</Link>
                       </div>

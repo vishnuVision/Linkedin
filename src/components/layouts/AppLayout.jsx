@@ -106,6 +106,7 @@ const AppLayout = ({ isChatDetailsOpen, setIsChatDetailsOpen }) => {
     const [allData, setAllData] = useState();
     const [isDropdownVisible, setIsDropdownVisible] = useState(false);
     const { apiAction } = useApi();
+    const [post,setPost] = useState([]);
 
     useEffect(() => {
         i18n.changeLanguage(language);
@@ -184,7 +185,7 @@ const AppLayout = ({ isChatDetailsOpen, setIsChatDetailsOpen }) => {
             <div className="" onClick={() => setIsDropdownVisible(false)}>
                 <Navbar setSearchQuery={setSearchQuery} searchResults={searchResults} isDropdownVisible={isDropdownVisible} setIsDropdownVisible={setIsDropdownVisible} />
                 <div className="h-[100vh] overflow-scroll md:overflow-hidden bg-[#866f55] bg-opacity-10">
-                    <FilterContextProvider value={allData}>
+                    <FilterContextProvider value={allData} post={post} setPost={setPost}>
                         <Outlet />
                     </FilterContextProvider>
                 </div>

@@ -39,11 +39,11 @@ const Comment = ({ comment, isPostAuthor, postId, isSubComment = false, isReplyi
             if (success && data) {
                 if (isSubComment) {
                     const parentComment = comment?.parentComment;
-                    const data2 = comments.map((com) => com._id.toString() === parentComment.toString() ? { ...com, subComments: com.subComments.map((subComment) => subComment._id.toString() === data.post.toString() ? { ...subComment, isLike: false, likeCount: subComment.likeCount - 1 } : subComment) } : com);
+                    const data2 = comments.map((com) => com._id.toString() === parentComment.toString() ? { ...com, subComments: com.subComments.map((subComment) => subComment._id.toString() === data.post.toString() ? { ...subComment, isLike: false, likeCount: !subComment.likeCount ? 1 : Number.parseInt(subComment.likeCount) - 1 } : subComment) } : com);
                     setComments(data2);
                 }
                 else {
-                    setComments(prev => prev.map((maincomment) => maincomment._id === comment._id ? { ...maincomment, isLike: false, likeCount: maincomment.likeCount - 1 } : maincomment));
+                    setComments(prev => prev.map((maincomment) => maincomment._id === comment._id ? { ...maincomment, isLike: false, likeCount: !maincomment.likeCount ? 1 : Number.parseInt(maincomment.likeCount) - 1 } : maincomment));
                 }
             }
         }
@@ -55,13 +55,13 @@ const Comment = ({ comment, isPostAuthor, postId, isSubComment = false, isReplyi
             });
 
             if (success && data) {
-                if (isSubComment) {
+                if (isSubComment) {                    
                     const parentComment = comment?.parentComment;
-                    const data2 = comments.map((com) => com._id.toString() === parentComment.toString() ? { ...com, subComments: com.subComments.map((subComment) => subComment._id.toString() === data.post.toString() ? { ...subComment, isLike: true, likeCount: subComment.likeCount + 1 } : subComment) } : com);
+                    const data2 = comments.map((com) => com._id.toString() === parentComment.toString() ? { ...com, subComments: com.subComments.map((subComment) => subComment._id.toString() === data.post.toString() ? { ...subComment, isLike: true, likeCount:  !subComment.likeCount ? 1 : Number.parseInt(subComment.likeCount) + 1 } : subComment) } : com);
                     setComments(data2);
                 }
                 else {
-                    setComments(prev => prev.map((maincomment) => maincomment._id === comment._id ? { ...maincomment, isLike: true, likeCount: maincomment.likeCount + 1 } : maincomment));
+                    setComments(prev => prev.map((maincomment) => maincomment._id === comment._id ? { ...maincomment, isLike: true, likeCount: !maincomment.likeCount ? 1 : Number.parseInt(maincomment.likeCount) + 1 } : maincomment));
                 }
             }
         }
