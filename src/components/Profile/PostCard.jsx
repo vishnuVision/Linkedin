@@ -2,11 +2,12 @@ import { Heart } from "lucide-react"
 import moment from "moment";
 import PropTypes from "prop-types"
 import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 
 function PostCard({ post }) {
     const { user } = useSelector(state => state.authReducer);
     return (
-        <div className="flex flex-col gap-2 border-t border-gray-200 pt-4">
+        <div className="flex flex-col gap-2 border-t border-gray-200 pt-4 hover:cursor-pointer">
             <div className="flex gap-2 items-center">
                 <p className="text-xs text-slate-700"><span className="font-semibold">{user.firstName + " " + user.lastName}</span> posted this</p>
                 <div className="flex items-center gap-2">

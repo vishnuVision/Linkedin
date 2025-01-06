@@ -5,7 +5,7 @@ import { useSignIn, useUser } from "@clerk/clerk-react";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { assignUser } from "../redux/slices/authReducer";
-import toast from "react-hot-toast";
+import {  toast } from "react-toastify";
 import { useAuth } from "@clerk/clerk-react";
 import Loader from "../components/Loaders/Loader";
 import ReCAPTCHA from "react-google-recaptcha";
@@ -40,24 +40,32 @@ function Login() {
     useEffect(() => {
         if (authenticateParam === "true") {
             if (user?.emailAddresses[0]?.emailAddress) {
-                login(user.emailAddresses[0].emailAddress)
+                toast.promise(
+                    login(user.emailAddresses[0].emailAddress),
+                    {
+                        pending: "Signing in...",
+                        success: "Signed in successfully! 🎉",
+                        error: "Signed in failed ❌",
+                    },
+                    { position: "bottom-left" }
+                );
             }
             else {
                 if (messageParam) {
-                    setError(messageParam);
+                    toast.error(messageParam,{position: "bottom-left"});
                 }
                 else {
-                    setError("Invalid email or password.");
+                    toast.error("Invalid email or password.",{position: "bottom-left"});
                 }
             }
         }
 
         if (authenticateParam === "false") {
             if (messageParam) {
-                setError(messageParam);
+                toast.error(messageParam,{position: "bottom-left"});
             }
             else {
-                setError("Invalid email or password.");
+                toast.error("Invalid email or password.",{position: "bottom-left"});
             }
         }
     }, [])
@@ -78,13 +86,13 @@ function Login() {
                         dispatch(assignUser(data));
                     }
                     else {
-                        toast.error(message);
+                        toast.error(message,{position: "bottom-left"});
                     }
                 }
             }
         } catch (err) {
             await signOut({ redirectTo: undefined });
-            setError(err.errors ? err.errors[0].message : "Invalid email or password.");
+            toast.error(err.errors ? err.errors[0].message : "Invalid email or password.",{position: "bottom-left"});
         }
         setIsLoading(false);
     }
@@ -92,7 +100,6 @@ function Login() {
     const handleEmailLogin = async (e) => {
         e.preventDefault();
         setIsLoading(true);
-        setError("");
 
         if (!isLoaded) return;
 
@@ -108,9 +115,9 @@ function Login() {
         } catch (err) {
             await signOut({ redirectTo: undefined });
             if (err.message.includes("verification strategy is not valid")) {
-                setError("This account requires social login or email verification.");
+                toast.error("This account requires social login or email verification.",{position: "bottom-left"});
             } else {
-                setError("Invalid email or password.");
+                toast.error(err.errors ? err.errors[0].message : "Invalid email or password.",{position: "bottom-left"});
             }
         }
         setIsLoading(false);

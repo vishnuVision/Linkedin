@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import ReactPlayer from 'react-player';
 import useApi from "../../hook/useApi";
 import { useSelector } from "react-redux";
-import toast from "react-hot-toast";
+import {toast} from "react-toastify";
 
 function CreatePostModal({ accept = "image/*", videos, previews, isOpen, setIsOpen, setPreviews, setVideos, refereshData }) {
     const textareaRef = useRef(null);
@@ -64,11 +64,11 @@ function CreatePostModal({ accept = "image/*", videos, previews, isOpen, setIsOp
 
         if (success && data) {
             refereshData();
-            toast.success("Post created successfully", { id: toastId });
+            toast.update(toastId, { render: "Post uploaded successfully", type: "success", isLoading: false, autoClose: 3000 });
         }
         else
         {
-            toast.error("Something went wrong", { id: toastId });
+            toast.update(toastId, { render: data.message, type: "error", isLoading: false, autoClose: 3000 });
         }
         setIsLoading(true);
         setIsOpen(false);

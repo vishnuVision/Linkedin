@@ -30,6 +30,7 @@ const ProtectedRouting = lazy(() => import('./components/auth/ProtectedRouting')
 const ProvideDetails = lazy(() => import('./pages/ProvideDetails'));
 const Home = lazy(() => import('./pages/Home'));
 const Loader = lazy(() => import('./components/Loaders/Loader'));
+const SinglePost = lazy(() => import('./components/Profile/SinglePost'));
 
 function RoutesPage() {
     const [isChatDetailsOpen, setIsChatDetailsOpen] = useState(false);
@@ -63,6 +64,7 @@ function RoutesPage() {
                     <Route path="/my-items/*" element={<JobPostingAccount />} />
                     <Route path="/search/results/all/*" element={<SearchResult />} />
                     <Route path="/provide-details" element={<ProvideDetails />} />
+                    <Route path="/single-post/:id" element={<SinglePost />} />
                 </Route>
             </Routes>
         </Suspense>

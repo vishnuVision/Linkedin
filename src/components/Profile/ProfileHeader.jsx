@@ -139,7 +139,7 @@ function ProfileHeader({ setIsModalOpen, user, educations, experiences }) {
               <img
                 src={avatar}
                 alt="Profile"
-                className={`w-32 h-32 rounded-full border-4 border-white ${isAvatarLoading ? 'blur-[20px]' : ''}`}
+                className={`w-32 h-32 rounded-full border-4 border-white ${isAvatarLoading ? 'blur-[1px]' : ''}`}
               />
             }
             {

@@ -15,7 +15,7 @@ import EditIntroForm from '../Forms/EditIntroForm';
 import PropTypes from 'prop-types';
 import useApi from '../hook/useApi';
 import Loader from '../components/Loaders/Loader';
-import toast from 'react-hot-toast';
+import {toast} from 'react-toastify';
 import { useDispatch, useSelector } from 'react-redux';
 import { assignUser } from '../redux/slices/authReducer';
 import SkillForm from '../Forms/SkillForm';
@@ -142,7 +142,7 @@ const ProfilePage = ({ user, posts, getUserData, educations, allSkills, experien
       });
 
       if (success) {
-        toast.success("Intro updated successfully", { id: toastId });
+        toast.update(toastId, { render: "Intro updated successfully", type: "success", isLoading: false, autoClose: 3000 });
         if (id === data._id) {
           dispatch(assignUser(data))
         }
@@ -150,7 +150,7 @@ const ProfilePage = ({ user, posts, getUserData, educations, allSkills, experien
       }
       setIsModalOpen(false);
     } catch (error) {
-      toast.error(error.message, { id: toastId });
+      toast.update(toastId, { render: error.message, type: "error", isLoading: false, autoClose: 3000 });
     }
     setIsLoading(false);
   };

@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import Modal from "../../Modal/Modal";
 import React, { useEffect, useState } from "react";
 import AboutForm from "../../Forms/AboutForm";
-import toast from "react-hot-toast";
+import {toast} from "react-toastify";
 import useApi from "../../hook/useApi";
 import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -41,12 +41,12 @@ function About({ about, skills = [], refereshUserData }) {
       });
 
       if (success) {
-        toast.success("Intro updated successfully", { id: toastId });
+        toast.update(toastId, { render: "About updated successfully", type: "success", isLoading: false, autoClose: 3000 });
         setIsModalOpen(false);
         refereshUserData();
       }
     } catch (error) {
-      toast.error(error.message, { id: toastId });
+      toast.update(toastId, { render: error.message, type: "error", isLoading: false, autoClose: 3000 });
     }
     setIsLoading(false);
   }

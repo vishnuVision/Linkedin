@@ -2,7 +2,7 @@ import { Plus, X } from "lucide-react";
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import useApi from "../hook/useApi";
-import toast from "react-hot-toast";
+import {toast} from "react-toastify";
 import { customStyles } from "../utils/reactStyle";
 import CreatableSelect from "react-select/creatable";
 import { default as skillsData } from 'skills';
@@ -22,15 +22,6 @@ function AboutForm({ onCancel, onSave, setSummary, summary, skills, setSkills, i
         ).slice(0, 100);
         setSkillsList(data.map(({ tagName }) => ({ value: tagName, label: tagName })));
     }, [skillsData, searchInput]);
-
-    useEffect(() => {
-        if (summary) {
-            setSummaryError("");
-        }
-        else {
-            setSummaryError("Summary is required");
-        }
-    }, [summary]);
 
     const addSkills = () => {
         setError("");
@@ -77,8 +68,17 @@ function AboutForm({ onCancel, onSave, setSummary, summary, skills, setSkills, i
             setError("Please select or add a skill");
         }
         setSkill(selectedOption);
-        addSkills();
     };
+
+    const handleSummaryChange = (e) => {
+        setSummary(e.target.value);
+        if(!e.target.value) {
+            setSummaryError("Please enter a summary");
+        }
+        else {
+            setSummaryError("");
+        }
+    }
 
     return (
 
@@ -99,7 +99,7 @@ function AboutForm({ onCancel, onSave, setSummary, summary, skills, setSkills, i
                                     <textarea
                                         placeholder="Write your professional summary..."
                                         value={summary}
-                                        onChange={(e) => setSummary(e.target.value)}
+                                        onChange={handleSummaryChange}
                                         rows={4}
                                         className="w-full px-4 py-2 shadow-sm rounded-lg focus:ring-0 outline-none"
                                     />

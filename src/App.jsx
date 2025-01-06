@@ -1,7 +1,7 @@
 import { lazy, Suspense } from "react"
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useSelector } from "react-redux"
-import { Toaster } from "react-hot-toast";
+import { ToastContainer } from 'react-toastify';
 import ForgotPasswordPage from "./components/auth/ForgotPasswordPage";
 
 const RoutesPage = lazy(() => import('./RoutesPage'));
@@ -25,7 +25,7 @@ function App() {
             <Route path="*" element={<Notfound />} />
           </Route>
         </Routes>
-        <Toaster />
+        <ToastContainer />
       </Suspense>
     </Router>
   )

@@ -1,7 +1,7 @@
 import { useAuth, useSignIn, useUser } from "@clerk/clerk-react";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import toast from "react-hot-toast";
+import { toast } from "react-toastify";
 import { useDispatch } from "react-redux";
 import { Link } from "react-router-dom";
 import { assignUser } from "../redux/slices/authReducer";
@@ -9,7 +9,6 @@ import { assignUser } from "../redux/slices/authReducer";
 export default function Hero() {
   const { signIn, isLoaded } = useSignIn();
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
   const dispatch = useDispatch();
   const { user } = useUser();
   const { signOut } = useAuth();
@@ -21,24 +20,32 @@ export default function Hero() {
 
     if (authenticateParam === "true") {
       if (user?.emailAddresses[0]?.emailAddress) {
-        login(user.emailAddresses[0].emailAddress)
+        toast.promise(
+          login(user.emailAddresses[0].emailAddress),
+          {
+            pending: "Signing in...",
+            success: "Signed in successfully! 🎉",
+            error: "Signed in failed ❌",
+          },
+          { position: "bottom-left" }
+        );
       }
       else {
         if (messageParam) {
-          setError(messageParam);
+          toast.error(messageParam, { position: "bottom-left" });
         }
         else {
-          setError("Invalid email or password.");
+          toast.error("Invalid email or password.", { position: "bottom-left" });
         }
       }
     }
 
     if (authenticateParam === "false") {
       if (messageParam) {
-        setError(messageParam);
+        toast.error(messageParam, { position: "bottom-left" });
       }
       else {
-        setError("Invalid email or password.");
+        toast.error("Invalid email or password.", { position: "bottom-left" });
       }
     }
   }, [])
@@ -60,13 +67,13 @@ export default function Hero() {
           }
           else {
             await signOut({ redirectTo: undefined });
-            toast.error(message);
+            toast.error(message, { position: "bottom-left" });
           }
         }
       }
     } catch (err) {
       await signOut({ redirectTo: undefined });
-      setError(err.errors ? err.errors[0].message : "Invalid email or password.");
+      toast.error(err.errors ? err.errors[0].message : "Invalid email or password.", { position: "bottom-left" });
     }
     setIsLoading(false);
   }
@@ -124,7 +131,6 @@ export default function Hero() {
                 <Link to={isLoading ? "#" : "/signin"} className={`${isLoading ? "disabled-link opacity-50 cursor-not-allowed flex w-full justify-center items-center py-2 border rounded-full" : "flex w-full gap-1 justify-center items-center py-2 text-left border rounded-full hover:bg-gray-100 font-medium"}`}>
                   Sign in With email
                 </Link>
-                {error && <p className="text-red-600 text-sm">{error} <Link to="/signup" className="text-[#0a66c2] font-semibold hover:underline hover:cursor-pointer">Sign up</Link></p>}
                 <p className="break-words text-sm text-center mt-2 px-4">By clicking Continue to join or sign in, you agree to LinkedIn&apos;s <span className="text-[#0a66c2] font-semibold">User Agreement, Privacy Policy,</span> and <span className="text-[#0a66c2] font-semibold">Cookie Policy.</span></p>
                 <div className="flex justify-center items-center mt-4">
                   <p>New to Linkedin? <Link to={"/signup"} className="no-underline text-[#0a66c2] font-semibold text-lg hover:underline hover:text-blue-900">Join now</Link></p>

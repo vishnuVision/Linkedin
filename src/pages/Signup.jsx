@@ -5,7 +5,7 @@ import { useAuth, useSignUp, useUser } from "@clerk/clerk-react";
 import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import { assignUser } from "../redux/slices/authReducer";
-import toast from "react-hot-toast";
+import { toast } from "react-toastify";
 import Loader from "../components/Loaders/Loader";
 import ReCAPTCHA from "react-google-recaptcha";
 
@@ -42,21 +42,27 @@ function Signup() {
     useEffect(() => {
         if (authenticateParam === "true") {
             if (user?.user?.emailAddresses[0]?.emailAddress) {
-                signUpUser();
+                toast.promise(
+                    signUpUser(),
+                    {
+                        pending: "Signing up...",
+                        success: "Signed up successfully! 🎉",
+                        error: "Signed up failed ❌",
+                    },
+                    {position: "bottom-left"}
+                );
             }
             else {
-                setError("Someone's already using that email.");
+                toast.error("Someone's already using that email.",{position: "bottom-left"});
             }
         }
 
         if (authenticateParam === "false") {
-            if(messageParam)
-            {
-                setError(messageParam);
+            if (messageParam) {
+                toast.error(messageParam,{position: "bottom-left"});
             }
-            else
-            {
-                setError("Someone's already using that email.");
+            else {
+                toast.error("Someone's already using that email.",{position: "bottom-left"});
             }
         }
     }, [])
@@ -77,18 +83,17 @@ function Signup() {
                     const { success, data, message } = await response.data;
                     if (success) {
                         dispatch(assignUser(data));
-                        setError("");
                         navigate("/feed");
                     }
                     else {
-                        toast.error(message);
+                        toast.error(message,{position: "bottom-left"});
                     }
                 }
             }
         }
         catch (err) {
             await signOut({ redirectTo: undefined });
-            setError(err.errors ? err.errors[0].message : "Someone's already using that email.");
+            toast.error(err.errors ? err.errors[0].message : "Someone's already using that email.",{position: "bottom-left"});
         }
         setIsLoading(false);
     }
@@ -104,11 +109,10 @@ function Signup() {
                 password: password,
             });
             await signUpAttempt.prepareEmailAddressVerification();
-            setError("");
             setPage(1);
         } catch (err) {
             await signOut({ redirectTo: undefined });
-            setError(err.errors ? err.errors[0].message : "Someone's already using that email.");
+            toast.error(err.errors ? err.errors[0].message : "Someone's already using that email.",{position: "bottom-left"});
         }
         setIsLoading(false);
     };
@@ -129,7 +133,7 @@ function Signup() {
             setOtp("");
             await signOut({ redirectTo: undefined });
             window.location.href = `/signup?authenticate=false&&message=Invalid OTP. Please try again`;
-            setError(err.errors ? "Invalid OTP. Please try again." : "Something went wrong");
+            toast.error(err.errors ? "Invalid OTP. Please try again." : "Something went wrong",{position: "bottom-left"});
         }
     };
 
@@ -163,11 +167,6 @@ function Signup() {
         }
     };
 
-    const handleCaptchaChange = (value) => {
-        setError("");
-        setCaptchaValue(value);
-    };
-
     if (userData) {
         return <Loader />
     }
@@ -195,10 +194,10 @@ function Signup() {
                                 <p className="break-words text-sm text-center mt-2 px-4">By clicking Continue to join or sign in, you agree to LinkedIn&apos;s <span className="text-[#0a66c2] font-semibold">User Agreement, Privacy Policy,</span> and <span className="text-[#0a66c2] font-semibold">Cookie Policy.</span></p>
                                 {
                                     captchaValue === null &&
-                                    <div className="flex justify-start flex-col items-start">
+                                    <div className="flex justify-start flex-col items-center">
                                         <ReCAPTCHA
                                             sitekey="6LekZKUqAAAAAMZ5FCTLw5oQ8SZdtXq5c7VlT_xV"
-                                            onChange={handleCaptchaChange}
+                                            onChange={(value)=>{setCaptchaValue(value);setError("")}}
                                             onExpired={() => setError("CAPTCHA expired. Please try again.")}
                                             onErrored={() => setError("CAPTCHA verification failed. Please try again.")}
                                         />

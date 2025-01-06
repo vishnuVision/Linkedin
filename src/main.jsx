@@ -8,6 +8,7 @@ import { store, persistor } from './redux/store/store.js';
 import { PersistGate } from 'redux-persist/integration/react';
 import "./i18.js";
 import "react-datepicker/dist/react-datepicker.css";
+import "react-toastify/dist/ReactToastify.css";
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
 

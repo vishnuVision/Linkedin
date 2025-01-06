@@ -10,7 +10,7 @@ import FormTextArea from "../components/Ui/FormTextArea"
 import CreatableSelect from "react-select/creatable";
 import { customStyles } from "../utils/reactStyle";
 import FormInput from "../components/Ui/FormInput"
-import toast from "react-hot-toast"
+import { toast } from "react-toastify"
 import { default as skillsData } from 'skills';
 
 const list = ["Please Select", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -22,6 +22,7 @@ function ExperienceForm({ setIsOpen, refreshExperience, experienceData, isUpdate
     const [skill, setSkill] = useState({});
     const [error, setError] = useState("");
     const [isEdit, setIsEdit] = useState(false);
+    const [deletedSkills, setDeletedSkills] = useState([]);
 
     const [image, setImage] = useState("");
     const [imagePreview, setImagePreview] = useState("");
@@ -46,7 +47,7 @@ function ExperienceForm({ setIsOpen, refreshExperience, experienceData, isUpdate
     }, [skillsData, searchInput]);
 
     useEffect(() => {
-        setCompany({ value: experienceData?.company._id, label: experienceData?.company.name});
+        setCompany({ value: experienceData?.company._id, label: experienceData?.company.name });
     }, [experienceData])
 
     const {
@@ -97,10 +98,11 @@ function ExperienceForm({ setIsOpen, refreshExperience, experienceData, isUpdate
         const formData = new FormData();
         Object.entries(data).forEach(([key, value]) => formData.append(key, value));
         if (skills.length > 1) {
-            skills.forEach((skill) => skill && formData.append("skills", skill));
+            skills.map((skill) => skill && formData.append("skills", skill));
         }
         else {
-            formData.append("skills", [...skill]);
+            if (skills.length > 0)
+                formData.append("skills", skills[0]);
         }
         mediaList.map((media) => {
             formData.append("media", media.url)
@@ -119,7 +121,7 @@ function ExperienceForm({ setIsOpen, refreshExperience, experienceData, isUpdate
 
         if (success) {
             setIsLoading(false);
-            toast.success("Experience added successfully", { id: toastId });
+            toast.update(toastId, { render: "Experience added successfully", type: "success", isLoading: false, autoClose: 3000 });
             refreshExperience();
             setIsOpen(false);
         }
@@ -130,11 +132,21 @@ function ExperienceForm({ setIsOpen, refreshExperience, experienceData, isUpdate
         setIsLoading(true);
         const formData = new FormData();
         Object.entries(data).forEach(([key, value]) => formData.append(key, value));
+
         if (skills.length > 1) {
-            skills.forEach((skill) => skill && formData.append("skills", skill));
+            skills.map((skill) => skill && formData.append("skills", skill));
         }
         else {
-            formData.append("skills", [...skill]);
+            if (skills.length > 0)
+                formData.append("skills", skills[0]);
+        }
+
+        if (deletedSkills.length > 1) {
+            deletedSkills.map((skill) => formData.append("deletedSkills", skill));
+        }
+        else {
+            if (deletedSkills.length > 0)
+                formData.append("deletedSkills", deletedSkills[0]);
         }
 
         const uploadedMedia = mediaList.filter((media) => !(media.url instanceof File));
@@ -142,7 +154,6 @@ function ExperienceForm({ setIsOpen, refreshExperience, experienceData, isUpdate
             formData.append("uploadedMedia", JSON.stringify(media))
         });
         mediaList?.filter((media) => media.url instanceof File).map((media) => {
-            console.log(media)
             formData.append("media", media.url)
             formData.append("mediatitle", media.title)
             formData.append("mediaDescription", media.description)
@@ -159,7 +170,7 @@ function ExperienceForm({ setIsOpen, refreshExperience, experienceData, isUpdate
 
         if (success) {
             setIsLoading(false);
-            toast.success("Experience updated successfully", { id: toastId });
+            toast.update(toastId, { render: "Experience updated successfully", type: "success", isLoading: false, autoClose: 3000 });
             refreshExperience();
             setIsOpen(false);
         }
@@ -179,21 +190,26 @@ function ExperienceForm({ setIsOpen, refreshExperience, experienceData, isUpdate
     const addSkills = () => {
         setError("");
         if (skill.value) {
-            if (skills?.length <= 5) {
-                setSkills(prev => [...prev, skill?.value]);
+            const skillExists = skills.some((s) => s.toLowerCase() === skill.value.toLowerCase());
+
+            if (skillExists) {
+                setError("Skill already exists");
+            } else if (skills?.length < 5) {
+                setSkills((prev) => [...prev, skill.value]);
                 setSkill("");
-            }
-            else {
+            } else {
                 setError("You can't add more than 5 skills");
             }
-        }
-        else {
+        } else {
             setError("Please enter a skill");
         }
     }
 
-    const deleteSkill = (index) => {
+    const deleteSkill = (index, id) => {
         setSkills(skills.filter((skill, idx) => idx !== index));
+        if (id) {
+            setDeletedSkills((prev) => [...prev, id])
+        }
     }
 
     const deleteMedia = () => {
@@ -237,6 +253,7 @@ function ExperienceForm({ setIsOpen, refreshExperience, experienceData, isUpdate
     }
 
     const deleteExperience = async () => {
+        let toastId = toast.loading("Deleting experience...");
         const { success } = await apiAction({
             url: `/api/v1/profile/experience/deleteExperience/${experienceData._id}`,
             method: "DELETE",
@@ -244,6 +261,7 @@ function ExperienceForm({ setIsOpen, refreshExperience, experienceData, isUpdate
         });
 
         if (success) {
+            toast.update(toastId, { render: "Experience deleted successfully", type: "success", isLoading: false, autoClose: 2000 });
             refreshExperience();
             setIsOpen(false);
         }
@@ -347,7 +365,7 @@ function ExperienceForm({ setIsOpen, refreshExperience, experienceData, isUpdate
                         <div className='flex flex-col gap-4 px-2'>
                             <FormInput label="Title" placeholder="Ex: Retail Sales Manager" value={register("title", { required: "Title is required" })} error={errors.title && errors.title.message} />
                             <FormSelect label="Employment type" list={["Please Select", "Full-time", "Part-time", "Self-employed", "Freelance", "Internship", "Trainee"]} value={register("employmentType", { required: "Employment Type is required" })} error={errors.employmentType && errors.employmentType.message} />
-                            <div className="mt-4">
+                            <div className="">
                                 <label className="block text-sm font-medium text-gray-700">Company</label>
                                 <CreatableSelect
                                     options={pageList?.map((item) => ({ value: item._id, label: item.name }))}
@@ -378,10 +396,27 @@ function ExperienceForm({ setIsOpen, refreshExperience, experienceData, isUpdate
 
                             <div className='flex gap-4'>
                                 <div className='flex-grow'>
-                                    <FormSelect disable={isPresent} label="End Year" list={["Please Select", ...Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i)]} value={register("endYear", isPresent ? { required: false } : { required: "End Year is required" })} error={isPresent ? "" : errors.endYear && errors.endYear.message} />
+                                    <FormSelect disable={isPresent} label="End Year" list={["Please Select", ...Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i).filter((year) => year === "Please Select" || parseInt(year, 10) >= watch("startYear"))]} value={register("endYear", isPresent ? { required: false } : { required: "End Year is required" })} error={isPresent ? "" : errors.endYear && errors.endYear.message} />
                                 </div>
                                 <div className='flex-grow'>
-                                    <FormSelect disable={isPresent} label="End Month" list={watch("endYear") == new Date().getFullYear() ? list.slice(0, new Date().getMonth() + 2) : list} value={register("endMonth", isPresent ? { required: false } : { required: "End Month is required" })} error={isPresent ? "" : errors.endMonth && errors.endMonth.message} />
+                                    <FormSelect disable={isPresent} label="End Month" list={(() => {
+                                        const currentYear = new Date().getFullYear();
+                                        const currentMonth = new Date().getMonth();
+                                        if (watch("endYear") == currentYear) {
+                                            if (watch("endYear") === watch("startYear")) {
+                                                return ["Please select", ...list.slice(list.indexOf(watch("startMonth")), currentMonth + 2)]
+                                            }
+                                            else {
+                                                return [...list.slice(0, currentMonth + 2)]
+                                            }
+                                        }
+                                        else if (watch("endYear") === watch("startYear")) {
+                                            return ["Please Select", ...list.slice(list.indexOf(watch("startMonth")))]
+                                        }
+                                        else {
+                                            return list;
+                                        }
+                                    })()} value={register("endMonth", isPresent ? { required: false } : { required: "End Month is required" })} error={isPresent ? "" : errors.endMonth && errors.endMonth.message} />
                                 </div>
                             </div>
 
@@ -403,7 +438,7 @@ function ExperienceForm({ setIsOpen, refreshExperience, experienceData, isUpdate
                                                     placeholder="Select or add a skill"
                                                     onChange={handleSkillsChange}
                                                     onInputChange={(data) => setSearchInput(data)}
-                                                    value={skill?.value && skill}
+                                                    value={skill}
                                                     isDisabled={skills?.length >= 5 ? true : false}
                                                     isClearable
                                                 />
@@ -420,7 +455,7 @@ function ExperienceForm({ setIsOpen, refreshExperience, experienceData, isUpdate
                                 <div className='flex flex-wrap gap-2 mt-3'>
                                     {
                                         skills && skills?.length > 0 && skills?.map((skill, index) => (
-                                            <span onClick={() => deleteSkill(index)} key={index} className='bg-[#01754f] cursor-pointer hover:bg-[#10382a] flex items-center gap-2 text-gray-50 px-4 py-1 rounded-full'>
+                                            <span onClick={() => deleteSkill(index, skill)} key={index} className='bg-[#01754f] cursor-pointer hover:bg-[#10382a] flex items-center gap-2 text-gray-50 px-4 py-1 rounded-full'>
                                                 {skill} <X size={20} />
                                             </span>
                                         ))

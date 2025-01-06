@@ -56,38 +56,44 @@ function Experience({ experiences, refreshExperience }) {
                     )
                   }
                   <div className="flex items-center gap-2">
-                    <div className="h-1 p-[3px] w-1 rounded-full bg-slate-500"></div>
                     {
                       exp?.startYear && exp?.startMonth && (
-                        <p className="text-sm text-gray-500">
-                          {(() => {
-                            const start = moment(`${exp.startYear}-${exp.startMonth}`, "YYYY-MMMM");
-                            const end = moment();
+                        <>
+                          <div className="h-1 p-[3px] w-1 rounded-full bg-slate-500"></div>
+                          <p className="text-sm text-gray-500">
+                            {(() => {
+                              const start = moment(`${exp.startYear}-${exp.startMonth}`, "YYYY-MMMM");
+                              const end = moment();
 
-                            if (!start.isValid()) {
-                              return "";
-                            }
+                              if (!start.isValid()) {
+                                return "";
+                              }
 
-                            const years = end.diff(start, "years");
-                            if (years >= 1) {
-                              return `${years} year${years > 1 ? "s" : ""}`;
-                            }
+                              const years = end.diff(start, "years");
+                              if (years >= 1) {
+                                return `${years} year${years > 1 ? "s" : ""}`;
+                              }
 
-                            const months = end.diff(start, "months");
-                            if (months >= 1) {
-                              return `${months} month${months > 1 ? "s" : ""}`;
-                            }
+                              const months = end.diff(start, "months");
+                              if (months >= 1) {
+                                return `${months} month${months > 1 ? "s" : ""}`;
+                              }
 
-                            const days = end.diff(start, "days");
-                            return `${days} day${days > 1 ? "s" : ""}`;
-                          })()}
-                        </p>
+                              const days = end.diff(start, "days");
+                              return `${days} day${days > 1 ? "s" : ""}`;
+                            })()}
+                          </p>
+                        </>
                       )
                     }
                   </div>
                 </div>
                 <div className="flex gap-2 items-center">
-                  <p className="text-sm text-gray-500">{exp?.location}</p>
+                  {
+                    exp?.location && (
+                      <p className="text-sm text-gray-500">{exp?.location}</p>   
+                    )
+                  }
                   <div className="flex items-center gap-2">
                     <div className="h-1 p-[3px] w-1 rounded-full bg-slate-500"></div>
                     <p className="text-sm text-gray-500">{exp?.locationType}</p>

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { toast } from "react-hot-toast";
+import { toast } from "react-toastify";
 import { useDispatch } from "react-redux";
 import { setIsLoading } from "../redux/slices/state.reducer";
 import { assignUser } from "../redux/slices/authReducer";
@@ -44,10 +44,12 @@ const useApi = () => {
             dispatch(setIsLoading(false));
 
             if (response?.status === 200) {
-                if (message) toast.success(message,{ id: toastId });
+                if (message) {
+                    toast.update(toastId, { render: message, type: "success", isLoading: false, autoClose: 3000 });
+                }
                 return response?.data;
             } else {
-                toast.error(response?.data?.error || response?.data?.message || "Unexpected error occurred.",{ id: toastId });
+                toast.update(toastId, { render: response?.data?.message || "Something went wrong. Please try again later.", type: "error", isLoading: false, autoClose: 3000 });
             }
         } catch (err) {
             dispatch(setIsLoading(false));
@@ -62,7 +64,7 @@ const useApi = () => {
                     ? "Session expired. Please login again."
                     : err?.response?.data?.message || err?.message || "Something went wrong. Please try again later.";
 
-            toast.error(errorMessage,{ id: toastId });
+            toast.update(toastId, { render: errorMessage, type: "error", isLoading: false, autoClose: 3000 });
             return { success: false, message: errorMessage };
         }
     };

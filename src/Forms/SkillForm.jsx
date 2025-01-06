@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import useApi from "../hook/useApi";
 import CreatableSelect from "react-select/creatable";
 import { customStyles } from "../utils/reactStyle";
-import toast from "react-hot-toast";
+import { toast } from "react-toastify";
 import { default as skillsList } from 'skills';
 
 function SkillForm({ refreshSkill, setIsOpen }) {
@@ -29,7 +29,7 @@ function SkillForm({ refreshSkill, setIsOpen }) {
 
         if (success && data) {
             setIsOpen(false);
-            toast.success("Skill added successfully", { id: toastId });
+            toast.update(toastId, { render: "Skill added successfully", type: "success", isLoading: false, autoClose: 3000 });
             refreshSkill();
         }
     }
@@ -60,7 +60,7 @@ function SkillForm({ refreshSkill, setIsOpen }) {
                 placeholder="Select or add a skill"
                 onChange={handleSkillsChange}
                 onInputChange={(data)=>setSearchInput(data)}
-                value={skill}
+                value={skill?.value && skill}
                 isClearable
             />
             {
