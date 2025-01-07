@@ -2,18 +2,13 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
     isLoading:false,
-    // isLogin:false
 }
 
 const stateSlice = createSlice({
     name:"state",
     initialState,
     reducers:{
-        setIsLoading:{
-            reducer:(state,action)=>{
-                state.isLoading = action.payload
-            },
-        }
+        setIsLoading:(state,action) => {state.isLoading = action.payload},
     }
 })
 

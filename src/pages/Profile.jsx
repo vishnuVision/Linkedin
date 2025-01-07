@@ -55,7 +55,6 @@ function Profile() {
     });
 
     if (success) {
-      console.log(data);
       setUser(data);
     }
   };
@@ -139,6 +138,7 @@ const ProfilePage = ({ user, posts, getUserData, educations, allSkills, experien
         url: `/api/v1/profile/editProfile`,
         method: "PUT",
         data: { ...formData },
+        toastId
       });
 
       if (success) {

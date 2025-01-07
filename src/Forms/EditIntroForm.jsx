@@ -4,12 +4,12 @@ import FormInput from "../components/Ui/FormInput";
 import { useForm } from "react-hook-form";
 import FormSelect from "../components/Ui/FormSelect";
 import FormTextArea from "../components/Ui/FormTextArea";
-import DatePicker from "react-datepicker";
 import axios from "axios";
 import Select from "react-select";
 import { customStyles } from "../utils/reactStyle";
 import moment from "moment";
 import industries from "industries";
+import { Datepicker } from "flowbite-react";
 
 function EditIntroForm({ onSave, onCancel, user, isLoading }) {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -85,7 +85,7 @@ const EditContactInfo = ({ onCancel, isLoading, register, handleSubmit, handleUp
                         value={register("phoneNumber", {
                             required: "Phone number is required",
                             pattern: {
-                                value: /^[0-9]{10}$/, // Adjust regex for your desired phone format
+                                value: /^[0-9]{10}$/,
                                 message: "Phone number must be 10 digits"
                             }
                         })}
@@ -93,19 +93,18 @@ const EditContactInfo = ({ onCancel, isLoading, register, handleSubmit, handleUp
                     />
                     <FormSelect label="Phone type" list={["Please Select", "Mobile", "Home", "Work"]} value={register("phoneType", { required: "Phone type is required" })} error={errors.phoneType && errors.phoneType.message} />
                     <FormTextArea label="Address" placeholder="Enter your address" value={register("address", { required: "Address is required" })} error={errors.address && errors.address.message} />
+
                     <div className="flex flex-col">
                         <label htmlFor="birthday" className="">Birthday</label>
-                        <DatePicker
-                            selected={birthdayDate}
+                        <Datepicker
+                            id="birthday"
+                            value={birthdayDate && new Date(birthdayDate)}
                             onChange={date => setBirthdayDate(date)}
                             maxDate={new Date()}
-                            placeholderText="Select your date of birth"
-                            dateFormat="MM/dd/yyyy"
-                            className={`block w-full p-2 border rounded-md focus:outline-none focus:ring-2 ${dateError ? "border-red-600 focus:ring-red-600" : "border-gray-300 focus:ring-gray-900"
-                                }`}
-                            calendarContainer={({ className, children }) => (
-                                <div className={`custom-datepicker ${className}`}>{children}</div>
-                            )}
+                            placeholder="Select your date of birth"
+                            title="Birthday DatePicker"
+                            displayFormat="MM/dd/yyyy"
+                            className={`block w-full border rounded-md focus:outline-none focus:ring-2 ${dateError ? "border-red-600 focus:ring-red-600" : "border-gray-300 focus:ring-gray-900"}`}
                         />
                         {
                             dateError && <p className="text-red-600 text-sm">{dateError}</p>
@@ -144,7 +143,6 @@ const EditForm = ({ onCancel, setIsModalOpen, isLoading, errors, register, handl
 
     useEffect(() => {
         getAllCountries();
-        console.log(Object.keys(industries));
         setIndustryList(Object.keys(industries).map((item) => ({ value: item, label: item })));
     }, [])
 
@@ -226,10 +224,9 @@ const EditForm = ({ onCancel, setIsModalOpen, isLoading, errors, register, handl
                 <div className="space-y-4 p-2">
                     <FormInput label="First Name" placeholder="Enter your first name" value={register("firstName", { required: "First name is required" })} error={errors.firstName && errors.firstName.message} />
                     <FormInput label="Last Name" placeholder="Enter your last name" value={register("lastName", { required: "Last name is required" })} error={errors.lastName && errors.lastName.message} />
-                    <FormInput label="Additional Name" placeholder="Enter additional name" value={register("additionalName", { required: "Additional name is required" })} error={errors.additionalName && errors.additionalName.message} />
+                    <FormInput label="Additional Name" placeholder="Enter additional name" value={register("additionalName")} error={errors.additionalName && errors.additionalName.message} />
                     <FormSelect label="Pronouns" list={["Please Select", "He/Him", "She/Her", "They/Them", "Custom"]} value={register("pronouns", { required: "Pronouns are required" })} error={errors.pronouns && errors.pronouns.message} />
                     <FormTextArea label="Headline" placeholder="Enter your headline" value={register("bio", { required: "Headline is required" })} error={errors.bio && errors.bio.message} />
-                    {/* <FormSelect label="Industry" list={["Please Select", "Information Technology", "Finance", "Accounting", "Legal"]} value={register("industry", { required: "Industry is required" })} error={errors.industry && errors.industry.message} /> */}
                     <div className="mt-4">
                         <label className="block text-sm font-medium text-gray-700">Industry</label>
                         <Select
@@ -266,7 +263,7 @@ const EditForm = ({ onCancel, setIsModalOpen, isLoading, errors, register, handl
                             menuPortalTarget={document.body}
                             placeholder="Select a city"
                             onChange={handleCityChange}
-                            value={city?.value && city}
+                            value={city}
                             isClearable
                         />
                         {cityError && <p className="text-red-500 text-sm">{cityError}</p>}
@@ -285,7 +282,7 @@ const EditForm = ({ onCancel, setIsModalOpen, isLoading, errors, register, handl
                         </button>
                     </div>
                     <FormInput label="Website" placeholder="Enter your website" value={register("website", {
-                        required: "Website is required", pattern: {
+                        pattern: {
                             value: /^(https?:\/\/)?([a-z0-9]+[.-_])*[a-z0-9]+\.[a-z]{2,6}(\/[a-z0-9#]+\/?)*$/i,
                             message: "Please enter a valid website URL",
                         },

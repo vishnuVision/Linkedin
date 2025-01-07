@@ -7,7 +7,7 @@ import { filterContext } from '../../contextApi/filterContext';
 
 function Events({ handleBack }) {
 
-    const allData = useContext(filterContext);
+    const allData = useContext(filterContext)?.allData;
     const [searchResults,setSearchResults] = useState([]);
 
     useEffect(() => {

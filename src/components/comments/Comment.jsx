@@ -28,6 +28,8 @@ const Comment = ({ comment, isPostAuthor, postId, isSubComment = false, isReplyi
         setContent(comment?.text || '');
     }, [comment, comments])
 
+    console.log(comment);
+
     const handleLike = async () => {
         if (isLiked) {
             const { success, data } = await apiAction({
@@ -189,16 +191,16 @@ const Comment = ({ comment, isPostAuthor, postId, isSubComment = false, isReplyi
         <div className="p-4">
             <div className="flex gap-3">
                 <img
-                    src={comment.owner?.avatar}
+                    src={comment.owner?.avatar ? comment.owner?.avatar : `https://ui-avatars.com/api/?name=${comment.owner?.firstName}+${comment.owner?.lastName}`}
                     alt={comment.owner?.firstName + ' ' + comment.owner?.lastName}
                     className="w-10 h-10 rounded-full object-cover"
                 />
                 <div className='flex-grow'>
-                    <div className="bg-gray-50 rounded-lg px-3 pt-1 flex">
+                    <div className="bg-gray-100 rounded-lg px-3 py-1 flex">
                         <div className='flex-grow'>
                             <div className="flex flex-col">
                                 <h4 className="font-semibold text-sm">{comment.owner?.firstName + ' ' + comment.owner?.lastName}</h4>
-                                <span className="text-xs text-gray-500">Software engineer</span>
+                                <span className="text-xs text-gray-500">{comment.owner?.bio}</span>
                                 <span className="text-xs text-gray-500">{moment(comment?.createdAt).fromNow()}</span>
                             </div>
                             <div>

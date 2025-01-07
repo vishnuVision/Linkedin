@@ -174,7 +174,7 @@ function Login() {
                     <div className="bg-white shadow-lg rounded-lg max-w-md w-full p-6">
                         <div className="mb-4 text-start">
                             <h1 className="text-2xl font-bold text-gray-800">Sign in</h1>
-                            <p className="text-sm text-gray-600">Stay updated on your professional world.</p>
+                            <p className="text-sm text-gray-600">Stay updated oPn your professional world.</p>
                         </div>
                         <form onSubmit={handleEmailLogin} className="space-y-4">
                             <Input label="Email" value={email} setvalue={setEmail} type="email" placeholder="you@example.com" />

@@ -26,8 +26,6 @@ export default function Navbar({setSearchQuery,searchResults=[],isDropdownVisibl
   const { t } = useTranslation();
   const { user } = useSelector(state => state.authReducer);
 
-  console.log(user);
-
   const handleSearch = (value) => {
     setIsDropdownVisible(true);
     setSearchQuery(value);
@@ -114,9 +112,9 @@ export default function Navbar({setSearchQuery,searchResults=[],isDropdownVisibl
             </div>
             <div className='relative'>
               <NavButton onClick={() => setShowProfile((prev) => !prev)} icon={<img
-                src={user?.avatar}
+                src={ user?.avatar ? user?.avatar : `https://ui-avatars.com/api/?name=${user?.firstName + " " + user?.lastName}`}
                 alt="Profile"
-                className="w-8 h-8 rounded-full object-cover"
+                className="w-8 h-8 rounded-full object-cover border border-gray-300"
               />} label={<span className="flex items-center justify-center">{t("nav6")} <TiArrowSortedDown className='text-lg' /></span>} />
               {
                 showProfile && (
@@ -125,9 +123,9 @@ export default function Navbar({setSearchQuery,searchResults=[],isDropdownVisibl
                       <div className='w-full flex flex-col gap-2 justify-center items-center p-4'>
                         <Link className='w-full flex flex-col gap-2 justify-center items-center' to={`/profile/${user._id}`}>
                           <img
-                            src={user?.avatar}
+                            src={ user?.avatar ? user?.avatar : `https://ui-avatars.com/api/?name=${user?.firstName + " " + user?.lastName}`}
                             alt="Profile"
-                            className="w-10 h-10 rounded-full object-cover"
+                            className="w-12 h-12 rounded-full object-cover border border-gray-300"
                           />
                           <p>{user?.firstName + " " + user?.lastName}</p>
                         </Link>

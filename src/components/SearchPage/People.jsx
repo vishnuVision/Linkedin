@@ -6,7 +6,7 @@ import { MoveLeft } from "lucide-react"
 import { filterContext } from "../../contextApi/filterContext"
 
 function People({ handleBack }) {
-    const allData = useContext(filterContext);
+    const allData = useContext(filterContext)?.allData;
     const [searchResults,setSearchResults] = useState([]);
 
     useEffect(() => {
@@ -35,9 +35,9 @@ function People({ handleBack }) {
                                 </div>
                                 <h1 className='font-semibold text-xl'>People</h1>
                             </div>
-                            {searchResults && searchResults?.length > 0 && searchResults?.map(({ firstName, lastName, bio, location, avatar, followers }, index) => (
+                            {searchResults && searchResults?.length > 0 && searchResults?.map(({ firstName, lastName, bio, location, avatar, followers, _id }, index) => (
                                 <React.Fragment key={index}>
-                                    <SearchResult name={firstName + " " + lastName} title={bio} location={location} imageUrl={avatar} connections={followers.length} />
+                                    <SearchResult id={_id} name={firstName + " " + lastName} title={bio} location={location} imageUrl={avatar} connections={followers.length} />
                                     {index < searchResults.length - 1 && <div className="border-b" />}
                                 </React.Fragment>
                             ))}

@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useAuth, useSignIn } from '@clerk/clerk-react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom';
+import Input from '../Ui/Input';
+import { toast } from 'react-toastify';
 
 const ForgotPasswordPage = () => {
   const [email, setEmail] = useState('')
@@ -34,7 +36,6 @@ const ForgotPasswordPage = () => {
         setError('')
       })
       .catch((err) => {
-        console.error('error', err.errors[0].longMessage)
         setError(err.errors[0].longMessage)
       })
     await signOut();
@@ -53,12 +54,12 @@ const ForgotPasswordPage = () => {
           setSecondFactor(true)
           setError('')
         } else if (result.status === 'complete') {
+          toast.success("Password reset successfully");
           setActive({ session: result.createdSessionId })
           setError('')
         }
       })
       .catch((err) => {
-        console.error('error', err.errors[0].longMessage)
         setError(err.errors[0].longMessage)
       })
     await signOut();
@@ -100,34 +101,8 @@ const ForgotPasswordPage = () => {
             </>
           ) : (
             <>
-              <label
-                htmlFor="password"
-                className="text-gray-600 font-medium"
-              >
-                Enter your new password
-              </label>
-              <input
-                type="password"
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-
-              <label
-                htmlFor="code"
-                className="text-gray-600 font-medium"
-              >
-                Enter the password reset code that was sent to your email
-              </label>
-              <input
-                type="text"
-                id="code"
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-
+              <Input label="Password" value={password} setvalue={setPassword} type="password" placeholder="Enter your new password" />
+              <Input label="Verification Code" value={code} setvalue={setCode} type="password" placeholder="Enter verification code" />
               <button
                 type="submit"
                 className="bg-blue-600 text-white font-medium py-2 rounded-md hover:bg-blue-700 transition"

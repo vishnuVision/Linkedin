@@ -7,7 +7,7 @@ import { filterContext } from "../../contextApi/filterContext"
 
 function Schools({ handleBack }) {
 
-    const allData = useContext(filterContext);
+    const allData = useContext(filterContext)?.allData;
     const [searchResults,setSearchResults] = useState([]);
 
     useEffect(() => {
@@ -26,9 +26,9 @@ function Schools({ handleBack }) {
                                 </div>
                                 <h1 className='font-semibold text-xl'>Schools</h1>
                             </div>
-                            {searchResults && searchResults?.length > 0 && searchResults?.map(({ name, tagline, location, logo, organizationSize }, index) => (
+                            {searchResults && searchResults?.length > 0 && searchResults?.map(({ name, tagline, location, logo, organizationSize,_id }, index) => (
                                 <React.Fragment key={index}>
-                                    <SearchResult name={name} title={tagline} location={location} imageUrl={logo} connections={organizationSize} isCompany={true} />
+                                    <SearchResult name={name} title={tagline} location={location} imageUrl={logo} connections={organizationSize} isCompany={true} id={_id}/>
                                     {index < searchResults.length - 1 && <div className="border-b" />}
                                 </React.Fragment>
                             ))}

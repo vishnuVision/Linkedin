@@ -2,7 +2,7 @@ import { Plus, X } from "lucide-react";
 import PropTypes from "prop-types";
 import { useEffect, useState } from "react";
 import useApi from "../hook/useApi";
-import {toast} from "react-toastify";
+import { toast } from "react-toastify";
 import { customStyles } from "../utils/reactStyle";
 import CreatableSelect from "react-select/creatable";
 import { default as skillsData } from 'skills';
@@ -26,19 +26,26 @@ function AboutForm({ onCancel, onSave, setSummary, summary, skills, setSkills, i
     const addSkills = () => {
         setError("");
         if (skill?.value) {
-            if (skills?.length <= 5) {
-                setSkills(prev => [...prev, { _id: Date.now(), name: skill?.value }]);
+            const isSkillDuplicate = skills.some((existingSkill) =>
+                existingSkill.name.toLowerCase() === skill.value.toLowerCase()
+            );
+
+            if (isSkillDuplicate) {
+                setError("Skill already exists");
+                return;
+            }
+
+            if (skills?.length < 5) {
+                setSkills((prev) => [...prev, { _id: Date.now(), name: skill?.value }]);
                 setSkill("");
                 setIsEdit(false);
-            }
-            else {
+            } else {
                 setError("You can't add more than 5 skills");
             }
-        }
-        else {
+        } else {
             setError("Please enter a skill");
         }
-    }
+    };
 
     const deleteSkill = async (index, skillId) => {
         if (skillId.length === 24) {
@@ -72,7 +79,7 @@ function AboutForm({ onCancel, onSave, setSummary, summary, skills, setSkills, i
 
     const handleSummaryChange = (e) => {
         setSummary(e.target.value);
-        if(!e.target.value) {
+        if (!e.target.value) {
             setSummaryError("Please enter a summary");
         }
         else {
@@ -122,17 +129,10 @@ function AboutForm({ onCancel, onSave, setSummary, summary, skills, setSkills, i
                                 {skills?.map((skill, index) => (
                                     <div key={index} className="flex items-center justify-between p-3 border rounded hover:bg-gray-50">
                                         <div className="flex items-center">
-                                            <button type="button" onClick={() => deleteSkill(index, skill._id)} className="p-1 hover:bg-gray-200 rounded-full mr-2">
-                                                <X className="w-4 h-4 text-gray-500" />
-                                            </button>
                                             <span>{skill?.name}</span>
                                         </div>
-                                        <button className="px-2">
-                                            <div className="flex flex-col space-y-1">
-                                                <div className="w-4 h-0.5 bg-gray-400"></div>
-                                                <div className="w-4 h-0.5 bg-gray-400"></div>
-                                                <div className="w-4 h-0.5 bg-gray-400"></div>
-                                            </div>
+                                        <button type="button" onClick={() => deleteSkill(index, skill._id)} className="p-1 hover:bg-gray-200 rounded-full mr-2">
+                                            <X className="w-4 h-4 text-gray-500" />
                                         </button>
                                     </div>
                                 ))}

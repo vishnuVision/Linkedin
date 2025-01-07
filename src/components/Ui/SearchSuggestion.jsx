@@ -1,9 +1,9 @@
 import { Search } from 'lucide-react';
 import PropTypes from 'prop-types';
 
-function SearchSuggestion({ icon, primary, type }) {
+function SearchSuggestion({ icon, primary, type, handleClick }) {
   return (
-    <div className="flex items-center px-2 py-4 hover:bg-gray-100 cursor-pointer gap-2">
+    <div onClick={handleClick} className="flex items-center px-2 py-4 hover:bg-gray-100 cursor-pointer gap-2">
       <div className="flex-shrink-0 flex items-center w-8 h-8">
         {icon || <Search className="w-5 h-5 text-gray-400" />}
       </div>
@@ -22,7 +22,8 @@ function SearchSuggestion({ icon, primary, type }) {
 SearchSuggestion.propTypes = {
   icon: PropTypes.any,
   primary: PropTypes.any,
-  type: PropTypes.any
+  type: PropTypes.any,
+  handleClick: PropTypes.func
 }
 
 export default SearchSuggestion

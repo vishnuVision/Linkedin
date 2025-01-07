@@ -1,23 +1,24 @@
-import { Heart } from "lucide-react"
+import { ThumbsUp } from "lucide-react"
 import moment from "moment";
 import PropTypes from "prop-types"
-// import { useContext } from "react";
+import { useContext } from "react";
 import { useSelector } from "react-redux";
-// import { filterContext } from "../../contextApi/filterContext";
+import { filterContext } from "../../contextApi/filterContext";
+import { useNavigate } from "react-router-dom";
 
 function PostCard({ post }) {
     const { user } = useSelector(state => state.authReducer);
-    // const data = useContext(filterContext);
+    const {setPost} = useContext(filterContext);
+    const navigate = useNavigate();
 
-    // console.log(data);
-
-    // const redirectToPost = () => {
-
-        // window.location.href = `/post/${post._id}`;
-    // }
+    const handleRedirect = () => {
+        setPost(post);
+        if(post)
+            return navigate(`/single-post/${post._id}`);
+    }
 
     return (
-        <div className="flex flex-col gap-2 border-t border-gray-200 pt-4 hover:cursor-pointer">
+        <div onClick={handleRedirect} className="flex flex-col gap-2 border-t border-gray-200 pt-4 hover:cursor-pointer">
             <div className="flex gap-2 items-center">
                 <p className="text-xs text-slate-700"><span className="font-semibold">{user.firstName + " " + user.lastName}</span> posted this</p>
                 <div className="flex items-center gap-2">
@@ -34,10 +35,10 @@ function PostCard({ post }) {
                 </div>
             </div>
             <div className="flex items-center gap-1 my-4">
-                <Heart className="px-1 bg-red-200 rounded-full" />
+                <ThumbsUp className="px-[2px] h-6 fill-red-500" />
                 {
                     Number.parseInt(post?.likeCount) > 0 && (
-                        <p className="text-xs text-slate-700">{post.isLike ? "You & " : ""}{post.likeCount} Others</p>
+                        <p className="text-xs text-slate-700">{post.isLike ? "Liked by you" : `${post?.likeCount} others`}{post.isLike && post?.likeCount > 0 && ` & ${post?.likeCount} others`}</p>
                     )
                 }
                 {

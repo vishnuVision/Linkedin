@@ -106,16 +106,15 @@ const AppLayout = ({ isChatDetailsOpen, setIsChatDetailsOpen }) => {
     const [allData, setAllData] = useState();
     const [isDropdownVisible, setIsDropdownVisible] = useState(false);
     const { apiAction } = useApi();
-    const [post,setPost] = useState([]);
+    const [post, setPost] = useState("");
 
     useEffect(() => {
         i18n.changeLanguage(language);
     }, [language])
 
     useEffect(() => {
-        if(searchQuery)
-        {
-            getResult();   
+        if (searchQuery) {
+            getResult();
         }
     }, [searchQuery])
 
@@ -172,7 +171,7 @@ const AppLayout = ({ isChatDetailsOpen, setIsChatDetailsOpen }) => {
                 }) || [];
 
                 const resultData = shuffleArray([...persons, ...jobs, ...events, ...groups, ...newsLetters, ...company, ...school, ...articles, ...posts]);
-                setSearchResults(resultData.slice(0, 10));
+                setSearchResults(resultData.slice(0, 5));
                 return resultData;
             }
         } catch (error) {
@@ -183,18 +182,18 @@ const AppLayout = ({ isChatDetailsOpen, setIsChatDetailsOpen }) => {
     return (
         <HandleModalContext value={{ isChatDetailsOpen, setIsChatDetailsOpen }}>
             <div className="" onClick={() => setIsDropdownVisible(false)}>
-                <Navbar setSearchQuery={setSearchQuery} searchResults={searchResults} isDropdownVisible={isDropdownVisible} setIsDropdownVisible={setIsDropdownVisible} />
-                <div className="h-[100vh] overflow-scroll md:overflow-hidden bg-[#866f55] bg-opacity-10">
-                    <FilterContextProvider value={allData} post={post} setPost={setPost}>
+                <FilterContextProvider value={{ allData, post, setPost }}>
+                    <Navbar setSearchQuery={setSearchQuery} searchResults={searchResults} isDropdownVisible={isDropdownVisible} setIsDropdownVisible={setIsDropdownVisible} />
+                    <div className="h-[100vh] overflow-scroll md:overflow-hidden bg-[#866f55] bg-opacity-10">
                         <Outlet />
-                    </FilterContextProvider>
-                </div>
+                    </div>
+                </FilterContextProvider>
                 <div className={`hidden lg:flex absolute w-72 shadow-2xl border bottom-0 right-8 bg-white flex-col rounded-t-lg`}>
                     {
                         isDisplay &&
                         <div onClick={() => setIsChatOpen(prev => !prev)} className={`border-b-[1px] hover:bg-gray-100 cursor-pointer border-slate-200 flex px-4 py-2 justify-between items-center`}>
                             <div className="flex justify-center items-center gap-2">
-                                <img className="w-8 h-8 rounded-full object-cover" src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60" alt="User Avatar" />
+                                <img className="w-10 h-10 rounded-full object-cover border border-gray-300" src={user?.avatar ? user?.avatar : `https://ui-avatars.com/api/?name=${user?.firstName + " " + user?.lastName}`} alt="User Avatar" />
                                 <p className="text-sm font-semibold">{t("messaging")}</p>
                             </div>
                             <div className="flex justify-center items-center">

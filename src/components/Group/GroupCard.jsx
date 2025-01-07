@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
-function GroupCard({ to, groups, isEventPage = false, isAdmin = false,isLimit=false }) {
+function GroupCard({ groups, isEventPage = false, isAdmin = false,isLimit=false }) {
     const [isShow, setIsShow] = useState(false);
     return (
         <div className="flex-grow">
@@ -16,11 +16,15 @@ function GroupCard({ to, groups, isEventPage = false, isAdmin = false,isLimit=fa
                                     <div>
                                         {
                                             isEventPage &&
-                                            <img className="w-16 h-16 object-contain rounded-sm" src={group?.backgroundImage} alt={group?.name} />
+                                            <Link to={isEventPage ? `/event/${group._id}` : `/group/${group._id}`}>
+                                                <img className="w-16 h-16 object-contain rounded-sm" src={group?.backgroundImage} alt={group?.name} />
+                                            </Link>
                                         }
                                         {
                                             !isEventPage &&
-                                            <img className="w-16 h-16 object-contain rounded-full" src={group?.avatar} alt={group?.name} />
+                                            <Link to={isEventPage ? `/event/${group._id}` : `/group/${group._id}`}>
+                                                <img className="w-16 h-16 object-contain rounded-full" src={group?.avatar} alt={group?.name} />
+                                            </Link>
                                         }
                                     </div>
                                     <div className='block md:hidden'>
@@ -28,7 +32,7 @@ function GroupCard({ to, groups, isEventPage = false, isAdmin = false,isLimit=fa
                                     </div>
                                 </div>
                                 <div className="flex flex-col flex-grow">
-                                    <Link to={to} className="truncate max-w-60 text-ellipsis whitespace-nowrap overflow-hidden font-semibold hover:underline hover:text-blue-600">{group?.name}</Link>
+                                    <Link to={isEventPage ? `/event/${group._id}` : `/group/${group._id}`} className="truncate max-w-60 text-ellipsis whitespace-nowrap overflow-hidden font-semibold hover:underline hover:text-blue-600">{group?.name}</Link>
                                     <p className='text-sm truncate max-w-60 text-ellipsis whitespace-nowrap overflow-hidden'>{group?.description}</p>
                                     <p className='text-sm'>{group?.memberCount} member</p>
                                 </div>
@@ -69,7 +73,6 @@ function GroupCard({ to, groups, isEventPage = false, isAdmin = false,isLimit=fa
 }
 
 GroupCard.propTypes = {
-    to: PropTypes.string,
     groups: PropTypes.array,
     isEventPage: PropTypes.bool,
     isAdmin: PropTypes.bool,

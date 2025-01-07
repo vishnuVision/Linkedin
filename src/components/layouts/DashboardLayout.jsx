@@ -21,7 +21,7 @@ const DashboardLayout = () => (WrappedComponent) => {
                             </Link>
                         </div>
                     </div>
-                    <div className="col-span-12 md:col-span-9 lg:col-span-6 md:max-h-[90vh] md:overflow-scroll someElement">
+                    <div id="layout" className="col-span-12 md:col-span-9 lg:col-span-6 md:max-h-[90vh] md:overflow-scroll someElement">
                         <WrappedComponent {...props} />
                     </div>
                     <div className="col-span-3 hidden lg:block">

@@ -19,9 +19,9 @@ function CreatePost({refereshData}) {
   return (
     <div className="bg-white rounded-lg shadow p-2 md:p-4 mb-4">
       <div className="flex gap-4 mb-4">
-        <Link to={"/profile/1"} className='hover:underline hover:underline-offset-2'>
+        <Link to={`/profile/${user?._id}`} className='hover:underline hover:underline-offset-2'>
           <img
-            src={user?.avatar}
+            src={user?.avatar ? user?.avatar : `https://ui-avatars.com/api/?name=${user?.firstName}+${user?.lastName}`}
             alt={user?.name}
             className="w-12 h-12 rounded-full object-cover"
           />

@@ -6,7 +6,7 @@ import { useContext, useEffect, useState } from 'react';
 import { filterContext } from '../../contextApi/filterContext';
 
 function Jobs({ handleBack }) {
-    const allData = useContext(filterContext);
+    const allData = useContext(filterContext)?.allData;
     const [searchResults,setSearchResults] = useState([]);
 
     useEffect(() => {

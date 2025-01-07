@@ -9,7 +9,7 @@ import PropTypes from "prop-types";
 
 function SearchHome({setSelectedTab}) {
     const { hash } = useLocation();
-    const searchResults = useContext(filterContext);
+    const searchResults = useContext(filterContext)?.allData;
     const navigate = useNavigate();
 
     const handleNavigation = (tab) => {
@@ -39,14 +39,14 @@ function SearchHome({setSelectedTab}) {
                     <div id="peoples" className="flex-1">
                         <div className="bg-white rounded-lg shadow overflow-hidden">
                             <h1 className='px-4 pt-4 font-semibold text-xl'>People</h1>
-                            {searchResults?.peoples && searchResults?.peoples.length > 0 && searchResults?.peoples.slice(0, 3).map(({ firstName, lastName, bio, location, avatar, followers }, index) => (
+                            {searchResults?.peoples && searchResults?.peoples.length > 0 && searchResults?.peoples.slice(0, 3).map(({ firstName, lastName, bio, location, avatar, followers, _id }, index) => (
                                 <React.Fragment key={index}>
-                                    <SearchResult name={firstName + " " + lastName} title={bio} location={location} imageUrl={avatar} connections={followers.length} />
+                                    <SearchResult name={firstName + " " + lastName} title={bio} location={location} imageUrl={avatar} connections={followers.length} id={_id} />
                                     {index < searchResults.length - 1 && <div className="border-b" />}
                                 </React.Fragment>
                             ))}
                             {
-                                searchResults?.peoples && searchResults?.peoples.length > 0 &&
+                                searchResults?.peoples && searchResults?.peoples.length > 3 &&
                                 <div onClick={() => handleNavigation('People')} className='text-center hover:bg-gray-100 py-2 text-blue-500 font-semibold cursor-pointer'>
                                     View all
                                 </div>
@@ -71,14 +71,14 @@ function SearchHome({setSelectedTab}) {
                     <div id="companies" className="flex-1">
                         <div className="bg-white rounded-lg shadow overflow-hidden">
                             <h1 className='px-4 pt-4 font-semibold text-xl'>Companies</h1>
-                            {searchResults?.pages && searchResults?.pages.length > 0 && searchResults?.pages.slice(0, 3).map(({ name, tagline, location, logo, organizationSize }, index) => (
+                            {searchResults?.pages && searchResults?.pages.length > 0 && searchResults?.pages.slice(0, 3).map(({ name, tagline, location, logo, organizationSize, _id }, index) => (
                                 <React.Fragment key={index}>
-                                    <SearchResult name={name} title={tagline} location={location} imageUrl={logo} connections={organizationSize} isCompany={true} />
+                                    <SearchResult name={name} title={tagline} location={location} imageUrl={logo} connections={organizationSize} isCompany={true} id={_id}/>
                                     {index < searchResults.length - 1 && <div className="border-b" />}
                                 </React.Fragment>
                             ))}
                             {
-                                searchResults?.pages && searchResults?.pages.length > 0 &&
+                                searchResults?.pages && searchResults?.pages.length > 3 &&
                                 <div onClick={() => handleNavigation('Companies')} className='text-center hover:bg-gray-100 py-2 text-blue-500 font-semibold cursor-pointer'>
                                     View all
                                 </div>
@@ -107,7 +107,7 @@ function SearchHome({setSelectedTab}) {
                                 searchResults?.posts && searchResults.posts.length > 0 && <div className="p-2"><Feed posts={searchResults.posts} isLimit={true} /></div>
                             }
                             {
-                                searchResults?.posts && searchResults.posts.length > 0 &&
+                                searchResults?.posts && searchResults.posts.length > 3 &&
                                 <div onClick={() => handleNavigation('Posts')} className='text-center hover:bg-gray-100 py-2 text-blue-500 font-semibold cursor-pointer'>
                                     View all
                                 </div>
@@ -136,7 +136,7 @@ function SearchHome({setSelectedTab}) {
                                 searchResults?.groups && searchResults.groups.length > 0 && <GroupCard groups={searchResults.groups} isLimit={true} />
                             }
                             {
-                                searchResults?.groups && searchResults.groups.length > 0 &&
+                                searchResults?.groups && searchResults.groups.length > 3 &&
                                 <div onClick={() => handleNavigation('Groups')} className='text-center hover:bg-gray-100 py-2 text-blue-500 font-semibold cursor-pointer'>
                                     View all
                                 </div>
@@ -165,7 +165,7 @@ function SearchHome({setSelectedTab}) {
                                 searchResults?.jobs && searchResults.jobs.length > 0 && <div className="p-2"><JobList isJobPage={true} searchResults={searchResults.jobs} isLimit={true} /></div>
                             }
                             {
-                                searchResults?.groups && searchResults.groups.length > 0 &&
+                                searchResults?.jobs && searchResults.jobs.length > 3 &&
                                 <div onClick={() => handleNavigation('Jobs')} className='text-center hover:bg-gray-100 py-2 text-blue-500 font-semibold cursor-pointer'>
                                     View all
                                 </div>

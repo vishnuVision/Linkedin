@@ -13,6 +13,7 @@ import moment from "moment";
 import { useForm } from "react-hook-form";
 import FormInput from "../components/Ui/FormInput";
 import FormSelect from "../components/Ui/FormSelect";
+import { Datepicker } from "flowbite-react";
 
 function ProvideDetails() {
 
@@ -72,10 +73,10 @@ function ProvideDetails() {
       setBirthdayDateError("Please select your birthday");
     }
 
-    if(!isStudent && !recentCompany?.value)
+    if (!isStudent && !recentCompany?.value)
       setCompanyError("Please select recent company");
 
-    if(isStudent && !school?.value)
+    if (isStudent && !school?.value)
       setSchoolError("Please select recent school");
 
     if (!birthdayDate || (isStudent && !school?.value) || (!isStudent && !recentCompany?.value)) {
@@ -90,10 +91,10 @@ function ProvideDetails() {
       setBirthdayDateError("You must be at least 18 years old.");
     } else {
       setIsLoading(true);
-      id = toast.loading("Please wait...",{position:"bottom-left"});
+      id = toast.loading("Please wait...", { position: "bottom-left" });
       try {
         if (data) {
-          const response = await axios.put(`${import.meta.env.VITE_SERVER_URL}/api/v1/updateUserRequiredDetails`, { ...data , isStudent, mostRecentCompany: recentCompany?.value, school: school?.value, birthday: birthdayDate , avatar: user?.user?.imageUrl}, {
+          const response = await axios.put(`${import.meta.env.VITE_SERVER_URL}/api/v1/updateUserRequiredDetails`, { ...data, isStudent, mostRecentCompany: recentCompany?.value, school: school?.value, birthday: birthdayDate, avatar: user?.user?.imageUrl }, {
             withCredentials: true,
             headers: {
               "Content-Type": "application/json"
@@ -115,7 +116,7 @@ function ProvideDetails() {
       }
       catch (err) {
         setPage(0);
-        toast.update(id, { render: err.errors ? err.errors[0].message : "User not signup Properly" , type: "error", isLoading: false, autoClose: 3000, position: "bottom-left" });
+        toast.update(id, { render: err.errors ? err.errors[0].message : "User not signup Properly", type: "error", isLoading: false, autoClose: 3000, position: "bottom-left" });
       }
       setIsLoading(false);
     }
@@ -187,8 +188,8 @@ function ProvideDetails() {
             page === 1 && !isStudent &&
             <div className="bg-white shadow-lg rounded-lg max-w-md w-full p-6">
               <form onSubmit={handleSubmit(updateUserDetails)} className="space-y-4">
-              <FormInput disable={isLoading} label="Location" placeholder="Enter your location" value={register("location", { required: "Location is required" })} error={errors.location && errors.location.message} />
-              <FormInput disable={isLoading} label="Most recent job title" placeholder="Enter recent job" value={register("mostRecentJob", { required: "Recent Job is required" })} error={errors.mostRecentJob && errors.mostRecentJob.message} />
+                <FormInput disable={isLoading} label="Location" placeholder="Enter your location" value={register("location", { required: "Location is required" })} error={errors.location && errors.location.message} />
+                <FormInput disable={isLoading} label="Most recent job title" placeholder="Enter recent job" value={register("mostRecentJob", { required: "Recent Job is required" })} error={errors.mostRecentJob && errors.mostRecentJob.message} />
                 <div className="mt-4">
                   <label className="block text-sm font-medium text-gray-700">Most recent company</label>
                   <CreatableSelect
@@ -206,7 +207,7 @@ function ProvideDetails() {
                   <label htmlFor="birthday" className="">Date of Birthday</label>
                   <DatePicker
                     selected={birthdayDate}
-                    onChange={date => {setBirthdayDate(date); setBirthdayDateError("")}}
+                    onChange={date => { setBirthdayDate(date); setBirthdayDateError("") }}
                     maxDate={new Date()}
                     placeholderText="Select your date of birth"
                     dateFormat="MM/dd/yyyy"
@@ -260,17 +261,16 @@ function ProvideDetails() {
                   <FormSelect label="End Year" list={watch("startYear") === "Please Select" ? years : years.filter((year) => year > watch("startYear"))} disable={isLoading} value={register("endYear", { required: "End Year is required" })} error={errors.endYear && errors.endYear.message} />
                 </div>
                 <div className="flex flex-col">
-                  <label htmlFor="birthday" className="">Date of Birthday</label>
-                  <DatePicker
-                    selected={birthdayDate}
+                  <label htmlFor="birthday" className="">Birthday</label>
+                  <Datepicker
+                    id="birthday"
+                    value={birthdayDate && new Date(birthdayDate)}
                     onChange={date => setBirthdayDate(date)}
                     maxDate={new Date()}
-                    placeholderText="Select your date of birth"
-                    dateFormat="MM/dd/yyyy"
-                    className={`block w-full p-2 rounded focus:outline-none ${birthdayDateError ? "border border-red-600 focus:ring-red-600 focus:ring-0" : "border border-gray-300 focus:ring-gray-800 focus:ring-1"}`}
-                    calendarContainer={({ className, children }) => (
-                      <div className={`custom-datepicker ${className}`}>{children}</div>
-                    )}
+                    placeholder="Select your date of birth"
+                    title="Birthday DatePicker"
+                    displayFormat="MM/dd/yyyy"
+                    className={`block w-full border rounded-md focus:outline-none focus:ring-2 ${birthdayDateError ? "border-red-600 focus:ring-red-600" : "border-gray-300 focus:ring-gray-900"}`}
                   />
                   {
                     birthdayDateError && <p className="text-red-600 text-sm">{birthdayDateError}</p>

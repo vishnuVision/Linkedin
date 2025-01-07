@@ -171,7 +171,7 @@ function PostCard({ post }) {
                 <Link to={post.authorType === "page" ? `/company/${isAuthor ? post.author : post.authorDetails?._id}/` : post.authorType === "group" ? `/groups/${isAuthor ? post.author : post.authorDetails?._id}` : post.authorType === "event" ? `/events/${isAuthor ? post.author : post.authorDetails?._id}` : post.authorType === "company" ? `/company/${isAuthor ? post.author : post.authorDetails?._id}` : `/profile/${isAuthor ? post.author : post.authorDetails?._id}`} className="flex items-start gap-3">
                     {
                         post.authorDetails?.avatar && (
-                            <img src={post.authorDetails?.avatar}
+                            <img src={post.authorDetails?.avatar ? post.authorDetails?.avatar : `https://ui-avatars.com/api/?name=${post.authorDetails?.name}`}
                             onError={(e) => { e.target.src = `https://ui-avatars.com/api/?name=${post.authorDetails?.name}` }} alt={post.authorDetails?.name} className="w-12 h-12 border rounded-full object-cover" />       
                         )
                     }
@@ -221,7 +221,7 @@ function PostCard({ post }) {
                         <div className="flex flex-wrap items-start gap-4 sm:gap-6">
                             <img
                                 className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover"
-                                src={user?.avatar || "https://cdn-icons-png.flaticon.com/512/149/149071.png"}
+                                src={user?.avatar ? user?.avatar : `https://ui-avatars.com/api/?name=${user?.firstName}+${user?.lastName}`}
                                 alt="User avatar"
                             />
 

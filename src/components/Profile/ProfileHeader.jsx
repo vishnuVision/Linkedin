@@ -114,7 +114,7 @@ function ProfileHeader({ setIsModalOpen, user, educations, experiences }) {
   }, [avatarImage])
 
   return (
-    <div className="bg-white rounded-lg shadow">
+    <div className="bg-white rounded-lg shadow border border-gray-300">
       <div className="relative">
         <div className="h-48 w-full overflow-hidden bg-gradient-to-r from-blue-500 to-blue-600 rounded-t-lg">
           {
@@ -172,14 +172,14 @@ function ProfileHeader({ setIsModalOpen, user, educations, experiences }) {
       </div>
       <div className="pt-8 px-4 pb-4">
         <div className="flex flex-wrap justify-between items-start">
-          <div>
+          <div className={`${id !== _id ? "mt-4" : ""}`}>
             <h1 className="text-2xl font-bold text-gray-900">{user.firstName + " " + user.lastName}</h1>
             <p className="text-lg text-gray-600">{user?.bio}</p>
             <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
               {
                 user?.location && (
                   <span className="flex items-center gap-1">
-                    <MapPin className="w-4 h-4" /> {user?.location}
+                    <MapPin className="w-4 h-4" /> {user?.region && user?.city ? user?.region + ", " + user?.city : user?.location}
                   </span>
                 )
               }
@@ -199,16 +199,20 @@ function ProfileHeader({ setIsModalOpen, user, educations, experiences }) {
               }
             </div>
           </div>
-          <div className="flex gap-2 mt-4 md:mt-0">
-            <button onClick={() => setIsChatDetailsOpen(prev => !prev)} className="px-4 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 flex items-center gap-2">
-              <MessageCircle className="w-4 h-4" />
-              Message
-            </button>
-            <button className="px-4 py-2 border border-blue-600 text-blue-600 rounded-full hover:bg-blue-50 flex items-center gap-2">
-              <UserPlus className="w-4 h-4" />
-              Connect
-            </button>
-          </div>
+          {
+            id !== _id && (
+              <div className="flex gap-2 mt-4 md:mt-0">
+                <button onClick={() => setIsChatDetailsOpen(prev => !prev)} className="px-4 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 flex items-center gap-2">
+                  <MessageCircle className="w-4 h-4" />
+                  Message
+                </button>
+                <button className="px-4 py-2 border border-blue-600 text-blue-600 rounded-full hover:bg-blue-50 flex items-center gap-2">
+                  <UserPlus className="w-4 h-4" />
+                  Connect
+                </button>
+              </div>
+            )
+          }
         </div>
         <div>
           <Link to={"/"} className="font-semibold text-[#0a66c2] text-sm hover:underline">{user?.followers?.length + user?.following?.length || 0} connections</Link>
