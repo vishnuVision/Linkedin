@@ -35,15 +35,14 @@ function PostCard({ post }) {
                 </div>
             </div>
             <div className="flex items-center gap-1 my-4">
-                <ThumbsUp className="px-[2px] h-6 fill-red-500" />
                 {
-                    Number.parseInt(post?.likeCount) > 0 && (
-                        <p className="text-xs text-slate-700">{post.isLike ? "Liked by you" : `${post?.likeCount} others`}{post.isLike && post?.likeCount > 0 && ` & ${post?.likeCount} others`}</p>
+                    post?.likeCount > 0 && (
+                        <ThumbsUp className="px-[2px] h-6 fill-red-500" />
                     )
                 }
                 {
-                    Number.parseInt(post?.likeCount) <= 0 && (
-                        <p className="text-xs text-slate-700">{0}</p>
+                    Number.parseInt(post?.likeCount) > 0 && (
+                        <p className="text-xs text-slate-700">{post.isLike ? "Liked by you" : `${post?.likeCount} others`}{post.isLike && post?.likeCount > 0 && ` & ${post?.likeCount} others`}</p>
                     )
                 }
             </div>

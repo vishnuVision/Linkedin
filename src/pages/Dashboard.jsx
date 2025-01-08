@@ -41,7 +41,6 @@ function Dashboard() {
       console.error("Element with ID 'layout' not found");
       return;
     }
-
     divElement.addEventListener("scroll", handleInfiniteScroll);
     return () => {
       divElement.removeEventListener("scroll", handleInfiniteScroll);

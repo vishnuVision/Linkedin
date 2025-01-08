@@ -186,7 +186,7 @@ export default function Navbar({setSearchQuery,searchResults=[],isDropdownVisibl
               </div>
             </div>
           </div>
-          <div ref={menuRef} onClick={() => { setIsMobile(prev => !prev) }} className='lg:hidden flex justify-center items-center'>
+          <div ref={menuRef} onClick={() => { setIsMobile(prev => !prev) }} className='lg:hidden hover:cursor-pointer flex justify-center items-center'>
             <Menu />
           </div>
         </div>

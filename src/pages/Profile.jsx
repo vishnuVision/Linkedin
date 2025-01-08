@@ -7,15 +7,15 @@ import Activity from '../components/Profile/Activity';
 import Educations from '../components/Profile/Educations';
 import { Routes, Route, useParams } from 'react-router-dom';
 import Notfound from '../components/Notfound';
-import { MoveLeft, Plus, Trash2, Users } from 'lucide-react';
+import { Loader as Loader2, MoveLeft, Plus, Trash2, Users } from 'lucide-react';
 import Feed from '../components/Dashboard/Feed';
-import { createContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useEffect, useState } from 'react';
 import Modal from '../Modal/Modal';
 import EditIntroForm from '../Forms/EditIntroForm';
 import PropTypes from 'prop-types';
 import useApi from '../hook/useApi';
 import Loader from '../components/Loaders/Loader';
-import {toast} from 'react-toastify';
+import { toast } from 'react-toastify';
 import { useDispatch, useSelector } from 'react-redux';
 import { assignUser } from '../redux/slices/authReducer';
 import SkillForm from '../Forms/SkillForm';
@@ -32,6 +32,53 @@ function Profile() {
   const [experiences, setExperiences] = useState([]);
   const [skills, setSkills] = useState([]);
   const { id } = useParams();
+  const [error, setError] = useState("");
+
+  const [isPostLoading, setIsPostLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  let prevScrollTop = 0;
+
+  useEffect(() => {
+    if (page && user) {
+      fetchData(page);
+    }
+  }, [user, page])
+
+  const handleInfiniteScroll = useCallback(() => {
+    const divElement = document.getElementById("userLayout");
+    const { scrollTop, scrollHeight, clientHeight } = divElement;
+    if (scrollTop + clientHeight >= scrollHeight - 1 && scrollTop > prevScrollTop) {
+      setIsPostLoading(true);
+      setTimeout(() => {
+        if(!error)
+        {
+          setPage((prev) => prev + 1);
+        }
+      }, 1000);
+    }
+    prevScrollTop = scrollTop;
+  },[]);
+
+  useEffect(() => {
+    const checkElement = () => {
+      const divElement = document.getElementById("userLayout");
+      if (divElement) {
+        divElement.addEventListener("scroll", handleInfiniteScroll);
+        return true;
+      } else {
+        console.warn("Element with ID 'userLayout' not found, retrying...");
+        return false;
+      }
+    };
+
+    const timer = setInterval(() => {
+      if (checkElement()) clearInterval(timer);
+    }, 500);
+
+    return () => {
+      clearInterval(timer);
+    };
+  }, [handleInfiniteScroll]);
 
   useEffect(() => {
     getUserData();
@@ -40,7 +87,6 @@ function Profile() {
   useEffect(() => {
     setIsLoading(true);
     if (user) {
-      fetchData();
       getEducationsData();
       getExperiencesData();
       getSkills();
@@ -59,15 +105,21 @@ function Profile() {
     }
   };
 
-
-  const fetchData = async () => {
+  const fetchData = async (page) => {
     const { success, data } = await apiAction({
-      url: `/api/v1/post/listAllPost/${id}`,
+      url: `/api/v1/post/listAllPost/${id}?page=${page}`,
       method: "GET",
     });
 
     if (success) {
-      setPosts(data);
+      const fetchedData = data?.data;
+      if (fetchedData?.length <= 0) {
+        setError("No more posts");
+      }
+      else {
+        setPosts(() => [...posts, ...fetchedData]);
+      }
+      setIsPostLoading(false);
     }
   };
 
@@ -113,7 +165,7 @@ function Profile() {
         <PostContext.Provider value={{ setPosts }}>
           <Routes>
             <Route path="/" element={<ProfilePage getUserData={getUserData} allSkills={skills} refreshPost={fetchData} refreshEducation={getEducationsData} refreshExperience={getExperiencesData} refreshSkill={getSkills} user={user} posts={posts.length > 3 ? posts.slice(0, 3) : posts || []} educations={educations} experiences={experiences} skills={skills.length > 3 ? skills.slice(0, 3) : skills || []} />} />
-            <Route path="/all-posts" element={<ActivityPage posts={posts} setPosts={setPosts} />} />
+            <Route path="/all-posts" element={<ActivityPage posts={posts} setPosts={setPosts} isLoading={isPostLoading} error={error} />} />
             <Route path="/all-skills" element={<SkillPage skills={skills} refreshSkill={getSkills} />} />
             <Route path="*" element={<Notfound />} />
           </Routes>
@@ -180,15 +232,15 @@ const ProfilePage = ({ user, posts, getUserData, educations, allSkills, experien
   )
 }
 
-const ActivityPage = ({ posts }) => {
+const ActivityPage = ({ posts, isLoading, error }) => {
   return (
     <main className="px-2">
       <div className="max-w-6xl mx-auto grid grid-cols-12 gap-4">
         <div className="col-span-12 md:col-span-3">
           <ProfileCard />
         </div>
-        <div className="col-span-12 md:col-span-9 md:max-h-[90vh] md:overflow-scroll someElement">
-          <div className="bg-white rounded-lg shadow pt-6">
+        <div id="userLayout" className="col-span-12 md:col-span-9 md:max-h-[90vh] md:overflow-scroll someElement">
+          <div className="rounded-lg pt-6">
             <div className='flex items-center gap-2 px-6 mb-4'>
               <div onClick={handleBack} className='w-10 h-10 hover:bg-[#866f55] hover:bg-opacity-10 rounded-full flex justify-center items-center cursor-pointer'>
                 <MoveLeft />
@@ -197,6 +249,20 @@ const ActivityPage = ({ posts }) => {
             </div>
             <div className="grid grid-cols-1 gap-4 px-4 pb-4">
               <Feed posts={posts} />
+              {
+                isLoading && (
+                  <div className="lg:col-span-2 flex justify-center items-center py-2 animate-spin">
+                    <Loader2 />
+                  </div>
+                )
+              }
+              {
+                (!isLoading && error) && (
+                  <div className='text-center text-lg font-semibold text-gray-600 py-2'>
+                    {error}
+                  </div>
+                )
+              }
             </div>
           </div>
         </div>
@@ -284,6 +350,8 @@ const SkillPage = ({ skills, refreshSkill }) => {
 
 ActivityPage.propTypes = {
   posts: PropTypes.array,
+  isLoading: PropTypes.bool,
+  error: PropTypes.string,
 };
 
 ProfilePage.propTypes = {
