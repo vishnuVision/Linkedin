@@ -78,7 +78,7 @@ function Profile() {
     return () => {
       clearInterval(timer);
     };
-  }, [handleInfiniteScroll]);
+  }, []);
 
   useEffect(() => {
     getUserData();
